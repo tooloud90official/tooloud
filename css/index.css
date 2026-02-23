@@ -22,6 +22,8 @@ body {
 
 /* ===== 로고 ===== */
 .logo {
+    width: 30px;
+    height: 30px;
     display: flex;
     flex-direction: column;
     gap: 6px;
