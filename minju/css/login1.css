@@ -64,9 +64,26 @@ body {
 
 .social-login {
   display: flex;
+  align-items: center; 
   justify-content: center;
   gap: 20px;
-  margin-top: 18px;
+  margin-top: 20px;
+}
+
+
+.social.google img {
+  width: 36px;
+  height: 34px;
+  display: block;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  padding: 0;  
+}
+
+.social.apple img {
+  width: 26px;
+  height: 26px;
 }
 
 .social {
