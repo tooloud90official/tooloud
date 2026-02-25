@@ -71,7 +71,7 @@ function renderSubmitButton() {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // 1) 상단 배너 불러오기 (inquiry.html과 같은 폴더에 top-banner.html이 있을 때)
-    await includeHTML("#top-banner", "/common/top-banner/html/top-banner.html");
+    await includeHTML("#top-banner", "/common/top-banner/top-banner.html");
 
     // 2) FAQ 섹션 드롭다운 삽입
     await appendDropdownItems("#faqList", 5);

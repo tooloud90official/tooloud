@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tool Hero Section</title>
+
+  <link rel="stylesheet" href="/common/top-banner/top-banner.css" />
+  <link rel="stylesheet" href="/common/select/select.css" />
+  <!-- 공용 컴포넌트 -->
+  <link rel="stylesheet" href="/common/icon/icon.css" />
+  <link rel="stylesheet" href="/common/button/button.css" />
+
+  <!-- 섹션 전용 -->
+  <link rel="stylesheet" href="/yujin/css/detail_AI.css" />
+</head>
+<body>
+  <div class="detail_AI-page">
+    <div id="top-banner" class="detail_AI-banner-root"></div>
+
+    <main class="detail_AI-main">
+      <section class="detail_AI">
+        <!-- LEFT: 툴 정보 -->
+        <article class="detail_AI__tool-card">
+          <!-- ✅ 아이콘 컴포넌트 mount 자리 -->
+          <div id="toolIconMount"></div>
+
+          <div class="detail_AI__meta">
+            <p class="detail_AI__tool-brand" id="toolBrand">@ Midjourney, Inc</p>
+
+            <div class="detail_AI__stars" aria-label="별점">
+              <span class="star is-on">★</span>
+              <span class="star is-on">★</span>
+              <span class="star is-on">★</span>
+              <span class="star is-on">★</span>
+              <span class="star is-off">★</span>
+            </div>
+            <div class="detail_AI__divider"></div>
+            <p class="detail_AI__tool-desc" id="toolDesc">
+              이미지, 비디오 특화 생성형 AI 입니다.
+            </p>
+          </div>
+
+          <!-- ✅ 버튼 컴포넌트 mount 자리 -->
+          <div class="detail_AI__btns">
+            <div id="visitSiteBtn"></div>
+            <div id="wishlistBtn"></div>
+          </div>
+        </article>
+
+        <!-- RIGHT: 프로필 + 작업물 -->
+        <article class="detail_AI__showcase">
+          <div class="detail_AI__profile">
+            <div class="detail_AI__avatar">
+              <img src="/yujin/media/profil.png" alt="프로필" />
+            </div>
+
+            <div class="detail_AI__profile-meta">
+              <div class="detail_AI__profile-name">민주캉 님의 작업물</div>
+              <div class="detail_AI__likes">
+                <span class="detail_AI__like-icon">♡</span>
+                <span>490</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail_AI__carousel">
+            <div class="detail_AI__carousel-frame">
+              <img src="/yujin/media/work.png" alt="작업물" />
+            </div>
+
+            <div class="detail_AI__dots" aria-label="캐러셀 페이지">
+              <button class="dot is-active" type="button" aria-label="1"></button>
+              <button class="dot" type="button" aria-label="2"></button>
+              <button class="dot" type="button" aria-label="3"></button>
+              <button class="dot" type="button" aria-label="4"></button>
+              <button class="dot" type="button" aria-label="5"></button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ✅ 여기 아래로 계속 요소 추가하면 됨 -->
+      <section class="detail_AI-below" id="belowContent">
+        <!-- ===== 사이트 미리보기 섹션 ===== -->
+<section class="site-preview" id="sitePreview">
+    <div class="site-preview__header">
+      <span class="site-preview__line" aria-hidden="true"></span>
+      <h2 class="site-preview__title">사이트 미리보기</h2>
+      <span class="site-preview__line" aria-hidden="true"></span>
+    </div>
+  
+    <article class="site-preview__card">
+      <div class="site-preview__media" id="sitePreviewMedia">
+        <!-- 여기에 나중에 아이콘/썸네일/iframe 등 넣으면 됨 -->
+      </div>
+  
+      <div class="site-preview__meta">
+        <div class="site-preview__name" id="sitePreviewName">Midjourney</div>
+        <a class="site-preview__url" id="sitePreviewUrl" href="https://www.midjourney.com/" target="_blank" rel="noopener">
+          https://www.midjourney.com/
+        </a>
+      </div>
+    </article>
+  </section>
+      </section>
+      <!-- ===== 플랜 비교 섹션 ===== -->
+<section class="plan-compare" id="planCompare">
+    <div class="plan-compare__header">
+      <span class="plan-compare__line" aria-hidden="true"></span>
+      <h2 class="plan-compare__title">플랜 비교</h2>
+      <span class="plan-compare__line" aria-hidden="true"></span>
+    </div>
+  
+    <div class="plan-compare__grid">
+      <!-- 카드 1 (강조) -->
+      <article class="plan-card plan-card--active">
+        <div class="plan-card__top">
+          <div class="plan-card__badge">플랜 #1</div>
+          <div class="plan-card__name">Free</div>
+        </div>
+  
+        <ul class="plan-card__list">
+          <li>이미지 생성</li>
+          <li>작업물 미리보기</li>
+          <li>프롬프트 수정</li>
+        </ul>
+  
+        <div class="plan-card__btn" id="planBtn1"></div>
+      </article>
+  
+      <!-- 카드 2 -->
+      <article class="plan-card">
+        <div class="plan-card__top">
+          <div class="plan-card__badge">플랜 #2</div>
+          <div class="plan-card__name">Starter</div>
+        </div>
+  
+        <ul class="plan-card__list">
+          <li>이미지 생성 횟수 무제한</li>
+          <li>초고속 다운로드</li>
+          <li>상업적 이용 가능</li>
+        </ul>
+  
+        <div class="plan-card__btn" id="planBtn2"></div>
+      </article>
+  
+      <!-- 카드 3 -->
+      <article class="plan-card">
+        <div class="plan-card__top">
+          <div class="plan-card__badge">플랜 #3</div>
+          <div class="plan-card__name">Business</div>
+        </div>
+  
+        <ul class="plan-card__list">
+          <li>엔터프라이즈용 대량 이미지 생성</li>
+          <li>API 지원</li>
+          <li>여러 계정 이용 가능</li>
+        </ul>
+  
+        <div class="plan-card__btn" id="planBtn3"></div>
+      </article>
+    </div>
+  </section>
+  
+  <!-- ===== 프로모션 섹션 ===== -->
+  <section class="promo" id="promoSection">
+    <h3 class="promo__title">Midjourney 에서 진행 중인 프로모션</h3>
+    <p class="promo__hint">
+      * 이벤트는 당사의 정책에 따라 조기 마감되거나 변경 사항이 발생할 수 있습니다. 해당 사항을 유의해주시기 바랍니다.
+    </p>
+  
+    <article class="promo-banner">
+      <div class="promo-banner__left">
+        <div class="promo-banner__headline">
+          🏆 졸업생을 위한 Pro 모델 체험 이벤트
+        </div>
+        <div class="promo-banner__sub">
+          해당 이벤트 기간 내 졸업증명서를 인증하고 Pro 모델을 0원에!
+        </div>
+        <div class="promo-banner__date">
+          기간: 3030.01.01 ~ 3031.01.01
+        </div>
+      </div>
+  
+      <div class="promo-banner__right" id="promoBtn"></div>
+    </article>
+  </section>
+
+  <!-- ===== 평점 및 리뷰 섹션 ===== -->
+<section class="review-section" id="reviewSection">
+    <div class="review-section__header">
+      <span class="review-section__line" aria-hidden="true"></span>
+      <h2 class="review-section__title">평점 및 리뷰</h2>
+      <span class="review-section__line" aria-hidden="true"></span>
+    </div>
+  
+    <div class="review-section__score">
+      <div class="review-section__score-num">4.0 점</div>
+      <div class="review-section__score-stars" aria-label="평점 별점">
+        <span class="rstar is-on">★</span>
+        <span class="rstar is-on">★</span>
+        <span class="rstar is-on">★</span>
+        <span class="rstar is-on">★</span>
+        <span class="rstar is-off">★</span>
+      </div>
+    </div>
+  
+    <div class="review-panel">
+      <!-- 왼쪽: 리뷰 쓰기 -->
+      <aside class="review-write">
+        <div class="review-write__head">
+          <div class="review-write__title">리뷰 쓰기</div>
+        </div>
+  
+        <div class="review-write__box">
+          <div class="review-write__stars" aria-label="내 별점">
+            <span class="rstar is-on">★</span>
+            <span class="rstar is-on">★</span>
+            <span class="rstar is-on">★</span>
+            <span class="rstar is-on">★</span>
+            <span class="rstar is-on">★</span>
+            <span class="review-write__hint">(점)</span>
+          </div>
+  
+          <div class="review-write__login-hint">
+            로그인 후 작성하실 수 있습니다.
+          </div>
+        </div>
+  
+        <div class="review-write__submit" id="reviewSubmitBtn"></div>
+      </aside>
+  
+      <!-- 오른쪽: 리뷰 리스트 -->
+      <div class="review-list">
+        <div class="review-list__top">
+          <div class="review-list__spacer"></div>
+          <div class="review-sort" id="reviewSortSelect"></div>
+        </div>
+  
+        <div class="review-cards">
+          <!-- 카드 1 -->
+          <article class="review-card">
+            <div class="review-card__date">2026.01.01</div>
+            <div class="review-card__stars">
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-off">★</span>
+              <span class="review-card__rate">(4점)</span>
+            </div>
+            <div class="review-card__text">역시 지피티가 최고네요.</div>
+  
+            <div class="review-card__user">
+              <div class="review-card__avatar">
+                <img src="/yujin/media/profil.png" alt="작성자" />
+              </div>
+              <div class="review-card__name">민주 캉</div>
+            </div>
+          </article>
+  
+          <!-- 카드 2 -->
+          <article class="review-card">
+            <div class="review-card__date">2026.01.01</div>
+            <div class="review-card__stars">
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-off">★</span>
+              <span class="review-card__rate">(4점)</span>
+            </div>
+            <div class="review-card__text">역시 지피티가 최고네요.</div>
+  
+            <div class="review-card__user">
+              <div class="review-card__avatar">
+                <img src="/yujin/media/profil.png" alt="작성자" />
+              </div>
+              <div class="review-card__name">민주 캉</div>
+            </div>
+          </article>
+  
+          <!-- 카드 3 -->
+          <article class="review-card">
+            <div class="review-card__date">2026.01.01</div>
+            <div class="review-card__stars">
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-on">★</span>
+              <span class="rstar is-off">★</span>
+              <span class="review-card__rate">(4점)</span>
+            </div>
+            <div class="review-card__text">역시 지피티가 최고네요.</div>
+  
+            <div class="review-card__user">
+              <div class="review-card__avatar">
+                <img src="/yujin/media/profil.png" alt="작성자" />
+              </div>
+              <div class="review-card__name">민주 캉</div>
+            </div>
+          </article>
+        </div>
+  
+        <div class="review-dots" aria-label="리뷰 페이지">
+          <span class="rdot is-active"></span>
+          <span class="rdot"></span>
+          <span class="rdot"></span>
+          <span class="rdot"></span>
+          <span class="rdot"></span>
+          <span class="rdot"></span>
+          <span class="rdot"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+<!-- ===== 유사 AI 툴 추천 ===== -->
+<section class="similar-tools" id="similarTools">
+    <div class="similar-tools__header">
+      <span class="similar-tools__line" aria-hidden="true"></span>
+      <h2 class="similar-tools__title">유사 AI 툴 추천</h2>
+      <span class="similar-tools__line" aria-hidden="true"></span>
+    </div>
+  
+    <div class="similar-tools__row" id="similarToolsRow">
+      <!-- 아이콘 컴포넌트 mount들이 JS로 들어감 -->
+      <div class="similar-tools__item"><div class="similar-tools__mount" id="simTool1"></div></div>
+      <div class="similar-tools__item"><div class="similar-tools__mount" id="simTool2"></div></div>
+      <div class="similar-tools__item"><div class="similar-tools__mount" id="simTool3"></div></div>
+      <div class="similar-tools__item"><div class="similar-tools__mount" id="simTool4"></div></div>
+    </div>
+  
+    <div class="similar-tools__dots" aria-label="유사 툴 페이지">
+      <span class="sdot is-active"></span>
+      <span class="sdot"></span>
+      <span class="sdot"></span>
+      <span class="sdot"></span>
+      <span class="sdot"></span>
+      <span class="sdot"></span>
+      <span class="sdot"></span>
+    </div>
+  </section>
+    </main>
+  </div>
+
+  <!-- 공용 JS -->
+  <script src="/common/icon/icon.js"></script>
+  <script src="/common/button/button.js"></script>
+  <script src="/common/top-banner/include.js"></script>
+
+  <!-- 섹션 JS -->
+  <script type="module" src="/yujin/js/detail_AI.js"></script>
+</body>
+</html>

@@ -82,7 +82,7 @@ async function includeHTML(targetSelector, filePath) {
   document.addEventListener("DOMContentLoaded", async () => {
     try {
       // top-banner.html 경로는 personal_AI.html과 같은 폴더(yujin/html)에 있다고 가정
-      await includeHTML("#top-banner", "/common/top-banner/html/top-banner.html");
+      await includeHTML("#top-banner", "/common/top-banner/top-banner.html");
   
       renderToolIcons("#recommendedTools", recommendedTools);
       renderToolIcons("#recentTools", recentTools);
