@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이메일 회원가입</title>
+
+  <link rel="stylesheet" href="../css/login2.css">
+  <link rel="stylesheet" href="../../common/top-banner/top-banner.css">
+  <link rel="stylesheet" href="../../common/signup_status/signup_status.css">
+  <link rel="stylesheet" href="../../common/confirm/confirm.css">
+</head>
+
+<body>
+
+  <div id="top-banner"></div>
+  <div id="signup-status" data-step="1"></div>
+
+  <main class="signup-container">
+
+    <h1 class="title">이메일 회원가입</h1>
+
+    <div class="form-group">
+      <label>이메일 주소 입력</label>
+      <div class="email-wrap">
+        <input type="text" id="emailId" placeholder="이메일 입력창">
+        <span>@</span>
+        <select id="emailDomain">
+          <option value="">이메일 주소 선택</option>
+          <option value="gmail.com">gmail.com</option>
+          <option value="naver.com">naver.com</option>
+          <option value="icloud.com">icloud.com</option>
+          <option value="direct">직접 입력</option>
+        </select>
+        <input type="text" id="emailCustom" placeholder="직접 입력" style="display:none;">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>비밀번호 입력</label>
+      <input type="password" id="password">
+    </div>
+
+    <div class="form-group">
+      <label>비밀번호 재입력</label>
+      <input type="password" id="passwordConfirm">
+    </div>
+
+    <button class="signup-btn" id="signupBtn">회원가입</button>
+
+    <div class="back-link">
+      ← 이전으로 돌아가기
+    </div>
+
+  </main>
+
+  <!-- ✅ 경로: minju/html/login2.html 기준 -->
+  <script src="../../common/top-banner/include.js"></script>
+  <script src="../../common/signup_status/include.js"></script>
+  <script type="module" src="../js/login2.js"></script>
+
+</body>
+</html>

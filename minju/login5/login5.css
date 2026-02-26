@@ -1,0 +1,66 @@
+/* =========================
+   login5.css - 회원가입 완료 페이지
+========================= */
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(160deg, #dce8f8 0%, #eaf1fb 40%, #f5f8ff 100%);
+  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  color: #1a1a2e;
+}
+
+/* ===== 메인 컨테이너 ===== */
+.login5-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+}
+
+/* ===== 콘텐츠 영역 ===== */
+.complete-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  text-align: center;
+}
+
+/* ===== 제목 ===== */
+.title {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+/* ===== 웰컴 이미지 ===== */
+.welcome-image {
+  width: 320px;
+  height: auto;
+}
+
+.welcome-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ===== 메인페이지로 버튼 ===== */
+#goMainBtn {
+  min-width: 180px;
+  height: 52px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+}

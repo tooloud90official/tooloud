@@ -1,0 +1,72 @@
+/* =========================
+   signup_status.css
+========================= */
+
+/* ===== 화면 가운데 배치용 wrapper ===== */
+.signup-status-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+/* ===== 실제 상태바 ===== */
+.status-container {
+  position: relative;
+  width: 520px;
+  margin: 0 auto;
+  height: 70px;
+}
+
+/* ===== dashed line ===== */
+.progress-line {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  border-top: 2px dashed #d9d9d9dd;
+  z-index: 0;
+}
+
+/* ===== step 그룹 ===== */
+.status-steps {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  z-index: 1;
+}
+
+/* ===== 각 step ===== */
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ✅ 원과 텍스트 중앙 정렬 */
+}
+
+/* ===== 원 ===== */
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 활성 */
+.step-circle.active {
+  background: #2a7cff;
+  color: white;
+}
+
+/* ===== 텍스트 ===== */
+.step-label {
+  margin-top: 8px;
+  font-size: 13px;
+  text-align: center;
+  color: #777;
+  white-space: nowrap; /* ✅ 텍스트 줄바꿈 방지 */
+}

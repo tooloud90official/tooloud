@@ -23,7 +23,9 @@ body {
 /* ========================= */
 
 .login-form {
-  width: 360px;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -33,7 +35,7 @@ body {
   color: #ff3b30;
   font-size: 14px;
   justify-content: center;
-  margin-left: 20px
+  margin-left: 20px;
   margin-top: 8px;
   min-height: 18px;
 }
@@ -45,6 +47,7 @@ body {
   padding: 0 14px;
   font-size: 14px;
   background: #f3f3f3;
+  width: 400px
 }
 
 .login-input:focus {
@@ -118,6 +121,7 @@ body {
   margin-top: 16px;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 #signupBtn {

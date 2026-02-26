@@ -1,64 +1,59 @@
 <!DOCTYPE html>
 <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <title>로그인</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
 
-        <!-- 스타일시트 -->
-        <link rel="stylesheet" href="../css/login1.css">
-        <link rel="stylesheet" href="../../common/button/button.css">
-        <link rel="stylesheet" href="../../common/top-banner/top-banner.css">
-    </head>
+    <link rel="stylesheet" href="../../common/top-banner/top-banner.css">
+    <link rel="stylesheet" href="../../common/button/button.css">
+    <link rel="stylesheet" href="../css/login1.css">
+</head>
 
-    <body>
+<body>
 
-        <!-- 상단 배너 -->
-        <div id="top-banner"></div>
+    <div id="top-banner"></div>
 
-        <!-- 메인 콘텐츠 -->
-        <main class="login-page">
-            <h1 class="login-title">로그인</h1>
+    <main class="login-page">
+        <h1 class="login-title">로그인</h1>
 
-            <div class="login-form">
+        <div class="login-form">
+            <input type="email" id="email" class="login-input" placeholder="이메일 입력창" />
+            <input type="password" id="password" class="login-input" placeholder="비밀번호 입력창" />
 
-                <!-- 이메일 / 비밀번호 입력 -->
-                <input type="email" id="email" class="login-input" placeholder="이메일 입력창" />
-                <input type="password" id="password" class="login-input" placeholder="비밀번호 입력창" />
-
-                <!-- 로그인 유지 & 비밀번호 재설정 -->
-                <div class="login-options">
-                    <label class="remember">
-                        <input type="checkbox" id="remember">
-                        로그인 유지
-                    </label>
-                    <button class="text-btn" id="resetPw">비밀번호 재설정하기</button>
-                </div>
-                <!-- 에러 메시지 -->
-                <div id="loginError" class="login-error"></div>
-
-                <!-- 로그인 버튼 (JS 렌더링) -->
-                <div id="loginBtn"></div>
-
-                <!-- 소셜 로그인 -->
-                <div class="social-login">
-                    <button class="social google" id="googleLogin">
-                        <img src="http://127.0.0.1:5500/minju/media/googleLogo.svg" alt="Google 로그인">
-                    </button>
-                    <button class="social apple" id="appleLogin">
-                        <img src="http://127.0.0.1:5500/minju/media/appleLogo.svg" alt="Apple 로그인">
-                    </button>
-                </div>
-
-                <!-- 회원가입 버튼 (JS 렌더링) -->
-                <div id="signupBtn"></div>
-
+            <div class="login-options">
+                <label class="remember">
+                    <input type="checkbox" id="remember">
+                    로그인 유지
+                </label>
+                <button class="text-btn" id="resetPw">비밀번호 재설정하기</button>
             </div>
-        </main>
+            
+            <div id="loginError" class="login-error"></div>
 
-        <!-- 스크립트 -->
-        <script src="/common/button/button.js"></script>
-        <script src="../js/login1.js"></script>
-        <script src="/common/top-banner/include.js"></script>
+            <div id="loginBtnContainer">
+                <button type="button" class="btn btn-primary full-width" id="loginBtn">로그인</button>
+            </div>
 
-    </body>
+            <div class="social-login">
+                <button class="social google" id="googleLogin">
+                    <img src="../media/googleLogo.svg" alt="Google 로그인">
+                </button>
+                <button class="social apple" id="appleLogin">
+                    <img src="../media/appleLogo.svg" alt="Apple 로그인">
+                </button>
+            </div>
+
+            <div id="signupBtnContainer">
+                <button type="button" class="btn btn-outline full-width" id="signupBtn">회원가입</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../../common/top-banner/include.js"></script>
+    <script src="../../common/button/button.js"></script>
+    <script src="../js/login1.js"></script>
+
+</body>
 </html>

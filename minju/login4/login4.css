@@ -1,0 +1,210 @@
+/* =========================
+   login4.css - 관심 툴 추가 페이지
+========================= */
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(160deg, #dce8f8 0%, #eaf1fb 40%, #f5f8ff 100%);
+  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  color: #1a1a2e;
+  display: block;
+}
+
+/* ===== signup-status 여백 ===== */
+#signup-status {
+  display: block;
+  width: 100%;
+  position: static;
+  float: none;
+}
+
+.signup-status-area {
+  margin-top: 0 !important;
+  padding: 32px 0 16px !important; /* ✅ top-banner와 간격 추가 */
+}
+
+/* ===== 메인 컨테이너 ===== */
+.login4-container {
+  max-width: 520px;       /* ✅ signup-status 너비와 맞춤 */
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== 제목 ===== */
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0 0 12px;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 36px;
+  text-align: center;
+}
+
+/* ===== 툴 그리드 영역 ===== */
+.tool-grid-wrap {
+  width: 100%;
+  background: #f0f4fa;
+  border-radius: 20px;
+  padding: 32px 28px;
+  margin-bottom: 40px;
+  box-sizing: border-box;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ✅ 3열 고정 */
+  grid-auto-rows: auto;
+  gap: 28px 24px;
+}
+
+/* ===== 툴 아이콘 카드 ===== */
+.tool-icon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s;
+}
+
+.tool-icon-card:hover {
+  transform: translateY(-2px);
+}
+
+.tool-icon-card__icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: #ccc;
+  display: block;
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.tool-icon-card__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.tool-icon-card__title {
+  font-size: 13px;
+  color: #333;
+  text-align: center;
+}
+
+/* 선택된 카드 */
+.tool-icon-card.is-selected .tool-icon-card__icon::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 20px;
+  text-align: center;
+}
+
+.tool-icon-card.is-selected .tool-icon-card__icon {
+  box-shadow: 0 0 0 3px #3b82f6;
+}
+
+/* 최대 선택 시 미선택 카드 흐리게 */
+.tool-grid.is-max .tool-icon-card:not(.is-selected) {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ===== 선택한 툴 영역 ===== */
+.selected-wrap {
+  width: 100%;
+  background: #f0f4fa;
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.selected-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+/* 프로그레스 바 */
+.selected-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #d0dff5;
+  border-radius: 2px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.selected-progress-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* 선택된 아이콘 목록 */
+.selected-icons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 90px;
+  margin-bottom: 16px;
+}
+
+.selected-icons .tool-icon-card {
+  pointer-events: none;
+}
+
+.selected-icons .tool-icon-card__icon {
+  width: 56px;
+  height: 56px;
+}
+
+/* 카운트 */
+.selected-count {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 24px;
+}
+
+/* 선택 마치기 버튼 */
+#finishBtn {
+  min-width: 160px;
+  border-radius: 30px;
+}

@@ -1,0 +1,42 @@
+/* login3.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', sans-serif;
+    background: #f8faff;
+}
+
+.signup-container {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.subtitle { color: #5B7FFF; font-weight: 600; margin-bottom: 40px; font-size: 15px; }
+
+.form-group { text-align: left; margin-bottom: 25px; }
+.form-group label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
+
+.input-with-button, .date-select-group {
+    display: flex;
+    gap: 10px;
+}
+
+.custom-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.full-width { width: 100%; }
+.date-select-group select { flex: 1; }
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 50px;
+}
