@@ -14,14 +14,14 @@ async function includeHTML(targetSelector, filePath) {
   
   /**
    * 아이콘 컴포넌트 mount 생성 후 loadToolIconCard 호출
-   * - /common/icon/icon.js 의 전역 함수 사용
+   * - /_common/icon/icon.js 의 전역 함수 사용
    */
   function renderToolIcons(targetSelector, tools) {
     const container = document.querySelector(targetSelector);
     if (!container) return;
   
     if (typeof window.loadToolIconCard !== "function") {
-      console.warn("loadToolIconCard not found. /common/icon/icon.js 확인");
+      console.warn("loadToolIconCard not found. /_common/icon/icon.js 확인");
       return;
     }
   
@@ -82,7 +82,7 @@ async function includeHTML(targetSelector, filePath) {
   document.addEventListener("DOMContentLoaded", async () => {
     try {
       // top-banner.html 경로는 personal_AI.html과 같은 폴더(yujin/html)에 있다고 가정
-      await includeHTML("#top-banner", "/common/top-banner/top-banner.html");
+      await includeHTML("#top-banner", "/_common/top-banner/top-banner.html");
   
       renderToolIcons("#recommendedTools", recommendedTools);
       renderToolIcons("#recentTools", recentTools);

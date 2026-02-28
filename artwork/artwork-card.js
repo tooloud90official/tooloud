@@ -2,7 +2,7 @@ export async function mountArtworkCardTemplate() {
     // 템플릿 HTML을 한 번만 DOM에 주입
     if (document.getElementById("artworkCardTpl")) return;
   
-    const res = await fetch("/yujin/html/artwork-card.html");
+    const res = await fetch("/artwork/artwork-card.html");
     const html = await res.text();
   
     const wrap = document.createElement("div");

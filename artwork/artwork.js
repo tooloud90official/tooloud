@@ -1,5 +1,5 @@
-import { JeonubSelect } from "/common/select/select.js";
-import { mountArtworkCardTemplate, renderArtworkCards } from "/yujin/js/artwork-card.js";
+import { JeonubSelect } from "/_common/select/select.js";
+import { mountArtworkCardTemplate, renderArtworkCards } from "/artwork/artwork-card.js";
 /* =========================
    1) 사이드바 토글
 ========================= */
@@ -111,7 +111,7 @@ if (typeof loadSearchBar === "function") {
       },
     });
   } else {
-    console.warn("loadSearchBar가 없습니다. /common/searchBar/searchBar.js 경로 확인!");
+    console.warn("loadSearchBar가 없습니다. /_common/searchBar/searchBar.js 경로 확인!");
   }
 
   await mountArtworkCardTemplate();

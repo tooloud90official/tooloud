@@ -1,3 +1,36 @@
+/* ===== 섹션 탭 ===== */
+.section-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 18px 0 24px;
+}
+
+.section-tab {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.section-tab:hover {
+  border-color: #2a7cff;
+  color: #2a7cff;
+}
+
+.section-tab.is-active {
+  background: #2a7cff;
+  border-color: #2a7cff;
+  color: #fff;
+  font-weight: 600;
+}
+
 .detail_AI-main {
     max-width: 1100px;
     margin: 0 auto;

@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const target = document.getElementById("signup-status");
   if (!target) return;
 
-  const basePath = "../../common/signup_status/";
+  const basePath = "../../_common/signup_status/";
 
   try {
     const htmlRes = await fetch(basePath + "signup_status.html");

@@ -17,7 +17,7 @@ async function initAlert({ triggerSelector, mountSelector, alerts = [] }) {
 
   // alert.html 로드
   try {
-    const res = await fetch('/common/alert/alert.html');
+    const res = await fetch('/_common/alert/alert.html');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const html = await res.text();
     mount.innerHTML = html;
@@ -30,7 +30,7 @@ async function initAlert({ triggerSelector, mountSelector, alerts = [] }) {
   if (!document.querySelector('link[data-style="alert"]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/common/alert/alert.css';
+    link.href = '/_common/alert/alert.css';
     link.dataset.style = 'alert';
     document.head.appendChild(link);
   }

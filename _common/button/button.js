@@ -4,7 +4,7 @@ async function loadButton({
   variant = "primary",
   onClick = null
 }) {
-  const res = await fetch('/common/button/button.html');
+  const res = await fetch('/_common/button/button.html');
   const html = await res.text();
 
   const container =

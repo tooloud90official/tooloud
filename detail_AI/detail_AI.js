@@ -1,14 +1,14 @@
-import { JeonubSelect } from "/common/select/select.js"; 
+import { JeonubSelect } from "/_common/select/select.js"; 
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // 1) 아이콘: /common/icon/icon.html 불러와 mount에 삽입
+    // 1) 아이콘: /_common/icon/icon.html 불러와 mount에 삽입
     //    네 icon.js 방식 그대로: loadToolIconCard(selector, options)
     await window.loadToolIconCard("#toolIconMount", {
       toolName: "Midjourney",
       url: "https://www.midjourney.com/" // 필요 없으면 지워도 됨
     });
   
-    // 2) 버튼: /common/button/button.html 불러와 target에 삽입
+    // 2) 버튼: /_common/button/button.html 불러와 target에 삽입
     //    네 button.js 방식 그대로: loadButton({ target, text, variant, onClick })
     await window.loadButton({
       target: "#visitSiteBtn",
@@ -163,5 +163,66 @@ if (mount) {
     });
   });
   
+  /* =========================
+   섹션 탭: 클릭 스크롤 + active 관리
+========================= */
+(function initSectionTabs() {
+  const tabsRoot = document.getElementById("sectionTabs");
+  if (!tabsRoot) return;
+
+  const tabs = Array.from(tabsRoot.querySelectorAll(".section-tab"));
+
+  // ✅ 클릭 → 해당 섹션으로 스크롤
+  tabsRoot.addEventListener("click", (e) => {
+    const tab = e.target.closest(".section-tab");
+    if (!tab) return;
+
+    const targetId = tab.dataset.target;
+    const targetEl = document.getElementById(targetId);
+    if (!targetEl) return;
+
+    // active 처리
+    tabs.forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+
+    // 부드러운 스크롤
+    targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  // ✅ 스크롤할 때 현재 보이는 섹션에 맞춰 active 자동 변경
+  // (헤더가 fixed면 offset 필요할 수 있는데, 일단 기본형으로 깔끔하게!)
+  const sectionIds = tabs
+    .map((t) => t.dataset.target)
+    .filter(Boolean);
+
+  const sectionEls = sectionIds
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+
+  if (sectionEls.length === 0) return;
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      // 가장 많이 보이는 섹션을 active로
+      const visible = entries
+        .filter((en) => en.isIntersecting)
+        .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
+
+      if (!visible) return;
+
+      const activeId = visible.target.id;
+      tabs.forEach((t) => {
+        t.classList.toggle("is-active", t.dataset.target === activeId);
+      });
+    },
+    {
+      root: null,
+      threshold: [0.25, 0.4, 0.55], // 살짝만 보여도 잡히게
+    }
+  );
+
+  sectionEls.forEach((el) => io.observe(el));
+})();
+
 
   

@@ -3,7 +3,7 @@ async function loadSearchBar({
   placeholder = "검색어를 입력하세요",
   onSearch = null
 }) {
-  const res = await fetch('/common/searchBar/searchBar.html');
+  const res = await fetch('/_common/searchBar/searchBar.html');
   const html = await res.text();
 
   const container = document.querySelector(target);

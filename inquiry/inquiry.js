@@ -1,4 +1,4 @@
-import { initFaqItems } from "/common/drop_down/drop_down.js";
+import { initFaqItems } from "/_common/drop_down/drop_down.js";
 
 /**
  * html 조각 로드 (상단 배너 / 공용 드롭다운 html 삽입용)
@@ -22,7 +22,7 @@ async function appendDropdownItems(targetSelector, count) {
   if (!target) return; // 컨테이너 없으면 스킵
 
   for (let i = 0; i < count; i++) {
-    await includeHTML(targetSelector, "/common/drop_down/drop_down.html");
+    await includeHTML(targetSelector, "/_common/drop_down/drop_down.html");
   }
 }
 
@@ -52,7 +52,7 @@ function fixPanelIdsIn(containerSelector, prefix) {
  */
 function renderSubmitButton() {
   if (typeof window.loadButton !== "function") {
-    console.warn("loadButton not found. /common/button/button.js 확인");
+    console.warn("loadButton not found. /_common/button/button.js 확인");
     return;
   }
 
@@ -71,7 +71,7 @@ function renderSubmitButton() {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // 1) 상단 배너 불러오기 (inquiry.html과 같은 폴더에 top-banner.html이 있을 때)
-    await includeHTML("#top-banner", "/common/top-banner/top-banner.html");
+    await includeHTML("#top-banner", "/_common/top-banner/top-banner.html");
 
     // 2) FAQ 섹션 드롭다운 삽입
     await appendDropdownItems("#faqList", 5);

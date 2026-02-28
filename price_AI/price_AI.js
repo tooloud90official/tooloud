@@ -149,7 +149,7 @@ function initStepSlider() {
  */
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. 탑 배너 호출 (경로 확인해줘!)
-    await includeHTML("#top-banner", "/common/top-banner/top-banner.html");
+    await includeHTML("#top-banner", "/_common/top-banner/top-banner.html");
 
     // 2. 슬라이더 초기화
     initStepSlider();
