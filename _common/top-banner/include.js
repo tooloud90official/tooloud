@@ -1,41 +1,65 @@
-// top-banner/include.js
+// include.js
+// top-banner 자동 로드 - 로그인 상태에 따라 배리언트 분기
 
-async function loadTopBanner() {
-  const target = document.getElementById("top-banner");
-  if (!target) return;
+(async () => {
 
+  // ===== 로그인 상태 확인 =====
+  const isLoginPage = window.location.pathname.includes('/login');
+  const isLoggedIn  = !isLoginPage && localStorage.getItem('isLoggedIn') === 'true';
+  const bannerFile = isLoggedIn
+    ? '/_common/top-banner/top-banner-logged.html'
+    : '/_common/top-banner/top-banner.html';
+
+  // ===== HTML 로드 =====
   try {
-    // HTML 로드 (경로 순서대로 시도)
-    let html = null;
-
-    const paths = [
-      "/_common/top-banner/top-banner.html",       // 절대경로 (Live Server 루트 기준)
-      "/_common/top-banner/top-banner.html",  // 2단계 하위 폴더
-      "/_common/top-banner/top-banner.html",     // 1단계 하위 폴더
-    ];
-
-    for (const path of paths) {
-      const res = await fetch(path);
-      if (res.ok) {
-        html = await res.text();
-        break;
-      }
-    }
-
-    if (!html) throw new Error("top-banner.html 을 찾을 수 없습니다.");
-    target.innerHTML = html;
-
-    // ✅ index.js 로드 (HTML 삽입 후 실행)
-    if (!document.querySelector('script[data-script="top-banner"]')) {
-      const script = document.createElement("script");
-      script.src = "/_common/top-banner/index.js"; // 절대경로
-      script.dataset.script = "top-banner";
-      document.body.appendChild(script);
-    }
-
-  } catch (e) {
-    console.error("Top Banner Load Error:", e);
+    const res  = await fetch(bannerFile);
+    const html = await res.text();
+    const container = document.getElementById('top-banner');
+    if (container) container.innerHTML = html;
+  } catch (err) {
+    console.error('[include.js] top-banner 로드 실패:', err);
+    return;
   }
-}
 
-document.addEventListener("DOMContentLoaded", loadTopBanner);
+  // ===== index.js 로드 =====
+  const script = document.createElement('script');
+  script.src = '/_common/top-banner/index.js';
+  script.dataset.script = 'top-banner';
+  document.body.appendChild(script);
+
+  // ===== 로그인 후 배너 전용: alert + 로그아웃 초기화 =====
+  if (isLoggedIn) {
+    script.addEventListener('load', async () => {
+
+      // alert 컴포넌트 초기화 (alert.js가 로드된 경우)
+      if (typeof initAlert === 'function') {
+        if (!document.getElementById('alert-root')) {
+          const root = document.createElement('div');
+          root.id = 'alert-root';
+          document.body.appendChild(root);
+        }
+
+        await initAlert({
+          triggerSelector: '#bellBtn',
+          mountSelector:   '#alert-root',
+          alerts: [] // 실제 알림은 각 페이지 또는 API에서 주입
+        });
+      }
+
+      // 로그아웃 버튼
+      document.getElementById('logoutBtn')?.addEventListener('click', () => {
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = '/main1/main1.html';
+      });
+
+    });
+  } else {
+    // 로그인 전 배너: 로그인/회원가입 버튼
+    script.addEventListener('load', () => {
+      document.getElementById('authBtn')?.addEventListener('click', () => {
+        window.location.href = '/login1/login1.html';
+      });
+    });
+  }
+
+})();

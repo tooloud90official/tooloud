@@ -232,6 +232,28 @@ body {
   text-align: center;
 }
 
+/* ===== AI 추천 툴 섹션 ===== */
+.recommend-section {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  box-sizing: border-box;
+}
+
+/* 4열 2행 고정, 스크롤 없음 */
+.recommend-section .tool-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 20px;
+  overflow-x: visible;
+}
+
+.recommend-section .tool-grid .tool-icon-card {
+  width: auto;
+}
+
 
 /* ===== 대표 AI 툴 섹션 ===== */
 .tools-section-wrap {

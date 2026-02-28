@@ -87,6 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
     showMsg('', '');
     console.log('로그인 진행', { email, password });
     // TODO: 서버 로그인 API 연동
+    localStorage.setItem('isLoggedIn', 'true');
+    location.href = '/minju/main2/main2.html';
   });
 
 

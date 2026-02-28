@@ -1,6 +1,7 @@
 // main2.js
 // 경로: minju/main2/main2.js
 
+
 document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== 검색바 초기화 =====
@@ -9,12 +10,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     placeholder: '검색어를 입력하세요',
     onSearch: (value) => {
       console.log('검색어:', value);
-      // TODO: 검색 결과 페이지로 이동
     }
   });
 
 
-  // ===== AI 추천 툴 데이터 (로그인 후 개인 맞춤) =====
+  // ===== AI 추천 툴 데이터 =====
   const RECOMMEND_TOOLS = [
     { name: 'Chat GPT',   img: 'https://logo.clearbit.com/openai.com' },
     { name: 'Claude',     img: 'https://logo.clearbit.com/anthropic.com' },
@@ -29,42 +29,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== 카테고리별 작업물 데이터 =====
   const WORK_DATA = {
-    image: {
-      img: './media/work-image.png',
-      tool: { name: 'Midjourney', img: 'https://logo.clearbit.com/midjourney.com' },
-      stars: '★★★★☆'
-    },
-    research: {
-      img: './media/work-research.png',
-      tool: { name: 'Perplexity AI', img: 'https://logo.clearbit.com/perplexity.ai' },
-      stars: '★★★★★'
-    },
-    document: {
-      img: './media/work-document.png',
-      tool: { name: 'Notion AI', img: 'https://logo.clearbit.com/notion.so' },
-      stars: '★★★★☆'
-    },
-    dev: {
-      img: './media/work-dev.png',
-      tool: { name: 'Cursor', img: 'https://logo.clearbit.com/cursor.sh' },
-      stars: '★★★★★'
-    },
-    edu: {
-      img: './media/work-edu.png',
-      tool: { name: 'Gamma', img: 'https://logo.clearbit.com/gamma.app' },
-      stars: '★★★★☆'
-    },
-    chat: {
-      img: './media/work-chat.png',
-      tool: { name: 'ChatGPT', img: 'https://logo.clearbit.com/openai.com' },
-      stars: '★★★★★'
-    },
+    image:    { img: './media/work-image.png',    tool: { name: 'Midjourney',   img: 'https://logo.clearbit.com/midjourney.com' },  stars: '★★★★☆' },
+    research: { img: './media/work-research.png', tool: { name: 'Perplexity AI',img: 'https://logo.clearbit.com/perplexity.ai' },  stars: '★★★★★' },
+    document: { img: './media/work-document.png', tool: { name: 'Notion AI',    img: 'https://logo.clearbit.com/notion.so' },       stars: '★★★★☆' },
+    dev:      { img: './media/work-dev.png',      tool: { name: 'Cursor',       img: 'https://logo.clearbit.com/cursor.sh' },       stars: '★★★★★' },
+    edu:      { img: './media/work-edu.png',      tool: { name: 'Gamma',        img: 'https://logo.clearbit.com/gamma.app' },       stars: '★★★★☆' },
+    chat:     { img: './media/work-chat.png',     tool: { name: 'ChatGPT',      img: 'https://logo.clearbit.com/openai.com' },      stars: '★★★★★' },
   };
 
 
   // ===== 카테고리별 툴 데이터 =====
   const TOOLS_DATA = {
-    image: [
+    image:    [
       { name: 'Midjourney',    img: 'https://logo.clearbit.com/midjourney.com' },
       { name: 'Gamma',         img: 'https://logo.clearbit.com/gamma.app' },
       { name: 'Perplexity AI', img: 'https://logo.clearbit.com/perplexity.ai' },
@@ -138,9 +114,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </span>
         <span class="tool-icon-card__title">${tool.name}</span>
       `;
-      card.addEventListener('click', () => {
-        console.log('툴 클릭:', tool.name);
-      });
+      card.addEventListener('click', () => console.log('툴 클릭:', tool.name));
       grid.appendChild(card);
     });
   }
@@ -166,8 +140,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       toolEl.innerHTML = `
         <div class="tool-icon-card">
           <span class="tool-icon-card__icon">
-            <img src="${data.tool.img}" alt="${data.tool.name}"
-              onerror="this.style.display='none'">
+            <img src="${data.tool.img}" alt="${data.tool.name}" onerror="this.style.display='none'">
           </span>
           <span class="tool-icon-card__title">${data.tool.name}</span>
         </div>
@@ -183,9 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const toolsSection = document.getElementById('toolsSection');
     toolsSection.innerHTML = '';
 
-    const categories = category === 'all'
-      ? Object.keys(TOOLS_DATA)
-      : [category];
+    const categories = category === 'all' ? Object.keys(TOOLS_DATA) : [category];
 
     categories.forEach(cat => {
       const tools = TOOLS_DATA[cat];
@@ -207,14 +178,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         card.dataset.toolName = tool.name;
         card.innerHTML = `
           <span class="tool-icon-card__icon">
-            <img src="${tool.img}" alt="${tool.name}"
-              onerror="this.style.display='none'">
+            <img src="${tool.img}" alt="${tool.name}" onerror="this.style.display='none'">
           </span>
           <span class="tool-icon-card__title">${tool.name}</span>
         `;
-        card.addEventListener('click', () => {
-          console.log('툴 클릭:', tool.name);
-        });
+        card.addEventListener('click', () => console.log('툴 클릭:', tool.name));
         grid.appendChild(card);
       });
 
@@ -233,8 +201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('is-active'));
     tab.classList.add('is-active');
 
-    const category = tab.dataset.category;
-    renderWorkCard(category);
+    renderWorkCard(tab.dataset.category);
     renderTools('all');
   });
 
@@ -245,32 +212,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderTools('all');
 
 
-  // ===== top-banner auth 영역 → 종 아이콘 + 로그아웃으로 교체 =====
+  // ===== alert 초기화 (top-banner 로드 후) =====
   setTimeout(async () => {
-    const authBtn = document.getElementById('authBtn');
-    if (authBtn) {
-      authBtn.innerHTML = `
-        <div class="bell-wrapper" id="bellBtn">
-          <svg class="auth-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span class="bell-badge hidden">0</span>
-        </div>
-        <span>로그아웃</span>
-      `;
-    }
-
-    // alert-root 생성
     if (!document.getElementById('alert-root')) {
       const root = document.createElement('div');
       root.id = 'alert-root';
       document.body.appendChild(root);
     }
 
-    // alert 컴포넌트 초기화
     if (typeof initAlert === 'function') {
       await initAlert({
         triggerSelector: '#bellBtn',
@@ -283,7 +232,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         ]
       });
     }
-
   }, 300);
 
 }); // DOMContentLoaded 끝
