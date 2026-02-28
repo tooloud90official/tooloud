@@ -304,8 +304,8 @@ body {
 }
 
 .doc-thumb {
-  width: 72px;
-  height: 90px;
+  width: 105px;
+  height: 150px;
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
@@ -326,6 +326,12 @@ body {
   object-fit: contain;
 }
 
+.doc-name {
+  font-size: 10px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
 
 .work-images-wrap {
   display: flex;
@@ -335,7 +341,7 @@ body {
 
 .work-img-thumb {
   width: 100%;
-  height: 56px;
+  height: 120px;
   background: #e8eef5;
   border-radius: 8px;
   overflow: hidden;
@@ -481,4 +487,98 @@ body {
 /* ===== 드롭다운 섹션 ===== */
 .faq-section {
   margin-bottom: 40px;
+}
+
+/* ===== 내 정보 수정 폼 ===== */
+.info-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.edit-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  min-width: 60px;
+}
+
+.edit-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.edit-input {
+  flex: 1;
+  height: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #1a1a2e;
+  outline: none;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.edit-input:focus {
+  border-color: #2a7cff;
+}
+
+.btn-check {
+  background: #2a7cff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-check:hover {
+  background: #1a6be0;
+}
+
+.edit-select-wrap {
+  flex: 1;
+}
+
+.edit-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.btn-submit {
+  padding: 0 32px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+/* ===== 리뷰 편집 textarea ===== */
+.review-edit-textarea {
+  width: 100%;
+  border: 1px solid #2a7cff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #1a1a2e;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.5;
 }

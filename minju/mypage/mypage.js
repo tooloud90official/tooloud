@@ -74,7 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const WORK_IMAGES = [
     'https://picsum.photos/200/56?random=1',
     'https://picsum.photos/200/56?random=2',
-    'https://picsum.photos/200/56?random=3',
   ];
 
   const LINKS = [
@@ -164,26 +163,121 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('reviewManageList');
     if (!container) return;
 
-    container.innerHTML = REVIEW_MANAGE.map(r => `
-      <div class="review-manage-item">
-        <div class="review-manage-item__icon">
-          <img src="${r.toolImg}" alt="" onerror="this.style.display='none'">
-        </div>
-        <div class="review-manage-item__body">
-          <div class="review-manage-item__meta">제마나우 ${r.date}</div>
-          <div class="review-manage-item__text">${r.text}</div>
-        </div>
-        <div class="review-manage-item__actions">
-          <button class="icon-btn" title="수정">✏️</button>
-          <button class="icon-btn" title="삭제">🗑️</button>
-        </div>
-      </div>
-    `).join('');
+    container.innerHTML = '';
+
+    REVIEW_MANAGE.forEach((r, idx) => {
+      const item = document.createElement('div');
+      item.className = 'review-manage-item';
+      item.dataset.idx = idx;
+
+      function renderViewMode() {
+        item.innerHTML = `
+          <div class="review-manage-item__icon">
+            <img src="${r.toolImg}" alt="" onerror="this.style.display='none'">
+          </div>
+          <div class="review-manage-item__body">
+            <div class="review-manage-item__meta">제마나우 ${r.date}</div>
+            <div class="review-manage-item__text">${r.text}</div>
+          </div>
+          <div class="review-manage-item__actions">
+            <button class="icon-btn edit-btn" title="수정">✏️</button>
+            <button class="icon-btn delete-btn" title="삭제">🗑️</button>
+          </div>
+        `;
+
+        // 수정 버튼 → 편집 모드로 전환
+        item.querySelector('.edit-btn').addEventListener('click', () => {
+          renderEditMode();
+        });
+
+        // 삭제 버튼
+        item.querySelector('.delete-btn').addEventListener('click', () => {
+          if (confirm('리뷰를 삭제할까요?')) {
+            item.remove();
+          }
+        });
+      }
+
+      function renderEditMode() {
+        item.innerHTML = `
+          <div class="review-manage-item__icon">
+            <img src="${r.toolImg}" alt="" onerror="this.style.display='none'">
+          </div>
+          <div class="review-manage-item__body">
+            <div class="review-manage-item__meta">제마나우 ${r.date}</div>
+            <textarea class="review-edit-textarea" rows="3">${r.text}</textarea>
+          </div>
+          <div class="review-manage-item__actions">
+            <button class="icon-btn save-btn" title="저장">✅</button>
+            <button class="icon-btn cancel-btn" title="취소">✖️</button>
+          </div>
+        `;
+
+        // 저장 버튼
+        item.querySelector('.save-btn').addEventListener('click', () => {
+          const newText = item.querySelector('.review-edit-textarea').value.trim();
+          if (newText) r.text = newText;
+          renderViewMode();
+        });
+
+        // 취소 버튼
+        item.querySelector('.cancel-btn').addEventListener('click', () => {
+          renderViewMode();
+        });
+      }
+
+      renderViewMode();
+      container.appendChild(item);
+    });
   }
 
 
   // ===== 드롭다운 초기화 =====
   initFaqItems();
+
+
+  // ===== 내 정보 수정 폼 초기화 =====
+  function initInfoEditForm() {
+
+    const initSelect = (wrapperId, options, defaultValue) => {
+      const wrap = document.getElementById(wrapperId);
+      if (!wrap) return;
+
+      if (typeof JeonubSelect !== 'undefined') {
+        wrap.innerHTML = '<div class="select-root"></div>';
+        const sel = new JeonubSelect(wrap.querySelector('.select-root'));
+        sel.setOptions(options.map(o => ({ label: o, value: o })));
+        sel.setValue(defaultValue);
+      } else {
+        // fallback: 기본 select
+        wrap.innerHTML = `
+          <select style="width:100%;height:40px;border:1px solid #e0e0e0;border-radius:10px;padding:0 14px;font-size:14px;color:#1a1a2e;outline:none;background:#fff;box-sizing:border-box;">
+            ${options.map(o => `<option value="${o}" ${o === defaultValue ? 'selected' : ''}>${o}</option>`).join('')}
+          </select>
+        `;
+      }
+    };
+
+    initSelect('selectJobWrap',     ['마케터', '개발자', '디자이너', '기획자', '기타'], '마케터');
+    initSelect('selectAgeWrap',     ['10대', '20대', '30대', '40대', '50대 이상'],     '20대');
+    initSelect('selectCountryWrap', ['대한민국', '미국', '일본', '중국', '기타'],       '대한민국');
+
+    // 중복확인 버튼
+    document.getElementById('nicknameCheckBtn')?.addEventListener('click', () => {
+      const val = document.getElementById('editNickname')?.value.trim();
+      if (!val) { alert('닉네임을 입력해주세요.'); return; }
+      // TODO: API 연동
+      alert(`"${val}" 사용 가능한 닉네임입니다.`);
+    });
+
+    // 수정 버튼
+    document.getElementById('infoSubmitBtn')?.addEventListener('click', () => {
+      // TODO: API 연동
+      alert('정보가 수정되었습니다.');
+    });
+  }
+
+  initInfoEditForm();
 
 
   // ===== 로그아웃 버튼 =====
