@@ -1,7 +1,7 @@
 // login2.js
 // 경로: minju/js/login2.js
 
-import { includeHTML } from '../common/confirm/include.js';
+import { includeHTML } from '/_common/confirm/include.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ✅ 경로: minju/html/login2.html 기준
-    await includeHTML('#modal-root', '../../common/confirm/confirm.html');
+    await includeHTML('#modal-root', '/_common/confirm/confirm.html');
 
     const modal     = document.querySelector('[data-confirm-modal]');
     const dialog    = modal.querySelector('.confirm-modal__dialog');

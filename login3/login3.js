@@ -1,6 +1,6 @@
 // login3.js
-import { includeHTML } from '../common/confirm/include.js';
-import { JeonubSelect } from '../common/select/select.js';
+import { includeHTML } from '/_common/confirm/include.js';
+import { JeonubSelect } from '/_common/select/select.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.body.appendChild(root);
     }
 
-    await includeHTML('#modal-root', '../../common/confirm/confirm.html');
+    await includeHTML('#modal-root', '/_common/confirm/confirm.html');
 
     const modal     = document.querySelector('[data-confirm-modal]');
     const dialog    = modal.querySelector('.confirm-modal__dialog');
