@@ -127,7 +127,7 @@ document.addEventListener('click', (e) => {
   }
 
   if (logo) {
-    alert('로고 클릭');
+    window.location.href = "/main1/main1.html";   // ✅ 여기 원하는 링크로 바꾸기
   }
 });
 
