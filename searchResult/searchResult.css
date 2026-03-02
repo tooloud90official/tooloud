@@ -1,0 +1,108 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: linear-gradient(#f6f7fb, #e6edf7);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== 검색바 ===== */
+#searchBar {
+  margin-top: 20px;
+  width: 600px;
+}
+
+/* ===== 결과 헤더 ===== */
+.result-header {
+  text-align: center;
+  margin-top: -300px;
+}
+
+.result-header h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.result-header p {
+  color: #777;
+  font-size: 14px;
+}
+
+/* ===== 리스트 ===== */
+.result-list {
+  width: 900px;
+  margin-top: 40px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ===== 카드 ===== */
+.tool-card {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+/* ===== 아이콘 영역 ===== */
+.tool-icon {
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  margin-right: 20px;
+}
+
+/* ===== 정보 ===== */
+.tool-info {
+  flex: 1;
+}
+
+.tool-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.tool-name {
+  background: #2f80ff;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.rating {
+  color: orange;
+}
+
+.tool-desc {
+  color: #555;
+  font-size: 14px;
+}
+
+/* ===== 오른쪽 ===== */
+.tool-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.bookmark-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.detail {
+  font-size: 13px;
+  color: #777;
+  cursor: pointer;
+}

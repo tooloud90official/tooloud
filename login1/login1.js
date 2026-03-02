@@ -24,6 +24,12 @@ loadButton({
   }
 });
 
+// ⭐ 여기 추가
+const resetPwBtn = document.getElementById('resetPw');
+resetPwBtn?.addEventListener('click', () => {
+  window.location.href = '/reset/reset.html';
+});
+
 
 // ===== 이메일 형식 검사 =====
 emailInput.addEventListener('input', () => {
