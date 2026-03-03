@@ -10,6 +10,23 @@
   <link rel="stylesheet" href="/_common/drop_down/drop_down.css">
   <link rel="stylesheet" href="/_common/alert/alert.css">
   <link rel="stylesheet" href="/mypage/mypage.css">
+  
+  <style>
+    /* 1:1 문의하기 내부 레이아웃 수정을 위한 추가 스타일 */
+    .inquiry-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* 텍스트는 왼쪽, 버튼은 오른쪽 */
+      gap: 16px;
+      width: 100%;
+    }
+    .inquiry-wrapper .drop_down__desc {
+      margin: 0; /* 기본 마진 제거로 정렬 유지 */
+    }
+    #inquiryBtnContainer {
+      flex-shrink: 0; /* 버튼 크기가 줄어들지 않도록 고정 */
+    }
+  </style>
 </head>
 <body>
 
@@ -17,7 +34,6 @@
 
   <main class="mypage-container">
 
-    <!-- 프로필 섹션 -->
     <section class="profile-section">
       <h1 class="page-title">마이페이지</h1>
       <div class="profile-avatar">
@@ -27,12 +43,10 @@
       <button type="button" class="btn-primary profile-logout">로그아웃</button>
     </section>
 
-    <!-- 대시보드 -->
     <section class="dashboard-section">
       <h2 class="section-title">대시보드</h2>
       <div class="dashboard-grid">
 
-        <!-- 내 정보 -->
         <div class="dashboard-card card-info">
           <h3 class="card-title">내 정보</h3>
           <ul class="info-list">
@@ -44,27 +58,23 @@
           <button type="button" class="btn-text">정보 수정하기</button>
         </div>
 
-        <!-- 최근 사용한 툴 -->
         <div class="dashboard-card card-recent">
           <h3 class="card-title">최근 사용한 툴</h3>
           <div class="card-tool-slider" id="recentToolSlider"></div>
           <button type="button" class="btn-text">최근 사용한 툴 더보기</button>
         </div>
 
-        <!-- 내가 쓴 리뷰 -->
         <div class="dashboard-card card-review">
           <h3 class="card-title">내가 쓴 리뷰</h3>
           <ul class="review-list" id="reviewList"></ul>
         </div>
 
-        <!-- AI 추천 툴 -->
         <div class="dashboard-card card-ai">
           <h3 class="card-title">AI 추천 툴</h3>
           <div class="card-tool-slider" id="aiToolSlider"></div>
           <button type="button" class="btn-text">AI 추천 툴 더보기</button>
         </div>
 
-        <!-- 관심 있는 툴 -->
         <div class="dashboard-card card-favorite">
           <h3 class="card-title">관심 있는 툴</h3>
           <div class="card-tool-slider" id="favoriteToolSlider"></div>
@@ -74,7 +84,6 @@
       </div>
     </section>
 
-    <!-- 업로드한 작업물 -->
     <section class="works-section">
       <h2 class="section-title">업로드한 작업물</h2>
       <div class="works-card">
@@ -126,17 +135,14 @@
       </div>
     </section>
 
-    <!-- 리뷰 관리 -->
     <section class="review-manage-section">
       <h2 class="section-title">리뷰 관리</h2>
       <div class="review-manage-list" id="reviewManageList"></div>
     </section>
 
-    <!-- 드롭다운 -->
     <section class="faq-section">
       <div class="faq-list">
 
-        <!-- 내 정보 수정하기 -->
         <div class="drop_down" data-drop_down>
           <button type="button" class="drop_down__trigger" data-faq-trigger aria-expanded="false" aria-controls="panel-info">
             <span class="drop_down__title">내 정보 수정하기</span>
@@ -147,43 +153,37 @@
           <div id="panel-info" class="drop_down__panel" data-faq-panel role="region" aria-hidden="true">
             <div class="drop_down__content info-edit-form">
 
-              <!-- 닉네임 -->
               <div class="edit-row">
                 <span class="edit-label">닉네임</span>
                 <div class="edit-input-wrap">
                   <input type="text" class="edit-input" id="editNickname" value="민주강" placeholder="닉네임">
-                  <button type="button" class="btn-check" id="nicknameCheckBtn">중복확인</button>
+                  <div id="nicknameCheckContainer"></div>
                 </div>
               </div>
 
-              <!-- 직군 -->
               <div class="edit-row">
                 <span class="edit-label">직군</span>
                 <div class="edit-select-wrap" id="selectJobWrap"></div>
               </div>
 
-              <!-- 연령대 -->
               <div class="edit-row">
                 <span class="edit-label">연령대</span>
                 <div class="edit-select-wrap" id="selectAgeWrap"></div>
               </div>
 
-              <!-- 국가 -->
               <div class="edit-row">
                 <span class="edit-label">국가</span>
                 <div class="edit-select-wrap" id="selectCountryWrap"></div>
               </div>
 
-              <!-- 수정 버튼 -->
               <div class="edit-submit-row">
-                <button type="button" class="btn-primary btn-submit" id="infoSubmitBtn">수정</button>
+              <div id="infoSubmitContainer"></div>
               </div>
 
             </div>
           </div>
         </div>
 
-        <!-- 계정 탈퇴하기 -->
         <div class="drop_down" data-drop_down>
           <button type="button" class="drop_down__trigger" data-faq-trigger aria-expanded="false" aria-controls="panel-withdraw">
             <span class="drop_down__title">계정 탈퇴하기</span>
@@ -198,7 +198,6 @@
           </div>
         </div>
 
-        <!-- 1:1 문의하기 -->
         <div class="drop_down" data-drop_down>
           <button type="button" class="drop_down__trigger" data-faq-trigger aria-expanded="false" aria-controls="panel-inquiry">
             <span class="drop_down__title">1:1 문의하기</span>
@@ -208,7 +207,10 @@
           </button>
           <div id="panel-inquiry" class="drop_down__panel" data-faq-panel role="region" aria-hidden="true">
             <div class="drop_down__content">
-              <p class="drop_down__desc">1:1 문의를 통해 고객센터에 직접 문의할 수 있습니다.</p>
+              <div class="inquiry-wrapper">
+                <p class="drop_down__desc">1:1 문의를 통해 고객센터에 직접 문의할 수 있습니다.</p>
+                <div id="inquiryBtnContainer"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -224,7 +226,8 @@
   <script src="/_common/icon/icon.js"></script>
   <script src="/_common/alert/alert.js"></script>
   <script src="/_common/select/select.js"></script>
-  <script type="module" src="/mypage/mypage.js"></script>
+  <script src="/_common/button/button.js"></script> 
+  <script src="/mypage/mypage.js"></script>
 
 </body>
 </html>

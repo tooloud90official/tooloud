@@ -1,0 +1,171 @@
+/* 기본 배경 및 폰트 */
+body {
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+  background: linear-gradient(180deg, #ffffff 0%, #dce8f8 30%, #eaf3fc 60%, #ffffff 100%);
+  overflow-y: scroll;
+}
+
+.category-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 20px;
+  text-align: center;
+  min-height: 800px;
+}
+
+.page-title {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 100px;
+}
+
+/* [이미지 1] 알약 모양 탭 메뉴 */
+.category-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 50px;
+}
+
+.tab-item {
+  padding: 10px 22px;
+  border-radius: 50px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #666;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-item.active {
+  background: #4A83FF;
+  color: #fff;
+  border-color: #4A83FF;
+  font-weight: 600;
+}
+
+/* [이미지 1] 폴더 그리드 및 카드 */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 180px);
+  gap: 40px 30px;
+  justify-content: center;
+}
+
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.tool-icon-box {
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 35px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  padding: 20px;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.tool-group:hover .tool-icon-box {
+  transform: translateY(-5px);
+  background: #fff;
+}
+
+.mini-icon {
+  background: #f5f5f5;
+  border-radius: 12px;
+  width: 100%;
+  height: 100%;
+}
+
+.group-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* [이미지 2] 중앙 고정 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: none; 
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: #D1D1D1;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  border-radius: 40px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.header-left h2 { margin: 0; font-size: 24px; }
+.total-count { font-size: 13px; color: #777; }
+
+.close-btn {
+  background: none; border: none; font-size: 30px; cursor: pointer; color: #555;
+}
+
+.modal-body {
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* 리스트 아이템 카드 */
+.list-item {
+  background: #fff;
+  border-radius: 25px;
+  padding: 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.item-badge {
+  background: #007aff; color: #fff;
+  padding: 3px 12px; border-radius: 15px; font-size: 12px; font-weight: 600;
+}
+
+/* 말줄임표 관련 수정 부분 */
+.item-desc {
+  font-size: 12px;
+  color: #666;
+  margin: 8px 0;
+  line-height: 1.4;
+  
+  /* 여러 줄 말줄임표 설정 */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* 두 줄까지 보여줌 */
+  line-clamp: 2;         /* 표준 속성 병기 */
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카테고리별 AI 툴 - TOOLOUD</title>
+  <link rel="stylesheet" href="/_common/top-banner/top-banner.css">
+  <link rel="stylesheet" href="/_common/icon/icon.css">
+  <link rel="stylesheet" href="category.css">
+</head>
+<body>
+
+  <div id="top-banner"></div>
+
+  <main class="category-container">
+    <h1 class="page-title">카테고리별 AI 툴</h1>
+
+    <nav class="category-tabs" id="categoryTabs">
+      <button class="tab-item active">이미지·오디오·영상</button>
+      <button class="tab-item">리서치</button>
+      <button class="tab-item">문서 생성·요약·편집</button>
+      <button class="tab-item">개발·코딩</button>
+      <button class="tab-item">학습·교육</button>
+      <button class="tab-item">챗봇·어시스턴트</button>
+    </nav>
+
+    <div class="tool-grid" id="toolGrid"></div>
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="header-left">
+          <h2 id="modalTitle">카테고리명</h2>
+          <span class="total-count" id="modalTotalCount">전체 (0)</span>
+        </div>
+        <div class="header-right">
+          <select class="sort-select">
+            <option>평점 순</option>
+            <option>무료 툴</option>
+            <option>유료 툴</option>
+          </select>
+          <button class="close-btn" id="closeModal">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="modalList">
+        </div>
+    </div>
+  </div>
+
+  <script src="/_common/top-banner/include.js"></script>
+  <script src="/_common/icon/icon.js"></script>
+  <script src="category.js"></script>
+</body>
+</html>

@@ -25,24 +25,19 @@ function bindDetailNavigation() {
 
 }
 
-/* 페이지 초기화 */
 async function initPage() {
 
-  // 공통 컴포넌트
   await includeHTML('#top-banner', '/_common/top-banner/top-banner.html');
   await includeHTML('#searchBar', '/_common/searchBar/searchBar.html');
 
-  // ===== 아이콘 컴포넌트 로드 =====
-  await loadToolIconCard('#toolIcon-chatgpt', {
-    toolName: "ChatGPT",
-    url: "#"
-  });
+  await loadToolIconCard('#toolIcon-chatgpt', { toolName: "ChatGPT" });
+  await loadToolIconCard('#toolIcon-midjourney', { toolName: "Midjourney" });
+  await loadToolIconCard('#toolIcon-notionai', { toolName: "Notion AI" });
+  await loadToolIconCard('#toolIcon-runway', { toolName: "Runway" });
+  await loadToolIconCard('#toolIcon-copilot', { toolName: "GitHub Copilot" });
+  await loadToolIconCard('#toolIcon-canva', { toolName: "Canva AI" });
 
-  await loadToolIconCard('#toolIcon-midjourney', {
-    toolName: "Midjourney",
-    url: "#"
-  });
-
+  bindDetailNavigation();
 }
 
 document.addEventListener("DOMContentLoaded", initPage);

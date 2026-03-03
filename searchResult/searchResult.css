@@ -10,19 +10,19 @@ body {
 
 /* ===== 검색바 ===== */
 #searchBar {
-  margin-top: 20px;
+  margin-top: 60px;
   width: 600px;
 }
 
 /* ===== 결과 헤더 ===== */
 .result-header {
   text-align: center;
-  margin-top: -300px;
+  margin-top: 0px;
 }
 
 .result-header h1 {
   font-size: 36px;
-  margin-bottom: 10px;
+  margin-bottom: 2%;
 }
 
 .result-header p {
@@ -32,12 +32,12 @@ body {
 
 /* ===== 리스트 ===== */
 .result-list {
-  width: 900px;
+  width: 1100px;
   margin-top: 40px;
 
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
 }
 
 /* ===== 카드 ===== */
@@ -47,7 +47,15 @@ body {
   background: white;
   border-radius: 20px;
   padding: 20px;
+  height: 120px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 1000px) {
+  .result-list {
+    grid-template-columns: 1fr;
+    width: 90%;
+  }
 }
 
 /* ===== 아이콘 영역 ===== */
@@ -55,6 +63,7 @@ body {
   width: 100px;
   display: flex;
   justify-content: center;
+  margin-top: 10px;
   margin-right: 20px;
 }
 
