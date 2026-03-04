@@ -11,6 +11,7 @@
 
   <link rel="stylesheet" href="/_common/top-banner/top-banner.css" />
   <link rel="stylesheet" href="/_common/searchBar/searchBar.css">
+
   <!-- 페이지 전용 -->
   <link rel="stylesheet" href="/artwork/artwork.css" />
 </head>
@@ -28,7 +29,6 @@
     </div>
 
     <nav class="artwork-sidebar__nav">
-
       <div class="artwork-sidebar__section">카테고리 별 작업물 보기</div>
       <a class="artwork-sidebar__item" href="#">이미지·오디오·영상</a>
       <a class="artwork-sidebar__item" href="#">리서치</a>
@@ -36,6 +36,7 @@
       <a class="artwork-sidebar__item" href="#">개발·코드</a>
       <a class="artwork-sidebar__item" href="#">학습·교육</a>
       <a class="artwork-sidebar__item" href="#">AI 추천 작업물 보기</a>
+
       <div class="artwork-sidebar__section">작업물</div>
       <a class="artwork-sidebar__item" href="#">내 라이브러리</a>
       <a class="artwork-sidebar__item" href="/artwork/artwork_upload/artwork_upload.html">작업물 올리기</a>
@@ -45,19 +46,17 @@
   <!-- ✅ 메인 콘텐츠 래퍼 (사이드바 열리면 오른쪽으로 밀림) -->
   <div class="artwork-shell" id="artworkShell">
     <div id="top-banner" class="detail_AI-banner-root"></div>
+
     <header class="artwork-hero">
+      <!-- ✅ 제목 뒤에만 signiture.png가 깔리도록 titleWrap 추가 -->
+      <div class="artwork-hero__titleWrap" aria-hidden="true"></div>
       <h1 class="artwork-hero__title">작업물 라이브러리</h1>
+
+      <!-- ✅ 아래 요소들은 PNG 배경 영역에 포함 X (그냥 기존처럼 아래 배치) -->
       <p class="artwork-hero__desc">아티스트가 되어 상상력을 펼쳐 주세요.</p>
 
-      <!-- ✅ 너가 만든 그림 넣을 자리 (artwork_img) -->
-      <div class="artwork_img" id="artworkImg">
-        <img src="/media/artwork.png" alt="banner" style="width:100%; height:auto; border-radius:18px;">
-      </div>
-
       <!--검색창-->
-
       <div id="search-area"></div>
-
     </header>
 
     <main class="artwork-main">
@@ -73,14 +72,14 @@
         </div>
 
         <!-- ✅ 작업물 카드 그리드 -->
-        <div class="artwork-grid" id="artworkGrid">
-        </div>
+        <div class="artwork-grid" id="artworkGrid"></div>
       </section>
     </main>
   </div>
 
   <!-- 사이드바 열릴 때 배경 클릭 닫기 -->
   <div class="artwork-dim" id="artworkDim" aria-hidden="true"></div>
+
   <script src="/_common/searchBar/searchBar.js"></script>
   <script src="/_common/top-banner/include.js"></script>
   <script type="module" src="/artwork/artwork.js"></script>
