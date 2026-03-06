@@ -13,13 +13,6 @@ body {
     box-sizing: border-box;
   }
   
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(180deg, #ffffff 0%, #dce8f8 30%, #eaf3fc 60%, #ffffff 100%);
-    min-height: 100vh;       /* ✅ 이걸로 */
-  }
-  
   .inquiry-page {
     min-height: 100vh;
   }

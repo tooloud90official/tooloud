@@ -9,7 +9,7 @@ body{
 }
 
 /* Tabs */
-.section-tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0 24px}
+.section-tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:20px 0 50px}
 .section-tab{
   padding:8px 16px;border:1px solid #e0e0e0;border-radius:20px;background:#fff;
   font-size:13px;color:#666;cursor:pointer;transition:all .2s;white-space:nowrap
@@ -18,7 +18,7 @@ body{
 .section-tab.is-active{background:#2a7cff;border-color:#2a7cff;color:#fff;font-weight:600}
 
 /* Layout */
-.detail_AI-main{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+.detail_AI-main{max-width:1100px;margin:0 auto;padding:40px 20px 60px}
 .detail_AI{display:grid;grid-template-columns:340px 1fr;gap:28px;align-items:stretch}
 
 /* LEFT card */
@@ -156,7 +156,7 @@ body{
 }
 
 /* Site preview */
-.site-preview{width:min(100%,1100px);margin:26px auto 0;padding:0 20px}
+.site-preview{width:min(100%,1100px);margin:40px auto 0;padding:0 20px}
 .site-preview__header{
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin-bottom:14px
 }

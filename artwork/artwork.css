@@ -142,7 +142,7 @@
 .artwork-hero__titleWrap{
   position: absolute;
   left: 50%;
-  top: 100px;                 /* 제목 라인에 맞춰 조절 가능 */
+  top: 80px;                 /* 제목 라인에 맞춰 조절 가능 */
   transform: translateX(-50%);
   width: min(760px, 92vw);
   height: 120px;             /* PNG 높이 */
@@ -164,7 +164,7 @@
   margin: 0;
   text-align: center;
   letter-spacing: -0.5px;
-  margin-top: 80px; /* 제목 위에 여백이 생기면서 아래로 내려감 */
+  margin-top: 70px; /* 제목 위에 여백이 생기면서 아래로 내려감 */
 }
 
 /* 설명/검색은 기존 그대로 (PNG 영역에 “포함”되는 건 아니고, 그냥 아래로 내려감) */

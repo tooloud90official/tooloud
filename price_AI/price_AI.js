@@ -19,11 +19,11 @@ const SLIDER_LABELS = ["옵션 1", "옵션 2", "옵션 3", "옵션 4", "옵션 5
 
 /** 샘플 카드 데이터 */
 const TOOL_CARDS = [
-  { toolName: "Chat GPT",     price: "$35/월", url: "/detail_AI/detail_AI.html" },
-  { toolName: "Claude",       price: "$40/월", url: "/detail_AI/detail_AI.html" },
-  { toolName: "Flexclip",     price: "$45/월", url: "/detail_AI/detail_AI.html" },
-  { toolName: "Adobe Firefly",price: "$50/월", url: "/detail_AI/detail_AI.html" },
-  { toolName: "Descript",     price: "$55/월", url: "/detail_AI/detail_AI.html" },
+  { toolName: "Chat GPT",      price: "$35/월", url: "/detail_AI/detail_AI.html" },
+  { toolName: "Claude",        price: "$40/월", url: "/detail_AI/detail_AI.html" },
+  { toolName: "Flexclip",      price: "$45/월", url: "/detail_AI/detail_AI.html" },
+  { toolName: "Adobe Firefly", price: "$50/월", url: "/detail_AI/detail_AI.html" },
+  { toolName: "Descript",      price: "$55/월", url: "/detail_AI/detail_AI.html" },
 ];
 
 /**
@@ -74,39 +74,105 @@ function renderToolCards() {
  */
 function initStepSlider() {
   const sliderRoot = document.querySelector("#stepSlider");
-  const thumb      = document.querySelector("#sliderThumb");
+  const labelsWrap = document.querySelector(".price-filter__labels");
+  const track      = document.querySelector(".price-filter__track");
   const fill       = document.querySelector("#sliderFill");
+  const thumb      = document.querySelector("#sliderThumb");
   const hint       = document.querySelector("#sliderHint");
-  const dots       = document.querySelectorAll(".price-filter__dot");
-  const labels     = document.querySelectorAll(".price-filter__step-label");
 
-  if (!sliderRoot || !thumb) return;
+  if (!sliderRoot || !thumb || !track || !fill || !labelsWrap) return;
 
-  const maxStep = 5;
+  const maxStep = SLIDER_LABELS.length - 1;
   let isDragging = false;
+  let stepPositions = [];
+  let currentStep = 0;
 
+  // ── 라벨 생성 (텍스트를 <span>으로 감쌈 → CSS 말풍선 적용 대상)
+  labelsWrap.innerHTML = "";
+  SLIDER_LABELS.forEach((label, i) => {
+    const el = document.createElement("div");
+    el.className = "price-filter__step-label";
+    el.innerHTML = `<span>${label}</span>`;
+    el.addEventListener("click", () => render(i));
+    labelsWrap.appendChild(el);
+  });
+
+  // ── dot 생성
+  sliderRoot.querySelectorAll(".price-filter__dot").forEach(d => d.remove());
+  const dotEls = SLIDER_LABELS.map((_, i) => {
+    const el = document.createElement("div");
+    el.className = "price-filter__dot";
+    el.addEventListener("click", (e) => { e.stopPropagation(); render(i); });
+    sliderRoot.appendChild(el);
+    return el;
+  });
+
+  // ── 라벨 중앙 x를 슬라이더 기준으로 계산
+  function calcStepPositions() {
+    const sliderRect = sliderRoot.getBoundingClientRect();
+    const labelNodes = labelsWrap.querySelectorAll(".price-filter__step-label");
+    stepPositions = Array.from(labelNodes).map(el => {
+      const r = el.getBoundingClientRect();
+      return (r.left + r.width / 2) - sliderRect.left;
+    });
+  }
+
+  // ── 트랙·dot 레이아웃
+  function layoutTrack() {
+    calcStepPositions();
+    if (stepPositions.length < 2) return;
+
+    const first = stepPositions[0];
+    const last  = stepPositions[stepPositions.length - 1];
+
+    track.style.left  = first + "px";
+    track.style.width = (last - first) + "px";
+    fill.style.left   = first + "px";
+
+    dotEls.forEach((d, i) => {
+      d.style.left = stepPositions[i] + "px";
+    });
+  }
+
+  // ── UI 렌더
   function render(step) {
-    const currentStep = Math.max(0, Math.min(maxStep, step));
-    const percent = (currentStep / maxStep) * 100;
+    currentStep = Math.max(0, Math.min(maxStep, step));
 
-    thumb.style.left = `${percent}%`;
-    fill.style.width = `${percent}%`;
-    hint.textContent = `현재 선택: ${SLIDER_LABELS[currentStep]}`;
+    const px    = stepPositions[currentStep];
+    const first = stepPositions[0];
 
-    dots.forEach((dot, idx) => {
-      dot.classList.toggle("is-passed", idx <= currentStep);
+    // thumb
+    thumb.style.left = px + "px";
+
+    // fill
+    fill.style.width = Math.max(0, px - first) + "px";
+
+    // dots
+    dotEls.forEach((d, i) => {
+      d.classList.toggle("is-right", i > currentStep);
     });
-    labels.forEach((label, idx) => {
-      label.classList.toggle("is-active", idx === currentStep);
+
+    // 라벨 - is-active 토글 (CSS가 말풍선으로 바꿔줌)
+    labelsWrap.querySelectorAll(".price-filter__step-label").forEach((l, i) => {
+      l.classList.toggle("is-active", i === currentStep);
     });
+
+    if (hint) hint.textContent = `현재 선택: ${SLIDER_LABELS[currentStep]}`;
   }
 
-  function getStepFromX(clientX) {
+  // ── 가장 가까운 스텝 찾기
+  function clientXToStep(clientX) {
     const rect = sliderRoot.getBoundingClientRect();
-    const x = Math.max(rect.left, Math.min(rect.right, clientX));
-    return Math.round(((x - rect.left) / rect.width) * maxStep);
+    const x = clientX - rect.left;
+    let closest = 0, minDist = Infinity;
+    stepPositions.forEach((pos, i) => {
+      const d = Math.abs(pos - x);
+      if (d < minDist) { minDist = d; closest = i; }
+    });
+    return closest;
   }
 
+  // ── 이벤트
   thumb.addEventListener("pointerdown", (e) => {
     isDragging = true;
     thumb.setPointerCapture(e.pointerId);
@@ -114,27 +180,30 @@ function initStepSlider() {
 
   window.addEventListener("pointermove", (e) => {
     if (!isDragging) return;
-    render(getStepFromX(e.clientX));
+    render(clientXToStep(e.clientX));
   });
 
   window.addEventListener("pointerup", () => { isDragging = false; });
 
   sliderRoot.addEventListener("click", (e) => {
     if (e.target.closest(".price-filter__thumb")) return;
-    render(getStepFromX(e.clientX));
+    render(clientXToStep(e.clientX));
   });
 
-  dots.forEach((dot, idx) => {
-    dot.addEventListener("click", (e) => {
-      e.stopPropagation();
-      render(idx);
-    });
-  });
+  // ── 초기화 & 리사이즈
+  function init() {
+    layoutTrack();
+    render(0);
+  }
 
-  render(0);
+  init();
+  window.addEventListener("resize", () => {
+    layoutTrack();
+    render(currentStep);
+  });
 }
 
-// ✅ 수정
+// ✅ DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
   initStepSlider();
   renderToolCards();
