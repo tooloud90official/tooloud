@@ -1,6 +1,5 @@
 /* 기본 배경 및 폰트 */
 body {
-  margin: 0;
   font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   overflow-y: scroll;
 }
@@ -8,7 +7,6 @@ body {
 .category-container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 70px 20px;
   text-align: center;
   min-height: 800px;
 }
@@ -16,6 +14,7 @@ body {
 .page-title {
   font-size: 40px;
   font-weight: 700;
+  margin-top: 28px;
   margin-bottom: 100px;
 }
 

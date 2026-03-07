@@ -34,8 +34,8 @@ body {
 
 /* ===== 제목 ===== */
 .title {
-  font-size: 36px;
-  font-weight: 800;
+  font-size: 40px;
+  font-weight: 700;
   color: #1a1a2e;
   margin: 0;
   line-height: 1.4;
@@ -45,7 +45,7 @@ body {
 
 /* ===== 웰컴 이미지 ===== */
 .welcome-image {
-  width: 320px;
+  width: 400px;
   height: auto;
 }
 
@@ -57,8 +57,8 @@ body {
 
 /* ===== 메인페이지로 버튼 ===== */
 #goMainBtn {
-  min-width: 180px;
-  height: 52px;
+  min-width: 350px;
+  height: 44px;
   border-radius: 30px;
   font-size: 15px;
   font-weight: 600;
