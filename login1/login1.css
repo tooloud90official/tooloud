@@ -16,10 +16,11 @@ body {
   font-size: 40px;
   font-weight: 700;
   margin-bottom: 40px;
+  text-align: center;
 }
 
 .login-form {
-  display: grid;
+  display: flex;
   grid-template-rows:
     auto   /* 이메일 */
     auto   /* 비밀번호 */
@@ -29,8 +30,10 @@ body {
     auto   /* 로그인버튼 */
     auto;  /* 회원가입 */
 
+  flex-direction: column;
+  align-items: center; /* 자식 요소 중앙정렬 */
+  width: 350px; /* 인풋, 버튼과 동일 너비 */
   gap: 14px;
-  width: 300px;
 }
 
 .login-error {
@@ -49,7 +52,7 @@ body {
   padding: 0 14px;
   font-size: 14px;
   background: #ffffff;
-  width: 300px;
+  width: 350px;
 }
 
 
@@ -111,11 +114,17 @@ body {
   width: 26px;
   height: 26px;
 }
-
+/* 로그인 버튼과 회원가입 버튼을 감싸는 컨테이너를 flex로 중앙 정렬 */
+#loginBtnContainer,
+#signupBtnContainer {
+  display: flex;            /* flex 컨테이너로 변경 */
+  justify-content: center;  /* 가로 중앙 정렬 */
+  width: 100%;              /* 부모 너비 전체 사용 */
+}
 /* ===== loadButton 버튼 너비 확장 ===== */
 #loginBtnContainer .btn,
 #signupBtnContainer .btn {
-  width: 300px;
+  width: 350px;
   height: 48px;
   font-size: 15px;
   margin-top: 8px;
