@@ -18,22 +18,22 @@
       <div class="artwork-post__tool" id="toolPicker" role="button" tabindex="0" aria-label="툴 선택">
         <div class="artwork-post__tool-ic" aria-hidden="true"></div>
 
-        <!-- ✅ 처음엔 안내 텍스트(가운데/회색) -->
+        <!-- ✅ 처음엔 안내 텍스트 -->
         <div class="artwork-post__tool-placeholder" id="toolPlaceholder">
-          툴을 선택해주세요.
+          📂 툴을 선택해주세요.
         </div>
 
         <!-- ✅ 선택 후에만 표시 -->
         <div class="artwork-post__tool-meta" id="toolMeta" hidden>
           <div class="artwork-post__tool-top">
             <span class="artwork-post__tool-name" id="toolName"></span>
-            <span class="artwork-post__tool-stars" id="toolStars"></span>
           </div>
+          <span class="artwork-post__tool-stars" id="toolStars"></span>
           <div class="artwork-post__tool-brand" id="toolBrand"></div>
         </div>
       </div>
 
-      <!-- ✅ 파일 드래그&드롭 영역 유지 -->
+      <!-- ✅ 파일 드래그&드롭 영역 -->
       <div class="drop-zone">
         <p>첨부할 파일을 여기에 끌어다 놓거나, 버튼을 클릭하세요.</p>
         <p class="sub">지원 파일: mp4, mp3, jpg, png, pdf, txt</p>
@@ -63,11 +63,8 @@
     </main>
   </div>
 
-  <!-- 공통 버튼 -->
   <script src="/_common/button/button.js"></script>
-  <!-- 상단 배너 include -->
   <script src="/_common/top-banner/include.js"></script>
-  <!-- 페이지 JS -->
   <script src="/artwork/artwork_upload/artwork_upload.js" defer></script>
 </body>
 </html>
