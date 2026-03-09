@@ -8,54 +8,61 @@
   <link rel="stylesheet" href="/_common/button/button.css" />
   <link rel="stylesheet" href="/_common/top-banner/top-banner.css" />
   <link rel="stylesheet" href="/artwork/artwork_upload/artwork_upload.css" />
+
+  <script type="module">
+    import * as pdfjsLib from './pdf.min.js';
+    window.pdfjsLib = pdfjsLib; // 전역 객체로 등록해서 기존 코드와 호환시켜줄게
+  </script>
 </head>
 <body>
   <div id="top-banner" class="detail_AI-banner-root"></div>
 
   <div class="upload-page">
     <section class="upload-hero">
-      <!-- ✅ 툴 선택 카드(클릭하면 모달) -->
       <div class="artwork-post__tool" id="toolPicker" role="button" tabindex="0" aria-label="툴 선택">
         <div class="artwork-post__tool-ic" aria-hidden="true"></div>
-
-        <!-- ✅ 처음엔 안내 텍스트 -->
-        <div class="artwork-post__tool-placeholder" id="toolPlaceholder">
-          📂 툴을 선택해주세요.
-        </div>
-
-        <!-- ✅ 선택 후에만 표시 -->
+        <div class="artwork-post__tool-placeholder" id="toolPlaceholder">📂 툴을 선택해주세요.</div>
         <div class="artwork-post__tool-meta" id="toolMeta" hidden>
-          <div class="artwork-post__tool-top">
-            <span class="artwork-post__tool-name" id="toolName"></span>
-          </div>
+          <div class="artwork-post__tool-top"><span class="artwork-post__tool-name" id="toolName"></span></div>
           <span class="artwork-post__tool-stars" id="toolStars"></span>
           <div class="artwork-post__tool-brand" id="toolBrand"></div>
         </div>
       </div>
 
-      <!-- ✅ 파일 드래그&드롭 영역 -->
-      <div class="drop-zone">
-        <p>첨부할 파일을 여기에 끌어다 놓거나, 버튼을 클릭하세요.</p>
-        <p class="sub">지원 파일: mp4, mp3, jpg, png, pdf, txt</p>
-        <div id="fileUploadMount"></div>
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-zone__empty" id="dropZoneEmpty">
+          <p>첨부할 파일을 여기에 끌어다 놓거나, 버튼을 클릭하세요.</p>
+          <p class="sub">지원 파일: mp4, mp3, jpg, jpeg, png, pdf, txt</p>
+          <div id="fileUploadMount"></div>
+        </div>
+        <div class="preview-card" id="previewCard" hidden>
+          <div class="preview-card__header">
+            <div class="preview-card__filemeta">
+              <div class="preview-card__badge" id="previewTypeBadge">FILE</div>
+              <div class="preview-card__meta-texts">
+                <div class="preview-card__filename" id="previewFileName">파일명</div>
+                <div class="preview-card__filesize" id="previewFileSize">0 KB</div>
+              </div>
+            </div>
+            <div class="preview-card__actions">
+              <button type="button" class="preview-action-btn" id="replaceFileBtn">파일 변경</button>
+              <button type="button" class="preview-action-btn preview-action-btn--danger" id="removeFileBtn">삭제</button>
+            </div>
+          </div>
+          <div class="preview-card__body" id="previewBody"></div>
+        </div>
       </div>
     </section>
 
     <main class="card">
       <div class="profile-section">
-        <div class="avatar-ring">
-          <img class="avatar" src="/media/profil.png" alt="프로필" />
-        </div>
+        <div class="avatar-ring"><img class="avatar" src="/media/profil.png" alt="프로필" /></div>
         <div class="user-name">Soojin</div>
       </div>
-
       <div class="input-section">
         <label class="label" for="description">설명</label>
-        <div class="input-box">
-          <textarea id="description" placeholder="커뮤니티 가이드라인 위반 시 제재될 수 있습니다."></textarea>
-        </div>
+        <div class="input-box"><textarea id="description" placeholder="커뮤니티 가이드라인 위반 시 제재될 수 있습니다."></textarea></div>
       </div>
-
       <div class="button-group">
         <div id="cancelBtnMount" class="btn-wrap"></div>
         <div id="submitBtnMount" class="btn-wrap"></div>
@@ -65,6 +72,7 @@
 
   <script src="/_common/button/button.js"></script>
   <script src="/_common/top-banner/include.js"></script>
-  <script src="/artwork/artwork_upload/artwork_upload.js" defer></script>
+  
+  <script type="module" src="/artwork/artwork_upload/artwork_upload.js" defer></script>
 </body>
 </html>
