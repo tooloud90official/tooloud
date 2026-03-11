@@ -1,8 +1,3 @@
-// /artwork/artwork_upload/artwork_upload.js
-
-/* =========================
-   TOOL LIST (15개 샘플)
-========================= */
 const TOOL_LIST = [
   { id:"firefly", name:"Adobe Firefly", brand:"@Adobe", stars:4 },
   { id:"chatgpt", name:"ChatGPT", brand:"@OpenAI", stars:5 },
@@ -23,57 +18,45 @@ const TOOL_LIST = [
 
 let selectedToolId = null;
 let toolModalRef = null;
+let fileInputRef = null;
+let currentFile = null;
+let currentObjectUrl = null;
 
-/* =========================
-   TOOL CARD
-========================= */
+const previewState = { pdfDoc: null, pdfPage: 1, pdfTotalPages: 1 };
+
+/* ── 툴 카드 ── */
 function starsToText(n) {
   const s = Math.max(0, Math.min(5, Number(n) || 0));
   return "★".repeat(s) + "☆".repeat(5 - s);
 }
-
 function getSelectedTool() {
   return TOOL_LIST.find(t => t.id === selectedToolId) || null;
 }
-
-// ✅ 처음엔 placeholder(가운데 회색), 선택하면 meta(이름/별점/브랜드)
 function renderToolCard(tool) {
   const placeholder = document.getElementById("toolPlaceholder");
-  const meta = document.getElementById("toolMeta");
-  const nameEl = document.getElementById("toolName");
-  const brandEl = document.getElementById("toolBrand");
-  const starsEl = document.getElementById("toolStars");
-
-  if (!placeholder || !meta || !nameEl || !brandEl || !starsEl) return;
-
+  const meta       = document.getElementById("toolMeta");
+  const nameEl     = document.getElementById("toolName");
+  const brandEl    = document.getElementById("toolBrand");
+  const starsEl    = document.getElementById("toolStars");
+  if (!placeholder || !meta) return;
   if (!tool) {
-    placeholder.hidden = false;
-    meta.hidden = true;
-    nameEl.textContent = "";
-    brandEl.textContent = "";
-    starsEl.textContent = "";
+    placeholder.hidden = false; meta.hidden = true;
+    nameEl.textContent = brandEl.textContent = starsEl.textContent = "";
     return;
   }
-
-  placeholder.hidden = true;
-  meta.hidden = false;
-
-  nameEl.textContent = tool.name;
+  placeholder.hidden = true; meta.hidden = false;
+  nameEl.textContent  = tool.name;
   brandEl.textContent = tool.brand || "@";
   starsEl.textContent = starsToText(tool.stars ?? 5);
 }
 
-/* =========================
-   TOOL MODAL
-========================= */
+/* ── 툴 모달 ── */
 function ensureToolModal() {
   if (toolModalRef) return toolModalRef;
-
   const modal = document.createElement("div");
   modal.className = "tool-modal";
   modal.innerHTML = `
     <div class="tool-modal__dim" data-tool-dim></div>
-
     <div class="tool-modal__panel" role="dialog" aria-modal="true" aria-label="툴 선택">
       <div class="tool-modal__header">
         <div class="tool-modal__toprow">
@@ -82,53 +65,32 @@ function ensureToolModal() {
         </div>
         <input class="tool-modal__search" data-tool-search type="text" placeholder="툴 이름 검색..." />
       </div>
-
-      <div class="tool-modal__body">
-        <div class="tool-grid" data-tool-grid></div>
-      </div>
-    </div>
-  `;
+      <div class="tool-modal__body"><div class="tool-grid" data-tool-grid></div></div>
+    </div>`;
   document.body.appendChild(modal);
 
-  const dim = modal.querySelector("[data-tool-dim]");
-  const closeBtn = modal.querySelector("[data-tool-close]");
-  const search = modal.querySelector("[data-tool-search]");
-  const grid = modal.querySelector("[data-tool-grid]");
-
   const close = () => modal.classList.remove("is-open");
-  const open = () => modal.classList.add("is-open");
+  const open  = () => modal.classList.add("is-open");
+  modal.querySelector("[data-tool-dim]").addEventListener("click", close);
+  modal.querySelector("[data-tool-close]").addEventListener("click", close);
+  document.addEventListener("keydown", e => { if (modal.classList.contains("is-open") && e.key === "Escape") close(); });
 
-  dim.addEventListener("click", close);
-  closeBtn.addEventListener("click", close);
-
-  document.addEventListener("keydown", (e) => {
-    if (!modal.classList.contains("is-open")) return;
-    if (e.key === "Escape") close();
-  });
-
-  search.addEventListener("input", () => {
-    renderToolGrid(grid, search.value.trim());
-  });
+  const search = modal.querySelector("[data-tool-search]");
+  const grid   = modal.querySelector("[data-tool-grid]");
+  search.addEventListener("input", () => renderToolGrid(grid, search.value.trim()));
 
   toolModalRef = { modal, search, grid, open, close };
   return toolModalRef;
 }
 
 function renderToolGrid(gridEl, keyword = "") {
-  const q = keyword.toLowerCase();
-  const list = TOOL_LIST.filter(t => t.name.toLowerCase().includes(q));
-
-  gridEl.innerHTML = list.map(t => {
-    const isSel = (t.id === selectedToolId) ? "is-selected" : "";
-    return `
-      <button type="button" class="tool-item ${isSel}" data-tool-id="${t.id}">
-        <div class="tool-icon" aria-hidden="true"></div>
-        <div class="tool-name">${t.name}</div>
-      </button>
-    `;
-  }).join("");
-
-  gridEl.querySelectorAll("[data-tool-id]").forEach((btn) => {
+  const list = TOOL_LIST.filter(t => t.name.toLowerCase().includes(keyword.toLowerCase()));
+  gridEl.innerHTML = list.map(t => `
+    <button type="button" class="tool-item ${t.id === selectedToolId ? "is-selected" : ""}" data-tool-id="${t.id}">
+      <div class="tool-icon" aria-hidden="true"></div>
+      <div class="tool-name">${t.name}</div>
+    </button>`).join("");
+  gridEl.querySelectorAll("[data-tool-id]").forEach(btn => {
     btn.addEventListener("click", () => {
       selectedToolId = btn.getAttribute("data-tool-id");
       renderToolCard(getSelectedTool());
@@ -139,149 +101,236 @@ function renderToolGrid(gridEl, keyword = "") {
 
 function openToolModal() {
   const { search, grid, open } = ensureToolModal();
-  open();
-  search.value = "";
-  renderToolGrid(grid, "");
+  open(); search.value = ""; renderToolGrid(grid, "");
   setTimeout(() => search.focus(), 0);
 }
 
-/* =========================
-   FILE UPLOAD (버튼 컴포넌트 + 아이콘 삽입)
-========================= */
+/* ── 파일 유틸 ── */
+function formatFileSize(bytes = 0) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+function getFileTypeInfo(file) {
+  const type = file.type || "", name = (file.name || "").toLowerCase();
+  if (type.startsWith("image/")) return { kind: "image", badge: "IMAGE" };
+  if (type.startsWith("video/")) return { kind: "video", badge: "VIDEO" };
+  if (type.startsWith("audio/")) return { kind: "audio", badge: "AUDIO" };
+  if (type === "application/pdf" || name.endsWith(".pdf")) return { kind: "pdf", badge: "PDF" };
+  if (type.startsWith("text/") || name.endsWith(".txt")) return { kind: "text", badge: "TEXT" };
+  return { kind: "other", badge: "FILE" };
+}
+function cleanupObjectUrl() {
+  if (currentObjectUrl) { URL.revokeObjectURL(currentObjectUrl); currentObjectUrl = null; }
+}
+
+/* ── 프리뷰 ── */
+function showPreviewShell(file) {
+  document.getElementById("dropZoneEmpty").hidden = true;
+  document.getElementById("previewCard").hidden   = false;
+  document.getElementById("previewFileName").textContent = file.name;
+  document.getElementById("previewFileSize").textContent = formatFileSize(file.size);
+  const info = getFileTypeInfo(file);
+  document.getElementById("previewTypeBadge").textContent = info.badge;
+  document.getElementById("previewBody").innerHTML = "";
+}
+
+function resetPreview() {
+  cleanupObjectUrl();
+  currentFile = null;
+  previewState.pdfDoc = null; previewState.pdfPage = 1; previewState.pdfTotalPages = 1;
+  const body  = document.getElementById("previewBody");
+  const card  = document.getElementById("previewCard");
+  const empty = document.getElementById("dropZoneEmpty");
+  if (body)  body.innerHTML = "";
+  if (card)  card.hidden = true;
+  if (empty) empty.hidden = false;
+  if (fileInputRef) fileInputRef.value = "";
+}
+
+function renderImagePreview(file) {
+  cleanupObjectUrl(); currentObjectUrl = URL.createObjectURL(file);
+  document.getElementById("previewBody").innerHTML = `
+    <div class="preview-image-wrap">
+      <img class="preview-image" src="${currentObjectUrl}" alt="${file.name}" />
+    </div>`;
+}
+function renderVideoPreview(file) {
+  cleanupObjectUrl(); currentObjectUrl = URL.createObjectURL(file);
+  document.getElementById("previewBody").innerHTML = `
+    <div class="preview-video-wrap">
+      <video class="preview-video" controls playsinline preload="metadata">
+        <source src="${currentObjectUrl}" type="${file.type || "video/mp4"}" />
+      </video>
+    </div>`;
+}
+function renderAudioPreview(file) {
+  cleanupObjectUrl(); currentObjectUrl = URL.createObjectURL(file);
+  document.getElementById("previewBody").innerHTML = `
+    <div class="preview-audio-wrap">
+      <div class="preview-audio-icon">🎵</div>
+      <div class="preview-audio-title">${file.name}</div>
+      <audio class="preview-audio" controls preload="metadata">
+        <source src="${currentObjectUrl}" type="${file.type || "audio/mpeg"}" />
+      </audio>
+    </div>`;
+}
+async function renderTextPreview(file) {
+  const text = await file.text();
+  const safe = text.slice(0, 12000).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  document.getElementById("previewBody").innerHTML = `
+    <div class="preview-text-wrap">
+      <div class="preview-text-title">텍스트 미리보기</div>
+      <div class="preview-text-content">${safe}</div>
+    </div>`;
+}
+
+function debounce(fn, delay = 100) {
+  let t = null; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); };
+}
+
+async function renderPdfPage() {
+  const canvas = document.getElementById("pdfPreviewCanvas");
+  const indicator = document.getElementById("pdfPageIndicator");
+  if (!canvas || !indicator || !previewState.pdfDoc) return;
+
+  const page = await previewState.pdfDoc.getPage(previewState.pdfPage);
+  const vp = page.getViewport({ scale: 1 });
+
+  const stage = canvas.parentElement;
+  const stageW = stage.clientWidth;
+  const stageH = stage.clientHeight;
+
+  // 가로/세로 둘 다 stage에 맞추고 작은 쪽 기준으로 scale → 전체 페이지가 항상 보임
+  const scaleW = stageW / vp.width;
+  const scaleH = stageH / vp.height;
+  const scale = Math.min(scaleW, scaleH);
+
+  const svp = page.getViewport({ scale });
+  const ctx = canvas.getContext("2d");
+  canvas.width = svp.width;
+  canvas.height = svp.height;
+
+  await page.render({ canvasContext: ctx, viewport: svp }).promise;
+  indicator.textContent = `${previewState.pdfPage} / ${previewState.pdfTotalPages}`;
+}
+
+async function renderPdfPreview(file) {
+  const body = document.getElementById("previewBody");
+  body.innerHTML = `
+    <div class="preview-pdf-wrap">
+      <div class="preview-pdf-stage"><canvas class="preview-pdf-canvas" id="pdfPreviewCanvas"></canvas></div>
+      <div class="preview-pdf-controls">
+        <button type="button" class="preview-pdf-btn" id="pdfPrevBtn">이전</button>
+        <div class="preview-pdf-page" id="pdfPageIndicator">1 / 1</div>
+        <button type="button" class="preview-pdf-btn" id="pdfNextBtn">다음</button>
+      </div>
+    </div>`;
+  try {
+    cleanupObjectUrl(); currentObjectUrl = URL.createObjectURL(file);
+
+    const lib = window.pdfjsLib;
+    if (!lib) throw new Error("pdf.js not loaded");
+    lib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.worker.min.mjs';
+
+    previewState.pdfDoc = await lib.getDocument(currentObjectUrl).promise;
+    previewState.pdfPage = 1;
+    previewState.pdfTotalPages = previewState.pdfDoc.numPages;
+
+    document.getElementById("pdfPrevBtn").addEventListener("click", async () => {
+      if (previewState.pdfPage > 1) { previewState.pdfPage--; await renderPdfPage(); }
+    });
+    document.getElementById("pdfNextBtn").addEventListener("click", async () => {
+      if (previewState.pdfPage < previewState.pdfTotalPages) { previewState.pdfPage++; await renderPdfPage(); }
+    });
+
+    await renderPdfPage();
+    window.addEventListener("resize", debounce(renderPdfPage, 120));
+  } catch (err) {
+    console.error(err);
+    body.innerHTML = `<div class="preview-fallback"><div class="preview-fallback__icon">📄</div><div class="preview-fallback__title">PDF 미리보기 실패</div></div>`;
+  }
+}
+
+async function renderFilePreview(file) {
+  currentFile = file;
+  const { kind } = getFileTypeInfo(file);
+  showPreviewShell(file);
+  if (kind === "image") { renderImagePreview(file); return; }
+  if (kind === "video") { renderVideoPreview(file); return; }
+  if (kind === "audio") { renderAudioPreview(file); return; }
+  if (kind === "pdf")   { await renderPdfPreview(file); return; }
+  if (kind === "text")  { await renderTextPreview(file); return; }
+  document.getElementById("previewBody").innerHTML = `<div class="preview-fallback"><div class="preview-fallback__icon">📎</div><div class="preview-fallback__title">${file.name}</div></div>`;
+}
+
+/* ── 파일 입력 / 드래그앤드롭 ── */
 function setupFileInput() {
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.id = "artworkFileInput";
-  fileInput.multiple = true;
-  fileInput.accept = ".mp4,.mp3,.jpg,.jpeg,.png,.pdf,.txt";
-  fileInput.style.display = "none";
-  document.body.appendChild(fileInput);
-
-  fileInput.addEventListener("change", (e) => {
+  const input = document.createElement("input");
+  input.type = "file"; input.id = "artworkFileInput"; input.multiple = false;
+  input.accept = ".mp4,.mp3,.jpg,.jpeg,.png,.pdf,.txt,video/*,audio/*,image/*,text/plain";
+  input.style.display = "none";
+  document.body.appendChild(input);
+  input.addEventListener("change", async e => {
     const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    console.log("선택된 파일:", files);
-
-    const dz = document.querySelector(".drop-zone p");
-    if (dz) dz.textContent = `${files.length}개 파일 선택됨`;
-
-    fileInput.value = "";
+    if (files.length) await renderFilePreview(files[0]);
   });
-
-  return fileInput;
+  fileInputRef = input;
+  return input;
 }
 
 function setupDragDrop() {
-  const dropZone = document.querySelector(".drop-zone");
+  const dropZone = document.getElementById("dropZone");
   if (!dropZone) return;
-
-  const prevent = (e) => { e.preventDefault(); e.stopPropagation(); };
-
-  ["dragenter","dragover"].forEach((t) => {
-    dropZone.addEventListener(t, (e) => {
-      prevent(e);
-      dropZone.classList.add("is-dragover");
-    });
-  });
-
-  ["dragleave","drop"].forEach((t) => {
-    dropZone.addEventListener(t, (e) => {
-      prevent(e);
-      dropZone.classList.remove("is-dragover");
-    });
-  });
-
-  dropZone.addEventListener("drop", (e) => {
+  const prevent = e => { e.preventDefault(); e.stopPropagation(); };
+  ["dragenter","dragover"].forEach(t => dropZone.addEventListener(t, e => { prevent(e); dropZone.classList.add("is-dragover"); }));
+  ["dragleave","drop"].forEach(t => dropZone.addEventListener(t, e => { prevent(e); dropZone.classList.remove("is-dragover"); }));
+  dropZone.addEventListener("drop", async e => {
     const files = Array.from(e.dataTransfer?.files || []);
-    if (!files.length) return;
-    console.log("드롭된 파일:", files);
-
-    const p = dropZone.querySelector("p");
-    if (p) p.textContent = `${files.length}개 파일 드롭됨`;
+    if (files.length) await renderFilePreview(files[0]);
   });
 }
 
+/* ── 버튼 렌더링 ── */
 async function mountUploadButton(fileInput) {
-  if (typeof loadButton !== "function") {
-    console.error("loadButton 없음: /_common/button/button.js 로드 확인!");
-    return;
-  }
-
-  // ✅ 버튼 컴포넌트로 마운트
-  await loadButton({
-    target: "#fileUploadMount",
-    text: "파일 업로드",
-    variant: "primary",
-    onClick: () => fileInput.click(),
-  });
-
-  // ✅ 버튼 안을 아이콘+텍스트로 교체
-  const mount = document.querySelector("#fileUploadMount");
-  const btn = mount?.querySelector(".btn") || mount?.querySelector("button");
-  if (btn) {
-    btn.innerHTML = `
-      <span class="upload-btn__inner">
-        <img class="upload-btn__icon" src="/media/upload.png" alt="" />
-        <span class="upload-btn__text">파일 업로드</span>
-      </span>
-    `;
-  }
+  if (typeof loadButton !== "function") return;
+  await loadButton({ target: "#fileUploadMount", text: "파일 업로드", variant: "primary", onClick: () => fileInput.click() });
+  const btn = document.querySelector("#fileUploadMount .btn") || document.querySelector("#fileUploadMount button");
+  if (btn) btn.innerHTML = `<span class="upload-btn__inner"><img class="upload-btn__icon" src="/media/upload.png" alt="" /><span>파일 업로드</span></span>`;
 }
 
-/* =========================
-   ACTION BUTTONS (취소/등록)
-========================= */
 async function mountActionButtons() {
   if (typeof loadButton !== "function") return;
-
+  await loadButton({ target: "#cancelBtnMount", text: "취소하기", variant: "outline", onClick: () => history.back() });
   await loadButton({
-    target: "#cancelBtnMount",
-    text: "취소하기",
-    variant: "outline",
-    onClick: () => history.back(),
-  });
-
-  await loadButton({
-    target: "#submitBtnMount",
-    text: "등록하기",
-    variant: "primary",
+    target: "#submitBtnMount", text: "등록하기", variant: "primary",
     onClick: () => {
       const desc = document.querySelector("#description")?.value?.trim() ?? "";
       const tool = getSelectedTool();
-      alert(
-        `등록하기 클릭\n` +
-        `설명: ${desc}\n` +
-        `툴: ${tool ? tool.name : "(미선택)"}`
-      );
+      alert(`등록하기 클릭\n설명: ${desc || "(없음)"}\n툴: ${tool ? tool.name : "(미선택)"}\n파일: ${currentFile ? currentFile.name : "(미선택)"}`);
     },
   });
 }
 
-/* =========================
-   INIT
-========================= */
+/* ── INIT ── */
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1) 툴 카드: 초기 상태(가운데 회색 안내 문구)
   renderToolCard(null);
-
-  // 2) 툴 카드 클릭 -> 모달
   const picker = document.getElementById("toolPicker");
   if (picker) {
     picker.addEventListener("click", openToolModal);
-    picker.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openToolModal();
-      }
-    });
+    picker.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openToolModal(); } });
   }
-
-  // 3) 파일 업로드: input + drag&drop + 버튼 마운트
   const fileInput = setupFileInput();
   setupDragDrop();
   await mountUploadButton(fileInput);
 
-  // 4) 취소/등록 버튼 마운트
+  document.getElementById("dropZone")?.addEventListener("click", e => {
+    if (!e.target.closest("button") && !e.target.closest(".preview-image-wrap") && !e.target.closest(".preview-pdf-wrap") && !e.target.closest(".preview-video-wrap") && !e.target.closest(".preview-audio-wrap")) fileInput.click();
+  });
+
+  document.getElementById("removeFileBtn")?.addEventListener("click", resetPreview);
+  document.getElementById("replaceFileBtn")?.addEventListener("click", () => fileInput.click());
+
   await mountActionButtons();
 });

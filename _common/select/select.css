@@ -1,47 +1,76 @@
-/* select.css */
-
 :root {
   --jsel-trigger-bg: #ffffff;
   --jsel-menu-bg: #ffffff;
   --jsel-border: #ddd;
   --jsel-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-  --jsel-radius-trigger: 8px;   /* input과 동일 */
+  --jsel-radius-trigger: 10px;
   --jsel-radius-menu: 8px;
   --jsel-text-main: #222;
-  --jsel-text-muted: #aaa;      /* input placeholder 색상과 동일 */
+  --jsel-text-muted: #aaa;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+/* ===== Native Select (select.html 구조) ===== */
+.select-root {
+  position: relative;
+  width: 220px;
+  font-family: "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+.select-native {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #ffffff url('/media/arrow.png') no-repeat right 14px center;
+  background-size: 10px;
+  padding: 0 40px 0 14px;
+  font-size: 14px;
+  font-family: "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  color: #222;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.select-root.is-placeholder .select-native {
+  color: #aaa;
+}
+
+.select-native:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Custom Select (기존 .select 구조) ===== */
 .select {
   position: relative;
   width: 220px;
-  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  font-family: "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
 
 /* ===== Trigger ===== */
 .select__trigger {
   width: 100%;
   box-sizing: border-box;
-  height: 44px;                 /* input과 동일한 높이 (padding 12px × 2 + line-height) */
-  border: 1px solid var(--jsel-border);   /* input과 동일한 border */
-  border-radius: var(--jsel-radius-trigger);
-  background: var(--jsel-trigger-bg);
+  height: 48px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #ffffff;
   box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 0 12px;              /* input padding과 동일 */
+  padding: 0 14px;
   cursor: pointer;
-  color: var(--jsel-text-main);
-  text-align: left;
+  font-size: 14px;
 }
 
-.select__trigger:focus-visible {
-  outline: 3px solid rgba(24, 119, 242, 0.2);
-  outline-offset: 2px;
-}
-
-/* 선택된 값 텍스트 — 기본(선택 전)은 #aaa */
 .select__value {
   font-size: 14px;
   font-weight: 400;
@@ -50,7 +79,6 @@
   color: #aaa !important;
 }
 
-/* 선택 후 — is-placeholder 클래스가 없을 때 #222 */
 .select:not(.is-placeholder) .select__value {
   color: #222 !important;
 }
@@ -61,17 +89,19 @@
   height: 20px;
   display: grid;
   place-items: center;
-  color: #aaa;
-}
-
-.select__chevron {
-  width: 18px;
-  height: 18px;
+  background-image: url('/media/arrow.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   transition: transform 180ms ease;
 }
 
-.select.is-open .select__chevron {
+.select.is-open .select__icon {
   transform: rotate(180deg);
+}
+
+.select__chevron {
+  display: none;
 }
 
 /* ===== Menu wrap ===== */
@@ -95,11 +125,8 @@
   border-radius: var(--jsel-radius-menu);
   box-shadow: var(--jsel-shadow);
   border: 1px solid rgba(0, 0, 0, 0.06);
-
-  /* 옵션이 많아도 페이지가 늘어나지 않도록 높이 제한 */
   max-height: 200px;
   overflow-y: auto;
-
   opacity: 0;
   transform: translateY(-4px) scale(0.98);
   transform-origin: top center;
@@ -107,22 +134,11 @@
   pointer-events: none;
 }
 
-/* 스크롤바 스타일 */
-.select__menu::-webkit-scrollbar {
-  width: 4px;
-}
-.select__menu::-webkit-scrollbar-track {
-  background: transparent;
-}
-.select__menu::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 4px;
-}
+.select__menu::-webkit-scrollbar { width: 4px; }
+.select__menu::-webkit-scrollbar-track { background: transparent; }
+.select__menu::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
-.select.is-open .select__menu-wrap {
-  pointer-events: auto;
-}
-
+.select.is-open .select__menu-wrap { pointer-events: auto; }
 .select.is-open .select__menu {
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -133,17 +149,13 @@
 .select__option {
   padding: 9px 14px;
   text-align: left;
-  font-size: 14px;              /* trigger와 동일 */
+  font-size: 14px;
   line-height: 1.4;
   font-weight: 400;
   color: #333;
   cursor: pointer;
   user-select: none;
   letter-spacing: normal;
-}
-
-.select__option + .select__option {
-  margin-top: 0;
 }
 
 .select__option:hover,
@@ -164,42 +176,49 @@
   cursor: not-allowed;
 }
 
-/* ===== Sample page helper ===== */
+/* 샘플 페이지용 */
 body.select-demo {
   margin: 0;
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f8fc 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 
-/* ===== Mobile ===== */
+.sample-wrap {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+}
+
+.sample-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.sample-title,
+.sample-label,
+.sample-result {
+  display: none;
+}
+
+.sample-row { display: block; }
+.sample-select-mount { width: 80px; }
+
 @media (max-width: 640px) {
-  .select {
-    width: 200px;
-  }
-
   .select__trigger {
-    height: 44px;
-    padding: 0 12px;
+    height: 48px;
+    padding: 0 14px;
   }
-
-  .select__value {
-    font-size: 14px;
-  }
-
-  .select__icon {
-    width: 18px;
-    height: 18px;
-  }
-
-  .select__chevron {
-    width: 16px;
-    height: 16px;
-  }
-
-  .select__option {
-    font-size: 14px;
-    padding: 9px 14px;
-  }
+  .select__value { font-size: 14px; }
+  .select__icon { width: 18px; height: 18px; }
+  .select__option { font-size: 14px; padding: 9px 14px; }
+  .select-root { width: 100%; }
+  .select-native { font-size: 14px; }
 }

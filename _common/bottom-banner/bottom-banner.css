@@ -1,0 +1,86 @@
+/* =========================
+   bottom-banner.css
+========================= */
+
+.footer-container {
+    position: relative;
+    width: 100%;
+    padding: 28px 40px;
+    box-sizing: border-box;
+  
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    background: transparent;
+  
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  }
+  
+  /* ===== 이메일 텍스트 ===== */
+  .footer-email {
+    font-size: 13px;
+    color: #888;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .footer-email:hover {
+    color: #333;
+  }
+  
+  /* ===== 카피라이트 (완전 가운데 고정) ===== */
+  .footer-copy {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #aaa;
+    white-space: nowrap;
+  }
+  
+  /* ===== 오른쪽 아이콘 묶음 ===== */
+  .footer-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .footer-icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  
+    color: #999;
+    transition: color 0.2s, background 0.2s;
+  }
+  
+  .footer-icon-link:hover {
+    color: #333;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  .footer-icon-link svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* ===== 모바일 ===== */
+  @media (max-width: 640px) {
+    .footer-container {
+      flex-direction: column;
+      gap: 14px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+  
+    .footer-copy {
+      position: static;
+      transform: none;
+    }
+  }

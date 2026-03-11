@@ -16,13 +16,15 @@ body {
 }
 
 .personal-ai-main {
-  width: min(100%, 1080px);
+  width: min(100%, 960px);   /* 기존 1080px → 960px */
   margin: 0 auto;
+  padding: 0 20px 40px;
+  box-sizing: border-box;
 }
 
 /* ===== Hero ===== */
 .personal-ai-hero {
-  margin-bottom: 72px;
+  margin-bottom: 84px;       /* 기존 72px → 더 넓힘 */
   text-align: center;
 }
 
@@ -48,11 +50,11 @@ body {
 
 /* ===== Sections ===== */
 .tool-board-section {
-  margin-top: 18px;
+  margin-top: 24px;
 }
 
 .tool-board-section__title {
-  margin: 0 0 16px 6px;
+  margin: 0 0 20px 6px;
   padding-left: 10px;
   border-left: 4px solid #2a7cff;
   font-size: 18px;
@@ -64,7 +66,7 @@ body {
 
 .tool-board {
   border-radius: 18px;
-  padding: 30px 34px;
+  padding: 28px 26px;        /* 좌우 패딩 살짝 줄여서 보드 짧아 보이게 */
   min-height: 210px;
   background: rgba(245, 248, 255, 0.72);
   border: 1px solid rgba(220, 226, 238, 0.9);
@@ -79,7 +81,7 @@ body {
 .tool-board__grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px 22px;
+  gap: 30px 34px;            /* 기존 18px 22px → 툴 사이 간격 넓힘 */
   align-items: start;
 }
 
@@ -88,7 +90,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: 96px;
+  min-height: 110px;
 }
 
 /* common/icon 컴포넌트가 만든 루트가 폭을 좁게 가지더라도 가운데 정렬 */
@@ -100,14 +102,18 @@ body {
 
 /* 섹션 간 간격 */
 .tool-board-section + .tool-board-section {
-  margin-top: 28px;
+  margin-top: 44px;          /* 기존 28px → 더 넓힘 */
 }
 
 /* ===== 반응형 ===== */
 @media (max-width: 900px) {
   .personal-ai-main {
-    width: min(100%, 860px);
-    padding: 22px 16px 32px;
+    width: min(100%, 820px);
+    padding: 0 16px 32px;
+  }
+
+  .personal-ai-hero {
+    margin-bottom: 64px;
   }
 
   .personal-ai-hero__title {
@@ -116,21 +122,22 @@ body {
 
   .tool-board-section__title {
     font-size: 19px;
+    margin-bottom: 18px;
   }
 
   .tool-board {
-    padding: 18px 16px;
+    padding: 20px 18px;
     border-radius: 14px;
   }
 
   .tool-board__grid {
-    gap: 16px 14px;
+    gap: 22px 20px;
   }
 }
 
 @media (max-width: 640px) {
   .personal-ai-hero {
-    margin-bottom: 30px;
+    margin-bottom: 34px;
   }
 
   .personal-ai-hero__title {
@@ -139,7 +146,7 @@ body {
 
   .tool-board-section__title {
     font-size: 16px;
-    margin-left: 2px;
+    margin: 0 0 14px 2px;
     padding-left: 8px;
     border-left-width: 3px;
   }
@@ -151,6 +158,10 @@ body {
 
   .tool-board__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px 10px;
+    gap: 18px 14px;
+  }
+
+  .tool-board-section + .tool-board-section {
+    margin-top: 32px;
   }
 }

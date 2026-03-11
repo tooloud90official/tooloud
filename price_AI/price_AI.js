@@ -15,7 +15,7 @@ async function includeHTML(targetSelector, filePath) {
 }
 
 /** 슬라이더 지점 라벨 */
-const SLIDER_LABELS = ["옵션 1", "옵션 2", "옵션 3", "옵션 4", "옵션 5", "옵션 6"];
+const SLIDER_LABELS = ["₩0", "₩1–29,999", "₩30,000–59,999", "₩60,000–89,999", "₩90,000+"];
 
 /** 샘플 카드 데이터 */
 const TOOL_CARDS = [
@@ -83,6 +83,7 @@ function initStepSlider() {
   if (!sliderRoot || !thumb || !track || !fill || !labelsWrap) return;
 
   const maxStep = SLIDER_LABELS.length - 1;
+  const extend  = 10; // ← 트랙 양쪽으로 늘릴 px (dot 위치는 그대로)
   let isDragging = false;
   let stepPositions = [];
   let currentStep = 0;
@@ -125,9 +126,10 @@ function initStepSlider() {
     const first = stepPositions[0];
     const last  = stepPositions[stepPositions.length - 1];
 
-    track.style.left  = first + "px";
-    track.style.width = (last - first) + "px";
-    fill.style.left   = first + "px";
+    // 트랙만 양쪽으로 extend만큼 늘림 (dot 위치는 그대로)
+    track.style.left  = (first - extend) + "px";
+    track.style.width = (last - first + extend * 2) + "px";
+    fill.style.left   = (first - extend) + "px";
 
     dotEls.forEach((d, i) => {
       d.style.left = stepPositions[i] + "px";
@@ -144,15 +146,15 @@ function initStepSlider() {
     // thumb
     thumb.style.left = px + "px";
 
-    // fill
-    fill.style.width = Math.max(0, px - first) + "px";
+    // fill (트랙 시작점 기준으로 계산)
+    fill.style.width = Math.max(0, px - (first - extend)) + "px";
 
     // dots
     dotEls.forEach((d, i) => {
       d.classList.toggle("is-right", i > currentStep);
     });
 
-    // 라벨 - is-active 토글 (CSS가 말풍선으로 바꿔줌)
+    // 라벨 - is-active 토글
     labelsWrap.querySelectorAll(".price-filter__step-label").forEach((l, i) => {
       l.classList.toggle("is-active", i === currentStep);
     });

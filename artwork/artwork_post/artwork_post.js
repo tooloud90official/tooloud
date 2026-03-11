@@ -17,7 +17,7 @@ const cCount = $("#commentCount"), cCountTitle = $("#commentCountTitle");
 
 function mountBtn() {
   if (typeof loadButton === "function") {
-    loadButton({ target: '#commentSubmitMount', text: '등록하기', variant: 'primary' });
+    loadButton({ target: '#commentSubmitMount', text: '등록', variant: 'primary' });
   }
 }
 
@@ -33,7 +33,7 @@ function render() {
 
     const replyMountId = `#reply-submit-${c.id}`;
     if ($(replyMountId) && typeof loadButton === "function") {
-      loadButton({ target: replyMountId, text: '대댓글 등록', variant: 'primary' });
+      loadButton({ target: replyMountId, text: '등록', variant: 'primary' });
     }
   });
 }
