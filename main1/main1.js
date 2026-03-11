@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     target: '#searchbar-container',
     placeholder: '검색어를 입력하세요',
     onSearch: (value) => {
-      console.log('검색어:', value);
+      const keyword = encodeURIComponent(value.trim());
+      window.location.href = `/searchResult/searchResult.html?keyword=${keyword}`;
     }
   });
 
