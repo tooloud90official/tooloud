@@ -2,7 +2,7 @@ body {
   margin: 0;
   padding-top: 75px;    /* 헤더 높이 보정 */
   font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .login-header {
@@ -35,6 +35,7 @@ body {
   flex-direction: column;
   align-items: center;
   margin-top: 160px;    /* ← 이 값 하나로 타이틀 y위치 조정 */
+  margin-bottom: 80px;
 }
 
 .login-title {
