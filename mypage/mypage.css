@@ -21,13 +21,6 @@ body {
 
 /* =====================================================
    마이페이지 전용 아이콘 클래스
-   icon.css와 완전히 독립적으로 작동합니다.
-   background-image는 JS에서 인라인 style로 주입합니다.
-
-   .mypage-icon        공통 기반 스타일
-   .mypage-icon--sm    28px  내가 쓴 리뷰 카드 (대시보드)
-   .mypage-icon--md    48px  리뷰 관리 섹션
-   .mypage-icon--lg    64px  툴 슬라이더
    ===================================================== */
 
 .mypage-icon {
@@ -43,7 +36,8 @@ body {
   width: 28px;
   height: 28px;
   border-radius: 7px;
-  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
+  border:1px solid rgba(0, 0, 0, 0.08);
+
 }
 
 .mypage-icon--md {
@@ -62,13 +56,8 @@ body {
 
 /* =====================================================
    빈 상태 (Empty State) UI
-   applyEmptyOverlay()가 대상 요소에 적용합니다.
-
-   .empty-blurred   콘텐츠를 흐리게 처리
-   .empty-overlay   블러 위에 올라오는 안내 문구 레이어
    ===================================================== */
 
-/* 콘텐츠 블러 */
 .empty-blurred > *:not(.empty-overlay) {
   filter: blur(3.5px);
   pointer-events: none;
@@ -76,7 +65,6 @@ body {
   opacity: 0.55;
 }
 
-/* 오버레이 레이어 */
 .empty-overlay {
   position: absolute;
   inset: 0;
@@ -107,12 +95,10 @@ body {
   line-height: 1.5;
 }
 
-/* review-manage-list는 배경이 파란 계열이므로 오버레이 색 조정 */
 .review-manage-list.empty-blurred .empty-overlay {
   background: rgba(220, 232, 248, 0.5);
 }
 
-/* works-card는 연회색 배경 */
 .works-card.empty-blurred .empty-overlay {
   background: rgba(244, 247, 252, 0.55);
 }
@@ -148,6 +134,16 @@ body {
   height: 100%;
   object-fit: cover;
 }
+.profile-avatar-ring {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  padding: 6px;
+  background: linear-gradient(180deg, #a78bfa, #60a5fa, #34d399);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.22);
+  display: grid;
+  place-items: center;
+}
 
 .profile-email-btn {
   display: inline-flex;
@@ -170,7 +166,7 @@ body {
 }
 
 /* =====================================================
-   섹션 타이틀 (SVG 아이콘 포함)
+   섹션 타이틀
    ===================================================== */
 .section-title {
   font-size: 20px;
@@ -260,7 +256,6 @@ body {
   flex-direction: column;
   gap: 12px;
   box-sizing: border-box;
-  /* 오버레이가 카드 경계를 벗어나지 않도록 */
   overflow: hidden;
 }
 
@@ -277,7 +272,6 @@ body {
   margin: 0;
 }
 
-/* 내 정보 */
 .info-list {
   list-style: none;
   padding: 0;
@@ -393,6 +387,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding-left: 2px;
 }
 
 .review-item__desc {
@@ -415,102 +410,272 @@ body {
 .works-card {
   background: #f4f7fc;
   border-radius: 20px;
-  padding: 32px;
+  padding: 24px 28px 28px;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
 }
 
-.works-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 28px;
+/* 헤더: 필터 select */
+.works-card-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
 }
 
-.works-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin: 0 0 12px;
+/* 가로형 작업물 리스트 */
+.works-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.works-docs {
-  display: grid;
-  grid-template-columns: repeat(2, 105px);
-  gap: 12px;
-}
-
-.doc-item { display: flex; flex-direction: column; gap: 6px; }
-
-.doc-thumb {
-  width: 105px;
-  height: 150px;
+/* 개별 작업물 아이템 (가로형 카드) */
+.work-item {
   background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+  transition: box-shadow 0.15s;
+}
+
+.work-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* 썸네일 공통: 가로형 고정 크기 */
+.work-thumb {
+  width: 96px;
+  height: 60px;
   border-radius: 8px;
+  flex-shrink: 0;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.doc-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-.work-images-wrap { display: flex; flex-direction: column; gap: 8px; }
-
-.work-img-thumb {
-  width: 100%;
-  height: 120px;
-  background: #e8eef5;
-  border-radius: 8px;
-  overflow: hidden;
+/* 문서 썸네일 */
+.work-thumb--doc {
+  background: #eef2fa;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
-.work-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.doc-ext {
+  font-size: 10px;
+  font-weight: 800;
+  color: #2a7cff;
+  letter-spacing: 0.04em;
+  background: rgba(42, 124, 255, 0.1);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
 
-.link-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.doc-lines {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 3px;
+  width: 100%;
 }
 
-.link-list li a {
-  font-size: 13px;
-  color: #2a7cff;
-  text-decoration: underline;
+.doc-line {
+  height: 3px;
+  border-radius: 2px;
+  background: #d0daf0;
+}
+
+.doc-line:last-child { width: 70%; }
+
+/* 이미지 썸네일 */
+.work-thumb--image {
+  background: #e8eef5;
+}
+
+.work-thumb--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 영상 썸네일 */
+.work-thumb--video {
+  background: #1a1a2e;
+  position: relative;
   cursor: pointer;
 }
 
-.video-thumb {
-  width: 100%;
-  height: 120px;
-  background: #c8d8f0;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
+.work-thumb--video::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  border-radius: 8px;
 }
 
-.video-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-.audio-player {
+.video-play-btn {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #fff;
-  border-radius: 30px;
-  padding: 10px 16px;
-}
-
-.audio-play-btn {
+  justify-content: center;
+  z-index: 2;
   background: none;
   border: none;
-  font-size: 16px;
   cursor: pointer;
-  color: #444;
+  padding: 0;
 }
 
-.audio-bar { flex: 1; height: 3px; background: #ccc; border-radius: 2px; }
+.video-play-btn svg {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  transition: transform 0.15s;
+}
+
+.video-play-btn:hover svg { transform: scale(1.12); }
+
+/* 오디오 썸네일 */
+.work-thumb--audio {
+  background: linear-gradient(135deg, #dce8f8 0%, #c8d9f5 100%);
+  color: #2a7cff;
+}
+
+/* 파일 정보 */
+.work-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.work-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.work-meta {
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* ===== 오디오 플레이어 (인라인) ===== */
+.work-audio-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.work-audio-play {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #2a7cff;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.work-audio-play:hover { background: #1a6be0; }
+
+.work-audio-track {
+  flex: 1;
+  height: 4px;
+  background: #e0e8f5;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.work-audio-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #2a7cff;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.work-audio-time {
+  font-size: 11px;
+  color: #888;
+  flex-shrink: 0;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ===== 영상 플레이어 (인라인) ===== */
+.work-video-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.work-video-play {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.work-video-play:hover { background: #333; }
+
+.work-video-track {
+  flex: 1;
+  height: 4px;
+  background: #e0e8f5;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.work-video-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #1a1a2e;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.work-video-time {
+  font-size: 11px;
+  color: #888;
+  flex-shrink: 0;
+  min-width: 32px;
+  text-align: right;
+}
 
 /* =====================================================
    리뷰 관리
@@ -570,7 +735,7 @@ body {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  border: 1.5px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
   background: #fff;
   color: #555;
   transition: all 0.15s;
@@ -699,6 +864,6 @@ body {
 .edit-submit-row { display: flex; justify-content: flex-end; }
 
 /* =====================================================
-   scroll-margin (앵커 이동 시 상단 여백)
+   scroll-margin
    ===================================================== */
 #section-faq-info { scroll-margin-top: 80px; }

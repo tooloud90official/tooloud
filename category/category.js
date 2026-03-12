@@ -187,7 +187,7 @@ function renderFolders(categoryName) {
   });
 }
 
-function renderToolList(tools, sortValue) {
+async function renderToolList(tools, sortValue) {
   let sorted = [...tools];
 
   if (sortValue === 'name') {
@@ -207,12 +207,15 @@ function renderToolList(tools, sortValue) {
   }
 
   sorted.forEach(tool => {
+    const iconId = `modalIcon-${tool.name.replace(/[^a-zA-Z0-9]/g, '')}`;
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div style="width:70px; height:70px; background:#eee; border-radius:20px; flex-shrink:0;"></div>
-      <div style="flex:1;">
-        <div style="display:flex; align-items:center; gap:8px;">
+      <div id="${iconId}" style="width:70px; height:70px; flex-shrink:0;"></div>
+      <div style="flex:1; position:relative;">
+        <img class="pin-icon" src="/media/pin.png" alt="pin" />
+
+        <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
           <span class="item-badge">${tool.name}</span>
           <span style="color:#ffcc00; font-size:14px;">${'★'.repeat(tool.rating)}</span>
         </div>
@@ -220,7 +223,15 @@ function renderToolList(tools, sortValue) {
         <a href="/detail_AI/detail_AI.html" class="item-detail-btn">상세 ></a>
       </div>
     `;
+    // 핀 클릭 토글
+    item.querySelector('.pin-icon').addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.currentTarget.classList.toggle('pinned');
+    });
     toolListEl.appendChild(item);
+
+    // 아이콘 로드
+    loadToolIconCard(`#${iconId}`, { toolName: tool.name });
   });
 }
 
@@ -235,7 +246,6 @@ async function openModal(folderData) {
   const tools = folderData.tools || [];
   modalCount.textContent = `전체 (${tools.length})`;
 
-  // ✅ loadNativeSelect로 교체 - onChange를 초기화 시 전달
   sortSelectInstance = await loadNativeSelect({
     target: '#modalSortSelect',
     placeholder: '이름 순',

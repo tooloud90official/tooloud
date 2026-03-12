@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="/_common/alert/alert.css">
   <link rel="stylesheet" href="/mypage/mypage.css">
   <link rel="stylesheet" href="/_common/bottom-banner/bottom-banner.css">
-
 </head>
 <body>
 
@@ -24,7 +23,9 @@
     <!-- ===== 프로필 섹션 ===== -->
     <section class="profile-section">
       <h1 class="page-title">마이페이지</h1>
-      <div class="profile-avatar">
+      <div class="profile-avatar-ring">
+        <div class="profile-avatar">...</div>
+      </div>
         <img src="./media/profile.png" alt="프로필" onerror="this.style.display='none'">
       </div>
       <span class="profile-email-btn">
@@ -105,59 +106,15 @@
     <!-- ===== 업로드한 작업물 섹션 ===== -->
     <section class="works-section" id="section-works">
       <h2 class="section-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="section-icon">
-          <polyline points="16 16 12 12 8 16"/>
-          <line x1="12" y1="12" x2="12" y2="21"/>
-          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-        </svg>
+        <img src="/media/upload1.png" width="20" height="20" style="object-fit:contain;">
+
         업로드한 작업물
       </h2>
       <div class="works-card">
-        <div class="works-grid">
-
-          <div class="works-group">
-            <h4 class="works-label">문서</h4>
-            <div class="works-docs">
-              <div class="doc-item">
-                <div class="doc-thumb">
-                  <img src="./media/doc1.png" alt="문서1" onerror="this.parentElement.style.background='#e8eef5'">
-                </div>
-              </div>
-              <div class="doc-item">
-                <div class="doc-thumb">
-                  <img src="./media/doc2.png" alt="문서2" onerror="this.parentElement.style.background='#e8eef5'">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="works-group">
-            <h4 class="works-label">이미지</h4>
-            <div id="workImages" class="work-images-wrap"></div>
-          </div>
-
-          <div class="works-group">
-            <h4 class="works-label">링크</h4>
-            <ul class="link-list" id="linkList"></ul>
-          </div>
-
-          <div class="works-group">
-            <h4 class="works-label">영상</h4>
-            <div class="video-thumb">
-              <button class="audio-play-btn">&#9654;</button>
-              <img src="./media/video-thumb.png" alt="영상" onerror="this.parentElement.style.background='#c8d8f0'">
-            </div>
-          </div>
-
-          <div class="works-group">
-            <h4 class="works-label">오디오</h4>
-            <div class="audio-player">
-              <button class="audio-play-btn">&#9654;</button>
-              <div class="audio-bar"></div>
-            </div>
-          </div>
-
+        <div class="works-card-header">
+          <div id="worksFilterSelect"></div>
         </div>
+        <div id="worksContent"></div>
       </div>
     </section>
 
