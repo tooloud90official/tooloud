@@ -5,26 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>작업물 라이브러리</title>
 
-  <!-- 공용 셀렉트 -->
   <link rel="stylesheet" href="/_common/background.css">
   <link rel="stylesheet" href="/_common/select/select.css" />
   <link rel="stylesheet" href="/artwork/artwork_card/artwork-card.css" />
-
   <link rel="stylesheet" href="/_common/top-banner/top-banner.css" />
   <link rel="stylesheet" href="/_common/searchBar/searchBar.css">
-
-  <!-- 페이지 전용 -->
   <link rel="stylesheet" href="/artwork/artwork.css" />
   <link rel="stylesheet" href="/_common/bottom-banner/bottom-banner.css">
 </head>
 
 <body class="artwork-page">
-  <!-- ✅ 왼쪽 떠다니는 메뉴 버튼 (스크롤해도 고정) -->
   <button class="artwork-fab" id="artworkFab" type="button" aria-label="메뉴 열기" aria-expanded="false">
     <img class="artwork-fab__img" src="/media/menu.png" alt="" aria-hidden="true" />
   </button>
 
-  <!-- ✅ 왼쪽 사이드바 -->
   <aside class="artwork-sidebar" id="artworkSidebar" aria-hidden="true">
     <div class="artwork-sidebar__head">
       <div class="artwork-sidebar__title">메뉴</div>
@@ -32,32 +26,28 @@
 
     <nav class="artwork-sidebar__nav">
       <div class="artwork-sidebar__section">카테고리 별 작업물 보기</div>
-      <a class="artwork-sidebar__item" href="#">이미지·오디오·영상</a>
-      <a class="artwork-sidebar__item" href="#">리서치</a>
-      <a class="artwork-sidebar__item" href="#">문서 생성·요약·편집</a>
-      <a class="artwork-sidebar__item" href="#">개발·코드</a>
-      <a class="artwork-sidebar__item" href="#">학습·교육</a>
-      <a class="artwork-sidebar__item" href="#">AI 추천 작업물 보기</a>
+
+      <!-- ✅ data-tab 추가 -->
+      <a class="artwork-sidebar__item" href="#" data-tab="이미지·오디오·영상">이미지·오디오·영상</a>
+      <a class="artwork-sidebar__item" href="#" data-tab="리서치">리서치</a>
+      <a class="artwork-sidebar__item" href="#" data-tab="문서 생성·요약·편집">문서 생성·요약·편집</a>
+      <a class="artwork-sidebar__item" href="#" data-tab="개발·코드">개발·코드</a>
+      <a class="artwork-sidebar__item" href="#" data-tab="학습·교육">학습·교육</a>
+      <a class="artwork-sidebar__item" href="#" data-tab="AI 추천 작업물 보기">AI 추천 작업물 보기</a>
 
       <div class="artwork-sidebar__section">작업물</div>
-      <a class="artwork-sidebar__item" href="#">내 라이브러리</a>
+      <a class="artwork-sidebar__item" href="#" data-tab="내 라이브러리">내 라이브러리</a>
       <a class="artwork-sidebar__item" href="/artwork/artwork_upload/artwork_upload.html">작업물 올리기</a>
     </nav>
   </aside>
 
-  <!-- ✅ 메인 콘텐츠 래퍼 (사이드바 열리면 오른쪽으로 밀림) -->
+  <div id="top-banner" class="detail_AI-banner-root"></div>
   <div class="artwork-shell" id="artworkShell">
-    <div id="top-banner" class="detail_AI-banner-root"></div>
 
     <header class="artwork-hero">
-      <!-- ✅ 제목 뒤에만 signiture.png가 깔리도록 titleWrap 추가 -->
       <div class="artwork-hero__titleWrap" aria-hidden="true"></div>
       <h1 class="artwork-hero__title">작업물 라이브러리</h1>
-
-      <!-- ✅ 아래 요소들은 PNG 배경 영역에 포함 X (그냥 기존처럼 아래 배치) -->
       <p class="artwork-hero__desc">아티스트가 되어 상상력을 펼쳐 주세요.</p>
-
-      <!--검색창-->
       <div id="search-area"></div>
     </header>
 
@@ -68,22 +58,17 @@
             <div class="artwork-section__title">💙 좋아요 많은 작업물</div>
             <div class="artwork-section__desc">지금 인기있는 작업물들을 감상해보세요.</div>
           </div>
-
-          <!-- ✅ 필터(셀렉트) 컴포넌트 mount 자리 -->
           <div id="select-root"></div>
         </div>
 
-        <!-- ✅ 작업물 카드 그리드 -->
         <div class="artwork-grid" id="artworkGrid"></div>
       </section>
     </main>
   </div>
 
-  <!-- 사이드바 열릴 때 배경 클릭 닫기 -->
   <div class="artwork-dim" id="artworkDim" aria-hidden="true"></div>
   <div id="bottom-banner"></div>
 
-  
   <script src="/_common/searchBar/searchBar.js"></script>
   <script src="/_common/top-banner/include.js"></script>
   <script type="module" src="/artwork/artwork.js"></script>

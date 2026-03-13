@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   initReviewSort();
   initSectionTabs();
-  setSitePreview({ name: "Midjourney", url: "https://www.midjourney.com/" });
+  setSitePreview({ name: "뤼튼", url: "https://ideogram.ai/", iframeEnabled: false });
   initWorkCarousel();
   initSimilarToolsSlider(allSimTools);
   initReviewSystem();
@@ -97,7 +97,6 @@ function initReviewSystem() {
   renderMyReviewArea();
 }
 
-/** 왼쪽 영역: 입력창 or 내 리뷰 카드 */
 function renderMyReviewArea() {
   const myReview = reviewData.find((r) => r.isMine);
   const writeArea = document.querySelector(".review-write");
@@ -165,7 +164,6 @@ function renderMyReviewArea() {
   }
 }
 
-/** 별점 입력 초기화 */
 function initWriteStars() {
   const stars = Array.from(document.querySelectorAll(".rstar-input"));
   const hint = document.getElementById("writeStarHint");
@@ -188,7 +186,6 @@ function initWriteStars() {
   });
 }
 
-/** 리뷰 등록 */
 function submitReview() {
   const textarea = document.getElementById("reviewTextarea");
   const text = textarea?.value.trim();
@@ -225,7 +222,6 @@ function submitReview() {
   updateAvgScore();
 }
 
-/** 수정 모드 진입 */
 function startEditMyReview() {
   const myReview = reviewData.find((r) => r.isMine);
   if (!myReview) return;
@@ -270,7 +266,6 @@ function startEditMyReview() {
   });
 }
 
-/** 삭제 */
 function deleteMyReview(id) {
   if (!confirm("리뷰를 삭제할까요?")) return;
   const idx = reviewData.findIndex((r) => r.id === id);
@@ -280,7 +275,6 @@ function deleteMyReview(id) {
   updateAvgScore();
 }
 
-/** 리뷰 페이지 렌더링 */
 function renderReviewPage(pageIndex) {
   currentReviewPage = pageIndex;
   const container = document.getElementById("reviewCards");
@@ -325,7 +319,6 @@ function renderReviewPage(pageIndex) {
   `).join("");
 }
 
-/** 평균 별점 업데이트 */
 function updateAvgScore() {
   if (!reviewData.length) return;
   const avg = reviewData.reduce((s, r) => s + r.score, 0) / reviewData.length;
@@ -341,7 +334,6 @@ function updateAvgScore() {
   }
 }
 
-// 전역 등록
 window.startEditMyReview = startEditMyReview;
 window.deleteMyReview = deleteMyReview;
 
@@ -420,13 +412,40 @@ function initReviewSort() {
 }
 
 /* ============================
-   사이트 미리보기
+   사이트 미리보기 (iframe 유무 자동 판별)
 ============================= */
-function setSitePreview({ name, url } = {}) {
+function setSitePreview({ name, url, iframeEnabled = false } = {}) {
   const nameEl = document.getElementById("sitePreviewName");
   const urlEl  = document.getElementById("sitePreviewUrl");
   if (nameEl && name) nameEl.textContent = name;
   if (urlEl  && url)  { urlEl.textContent = url; urlEl.href = url; }
+
+  const mediaEl = document.querySelector(".site-preview__media");
+  const cardEl  = document.querySelector(".site-preview__card");
+  if (!mediaEl || !url) return;
+
+  // 기존 로고 img를 fallback 래퍼로 감싸기
+  const existingImg = mediaEl.querySelector("img");
+  if (existingImg && !existingImg.closest(".site-preview__fallback-logo")) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "site-preview__fallback-logo";
+    existingImg.replaceWith(wrapper);
+    wrapper.appendChild(existingImg);
+  }
+
+  if (iframeEnabled) {
+    // ✅ iframe 가능 → 카드 크게 + iframe 삽입 + 로고 숨김
+    cardEl?.classList.add("has-iframe");
+    mediaEl.classList.add("has-iframe");
+
+    const iframe = document.createElement("iframe");
+    iframe.src = url;
+    iframe.title = name || "사이트 미리보기";
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  
+    mediaEl.appendChild(iframe);
+  }
+  // ✅ iframe 불가 → 카드 작게 + 그라데이션 + 로고 유지 (아무것도 안 해도 됨)
 }
 
 /* ============================

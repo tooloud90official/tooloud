@@ -83,12 +83,11 @@ function initStepSlider() {
   if (!sliderRoot || !thumb || !track || !fill || !labelsWrap) return;
 
   const maxStep = SLIDER_LABELS.length - 1;
-  const extend  = 10; // ← 트랙 양쪽으로 늘릴 px (dot 위치는 그대로)
+  const extend  = 10;
   let isDragging = false;
   let stepPositions = [];
   let currentStep = 0;
 
-  // ── 라벨 생성 (텍스트를 <span>으로 감쌈 → CSS 말풍선 적용 대상)
   labelsWrap.innerHTML = "";
   SLIDER_LABELS.forEach((label, i) => {
     const el = document.createElement("div");
@@ -98,7 +97,6 @@ function initStepSlider() {
     labelsWrap.appendChild(el);
   });
 
-  // ── dot 생성
   sliderRoot.querySelectorAll(".price-filter__dot").forEach(d => d.remove());
   const dotEls = SLIDER_LABELS.map((_, i) => {
     const el = document.createElement("div");
@@ -108,7 +106,6 @@ function initStepSlider() {
     return el;
   });
 
-  // ── 라벨 중앙 x를 슬라이더 기준으로 계산
   function calcStepPositions() {
     const sliderRect = sliderRoot.getBoundingClientRect();
     const labelNodes = labelsWrap.querySelectorAll(".price-filter__step-label");
@@ -118,7 +115,6 @@ function initStepSlider() {
     });
   }
 
-  // ── 트랙·dot 레이아웃
   function layoutTrack() {
     calcStepPositions();
     if (stepPositions.length < 2) return;
@@ -126,7 +122,6 @@ function initStepSlider() {
     const first = stepPositions[0];
     const last  = stepPositions[stepPositions.length - 1];
 
-    // 트랙만 양쪽으로 extend만큼 늘림 (dot 위치는 그대로)
     track.style.left  = (first - extend) + "px";
     track.style.width = (last - first + extend * 2) + "px";
     fill.style.left   = (first - extend) + "px";
@@ -136,25 +131,19 @@ function initStepSlider() {
     });
   }
 
-  // ── UI 렌더
   function render(step) {
     currentStep = Math.max(0, Math.min(maxStep, step));
 
     const px    = stepPositions[currentStep];
     const first = stepPositions[0];
 
-    // thumb
     thumb.style.left = px + "px";
-
-    // fill (트랙 시작점 기준으로 계산)
     fill.style.width = Math.max(0, px - (first - extend)) + "px";
 
-    // dots
     dotEls.forEach((d, i) => {
       d.classList.toggle("is-right", i > currentStep);
     });
 
-    // 라벨 - is-active 토글
     labelsWrap.querySelectorAll(".price-filter__step-label").forEach((l, i) => {
       l.classList.toggle("is-active", i === currentStep);
     });
@@ -162,7 +151,6 @@ function initStepSlider() {
     if (hint) hint.textContent = `현재 선택: ${SLIDER_LABELS[currentStep]}`;
   }
 
-  // ── 가장 가까운 스텝 찾기
   function clientXToStep(clientX) {
     const rect = sliderRoot.getBoundingClientRect();
     const x = clientX - rect.left;
@@ -174,7 +162,6 @@ function initStepSlider() {
     return closest;
   }
 
-  // ── 이벤트
   thumb.addEventListener("pointerdown", (e) => {
     isDragging = true;
     thumb.setPointerCapture(e.pointerId);
@@ -192,7 +179,6 @@ function initStepSlider() {
     render(clientXToStep(e.clientX));
   });
 
-  // ── 초기화 & 리사이즈
   function init() {
     layoutTrack();
     render(0);
@@ -207,6 +193,12 @@ function initStepSlider() {
 
 // ✅ DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ URL 파라미터로 카테고리 읽어서 텍스트 교체
+  const params = new URLSearchParams(window.location.search);
+  const category = params.get("category");
+  const descEl = document.querySelector(".category-hero__desc--accent");
+  if (descEl && category) descEl.textContent = category;
+
   initStepSlider();
   renderToolCards();
 });

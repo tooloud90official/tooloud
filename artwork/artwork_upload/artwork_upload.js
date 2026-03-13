@@ -1,19 +1,20 @@
 const TOOL_LIST = [
-  { id:"firefly", name:"Adobe Firefly", brand:"@Adobe", stars:4 },
-  { id:"chatgpt", name:"ChatGPT", brand:"@OpenAI", stars:5 },
-  { id:"claude", name:"Claude", brand:"@Anthropic", stars:5 },
-  { id:"gemini", name:"Gemini", brand:"@Google", stars:4 },
-  { id:"midjourney", name:"Midjourney", brand:"@Midjourney", stars:5 },
-  { id:"ideogram", name:"Ideogram", brand:"@Ideogram", stars:4 },
-  { id:"runway", name:"Runway", brand:"@Runway", stars:4 },
-  { id:"pika", name:"Pika", brand:"@Pika", stars:4 },
-  { id:"capcut", name:"CapCut", brand:"@ByteDance", stars:4 },
-  { id:"notion", name:"Notion", brand:"@Notion", stars:5 },
-  { id:"figma", name:"Figma", brand:"@Figma", stars:5 },
-  { id:"photoshop", name:"Photoshop", brand:"@Adobe", stars:5 },
-  { id:"illustrator", name:"Illustrator", brand:"@Adobe", stars:5 },
-  { id:"blender", name:"Blender", brand:"@Blender", stars:5 },
-  { id:"premiere", name:"Premiere Pro", brand:"@Adobe", stars:4 },
+  { id:"firefly", name:"Adobe Firefly", brand:"@Adobe", stars:4, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"chatgpt", name:"ChatGPT", brand:"@OpenAI", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"claude", name:"Claude", brand:"@Anthropic", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"gemini", name:"Gemini", brand:"@Google", stars:4, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"midjourney", name:"Midjourney", brand:"@Midjourney", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"ideogram", name:"Ideogram", brand:"@Ideogram", stars:4, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"runway", name:"Runway", brand:"@Runway", stars:4, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"pika", name:"Pika", brand:"@Pika", stars:4, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"capcut", name:"CapCut", brand:"@ByteDance", stars:4, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"notion", name:"Notion", brand:"@Notion", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"figma", name:"Figma", brand:"@Figma", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"photoshop", name:"Photoshop", brand:"@Adobe", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"illustrator", name:"Illustrator", brand:"@Adobe", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"blender", name:"Blender", brand:"@Blender", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"premiere", name:"Premiere Pro", brand:"@Adobe", stars:4, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
+  { id:"spotify", name:"Spotify", brand:"@Spotify", stars:5, icon:"https://cdn.brandfetch.io/idnrCPuv87/w/400/h/400/theme/dark/icon.png?c=1bxid64Mup7aczewSAYMX&t=1749539604383" },
 ];
 
 let selectedToolId = null;
@@ -23,6 +24,20 @@ let currentFile = null;
 let currentObjectUrl = null;
 
 const previewState = { pdfDoc: null, pdfPage: 1, pdfTotalPages: 1 };
+
+// ✅ URL 파라미터 읽기
+const urlParams = new URLSearchParams(window.location.search);
+const isEditMode = urlParams.get("mode") === "edit";
+const editArtworkId = urlParams.get("id") ?? null;
+
+// ✅ edit 모드일 때 DB에서 불러올 더미 데이터 (DB 연동 시 fetch로 교체)
+const EDIT_DUMMY = {
+  artwork_001: {
+    description: "신년을 맞아 비즈니스 계획을 세워보았습니다. 좋은 레퍼런스가 될 것 같아 여러분께 공유드립니다.",
+    toolId: "firefly",
+    imageSrc: "/media/work.png",  // DB 연동 시 실제 파일 URL로 교체
+  },
+};
 
 /* ── 툴 카드 ── */
 function starsToText(n) {
@@ -34,10 +49,10 @@ function getSelectedTool() {
 }
 function renderToolCard(tool) {
   const placeholder = document.getElementById("toolPlaceholder");
-  const meta       = document.getElementById("toolMeta");
-  const nameEl     = document.getElementById("toolName");
-  const brandEl    = document.getElementById("toolBrand");
-  const starsEl    = document.getElementById("toolStars");
+  const meta        = document.getElementById("toolMeta");
+  const nameEl      = document.getElementById("toolName");
+  const brandEl     = document.getElementById("toolBrand");
+  const starsEl     = document.getElementById("toolStars");
   if (!placeholder || !meta) return;
   if (!tool) {
     placeholder.hidden = false; meta.hidden = true;
@@ -87,7 +102,7 @@ function renderToolGrid(gridEl, keyword = "") {
   const list = TOOL_LIST.filter(t => t.name.toLowerCase().includes(keyword.toLowerCase()));
   gridEl.innerHTML = list.map(t => `
     <button type="button" class="tool-item ${t.id === selectedToolId ? "is-selected" : ""}" data-tool-id="${t.id}">
-      <div class="tool-icon" aria-hidden="true"></div>
+      ${t.icon ? `<img class="tool-icon" src="${t.icon}" alt="${t.name}" />` : `<div class="tool-icon" aria-hidden="true"></div>`}
       <div class="tool-name">${t.name}</div>
     </button>`).join("");
   gridEl.querySelectorAll("[data-tool-id]").forEach(btn => {
@@ -167,14 +182,38 @@ function renderVideoPreview(file) {
 }
 function renderAudioPreview(file) {
   cleanupObjectUrl(); currentObjectUrl = URL.createObjectURL(file);
+  const audioId = "audioPlayer_" + Date.now();
   document.getElementById("previewBody").innerHTML = `
     <div class="preview-audio-wrap">
-      <div class="preview-audio-icon">🎵</div>
-      <div class="preview-audio-title">${file.name}</div>
-      <audio class="preview-audio" controls preload="metadata">
+      <div class="preview-audio-thumb">
+        <img class="preview-audio-thumb__img" src="/media/audio_thumb.png" alt="오디오 썸네일" />
+        <button class="preview-audio-thumb__play" id="audioPlayBtn" aria-label="재생">
+          <svg viewBox="0 0 24 24" fill="white" width="36" height="36">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+      </div>
+      <audio id="${audioId}" preload="metadata">
         <source src="${currentObjectUrl}" type="${file.type || "audio/mpeg"}" />
       </audio>
     </div>`;
+
+  const audio   = document.getElementById(audioId);
+  const playBtn = document.getElementById("audioPlayBtn");
+
+  playBtn.addEventListener("click", () => {
+    if (audio.paused) {
+      audio.play();
+      playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" width="36" height="36"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    } else {
+      audio.pause();
+      playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" width="36" height="36"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+  });
+
+  audio.addEventListener("ended", () => {
+    playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" width="36" height="36"><path d="M8 5v14l11-7z"/></svg>`;
+  });
 }
 async function renderTextPreview(file) {
   const text = await file.text();
@@ -191,27 +230,16 @@ function debounce(fn, delay = 100) {
 }
 
 async function renderPdfPage() {
-  const canvas = document.getElementById("pdfPreviewCanvas");
+  const canvas    = document.getElementById("pdfPreviewCanvas");
   const indicator = document.getElementById("pdfPageIndicator");
   if (!canvas || !indicator || !previewState.pdfDoc) return;
-
-  const page = await previewState.pdfDoc.getPage(previewState.pdfPage);
-  const vp = page.getViewport({ scale: 1 });
-
+  const page  = await previewState.pdfDoc.getPage(previewState.pdfPage);
+  const vp    = page.getViewport({ scale: 1 });
   const stage = canvas.parentElement;
-  const stageW = stage.clientWidth;
-  const stageH = stage.clientHeight;
-
-  // 가로/세로 둘 다 stage에 맞추고 작은 쪽 기준으로 scale → 전체 페이지가 항상 보임
-  const scaleW = stageW / vp.width;
-  const scaleH = stageH / vp.height;
-  const scale = Math.min(scaleW, scaleH);
-
-  const svp = page.getViewport({ scale });
-  const ctx = canvas.getContext("2d");
-  canvas.width = svp.width;
-  canvas.height = svp.height;
-
+  const scale = Math.min(stage.clientWidth / vp.width, stage.clientHeight / vp.height);
+  const svp   = page.getViewport({ scale });
+  const ctx   = canvas.getContext("2d");
+  canvas.width = svp.width; canvas.height = svp.height;
   await page.render({ canvasContext: ctx, viewport: svp }).promise;
   indicator.textContent = `${previewState.pdfPage} / ${previewState.pdfTotalPages}`;
 }
@@ -229,22 +257,18 @@ async function renderPdfPreview(file) {
     </div>`;
   try {
     cleanupObjectUrl(); currentObjectUrl = URL.createObjectURL(file);
-
     const lib = window.pdfjsLib;
     if (!lib) throw new Error("pdf.js not loaded");
     lib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.worker.min.mjs';
-
     previewState.pdfDoc = await lib.getDocument(currentObjectUrl).promise;
     previewState.pdfPage = 1;
     previewState.pdfTotalPages = previewState.pdfDoc.numPages;
-
     document.getElementById("pdfPrevBtn").addEventListener("click", async () => {
       if (previewState.pdfPage > 1) { previewState.pdfPage--; await renderPdfPage(); }
     });
     document.getElementById("pdfNextBtn").addEventListener("click", async () => {
       if (previewState.pdfPage < previewState.pdfTotalPages) { previewState.pdfPage++; await renderPdfPage(); }
     });
-
     await renderPdfPage();
     window.addEventListener("resize", debounce(renderPdfPage, 120));
   } catch (err) {
@@ -304,23 +328,75 @@ async function mountActionButtons() {
   if (typeof loadButton !== "function") return;
   await loadButton({ target: "#cancelBtnMount", text: "취소하기", variant: "outline", onClick: () => history.back() });
   await loadButton({
-    target: "#submitBtnMount", text: "등록하기", variant: "primary",
+    target: "#submitBtnMount",
+    // ✅ edit 모드면 "수정하기", 아니면 "등록하기"
+    text: isEditMode ? "수정하기" : "등록하기",
+    variant: "primary",
     onClick: () => {
       const desc = document.querySelector("#description")?.value?.trim() ?? "";
       const tool = getSelectedTool();
-      alert(`등록하기 클릭\n설명: ${desc || "(없음)"}\n툴: ${tool ? tool.name : "(미선택)"}\n파일: ${currentFile ? currentFile.name : "(미선택)"}`);
+      if (isEditMode) {
+        // TODO: DB 연동 시 PATCH/PUT API 호출 후 이동
+        history.back();
+      } else {
+        // TODO: DB 연동 시 POST API 호출
+        alert(`등록하기 클릭\n설명: ${desc || "(없음)"}\n툴: ${tool ? tool.name : "(미선택)"}\n파일: ${currentFile ? currentFile.name : "(미선택)"}`);
+      }
     },
   });
 }
 
+// ✅ edit 모드일 때 기존 데이터 채우기 (DB 연동 시 fetch로 교체)
+function fillEditData() {
+  if (!isEditMode || !editArtworkId) return;
+
+  // TODO: DB 연동 시 아래 더미 데이터 대신 fetch(`/api/artworks/${editArtworkId}`) 로 교체
+  const data = EDIT_DUMMY[editArtworkId];
+  if (!data) return;
+
+  // 설명 채우기
+  const descEl = document.querySelector("#description");
+  if (descEl && data.description) descEl.value = data.description;
+
+  // 툴 선택 채우기
+  if (data.toolId) {
+    selectedToolId = data.toolId;
+    renderToolCard(getSelectedTool());
+  }
+
+  // ✅ 기존 이미지 미리보기로 바로 보여주기
+  if (data.imageSrc) {
+    document.getElementById("dropZoneEmpty").hidden = true;
+    document.getElementById("previewCard").hidden   = false;
+    document.getElementById("previewFileName").textContent = "기존 파일";
+    document.getElementById("previewFileSize").textContent = "";
+    document.getElementById("previewTypeBadge").textContent = "IMAGE";
+    document.getElementById("previewBody").innerHTML = `
+      <div class="preview-image-wrap">
+        <img class="preview-image" src="${data.imageSrc}" alt="기존 작업물" />
+      </div>`;
+  }
+}
+
+// ✅ edit 모드일 때 페이지 타이틀 변경
+function applyEditModeUI() {
+  if (!isEditMode) return;
+  const titleEl = document.querySelector(".upload-hero__title, h1, .upload-title");
+  if (titleEl) titleEl.textContent = "작업물 수정";
+  document.title = "작업물 수정";
+}
+
 /* ── INIT ── */
 document.addEventListener("DOMContentLoaded", async () => {
+  applyEditModeUI();
   renderToolCard(null);
+
   const picker = document.getElementById("toolPicker");
   if (picker) {
     picker.addEventListener("click", openToolModal);
     picker.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openToolModal(); } });
   }
+
   const fileInput = setupFileInput();
   setupDragDrop();
   await mountUploadButton(fileInput);
@@ -333,4 +409,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("replaceFileBtn")?.addEventListener("click", () => fileInput.click());
 
   await mountActionButtons();
+
+  // ✅ edit 모드 데이터 채우기 (버튼 마운트 후에 실행)
+  fillEditData();
 });

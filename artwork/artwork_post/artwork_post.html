@@ -63,9 +63,10 @@
         <p>작업 과정과 결과물을 공유합니다! 피드백/질문도 편하게 남겨주세요 🙂</p>
       </section>
 
+      <!-- ✅ data-act로 JS와 연결 -->
       <section class="post-foot">
-        <button class="icon-btn" id="btnEdit"><img src="/media/edit.png" alt="수정" /></button>
-        <button class="icon-btn" id="btnDelete"><img src="/media/delete.png" alt="삭제" /></button>
+        <button class="icon-btn" data-act="edit-artwork"><img src="/media/edit.png" alt="수정" /></button>
+        <button class="icon-btn" data-act="del-artwork"><img src="/media/delete.png" alt="삭제" /></button>
       </section>
 
       <hr class="divider" />
@@ -87,78 +88,7 @@
           </div>
         </div>
 
-        <ul class="comment-list" id="commentList">
-          <li class="comment-item">
-            <div class="row-top">
-              <div class="head">
-                <div class="avatar sm">
-                  <div class="avatar__inner">
-                    <img src="/media/profil.png" alt="댓글 작성자" />
-                  </div>
-                </div>
-                <div class="meta">
-                  <div class="n">Minjung</div>
-                  <div class="d">2026년 01월 02일</div>
-                </div>
-              </div>
-
-              <button class="pill">
-                <img src="/media/comment.png" class="pill-icon" alt="" aria-hidden="true" />
-                <span>대댓글 2</span>
-              </button>
-            </div>
-
-            <p class="text">정말 멋진 작업이에요! 색감이 너무 좋아요 ✨</p>
-
-            <div class="replies is-open">
-              <div class="rin">
-
-                <div class="reply-item">
-                  <div class="reply-item__inner">
-                    <div class="avatar sm">
-                      <div class="avatar__inner">
-                        <img src="/media/profil.png" alt="대댓글 작성자" />
-                      </div>
-                    </div>
-                    <div class="reply-body">
-                      <div class="reply-head">
-                        <span class="n">Soojin</span>
-                        <span class="d">2026년 01월 03일</span>
-                      </div>
-                      <p class="reply-text">감사해요! 색 조합에 가장 신경 썼어요 😊</p>
-                      <div class="actions">
-                        <button class="act">수정</button>
-                        <button class="act danger">삭제</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="reply-item">
-                  <div class="reply-item__inner">
-                    <div class="avatar sm">
-                      <div class="avatar__inner">
-                        <img src="/media/profil.png" alt="대댓글 작성자" />
-                      </div>
-                    </div>
-                    <div class="reply-body">
-                      <div class="reply-head">
-                        <span class="n">Hyunwoo</span>
-                        <span class="d">2026년 01월 04일</span>
-                      </div>
-                      <p class="reply-text">저도 배워보고 싶어요! 어떤 레퍼런스 보셨나요?</p>
-                      <div class="actions">
-                        <button class="act">수정</button>
-                        <button class="act danger">삭제</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </li>
-        </ul>
+        <ul class="comment-list" id="commentList"></ul>
       </section>
     </main>
   </div>

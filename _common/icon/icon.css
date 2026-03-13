@@ -13,7 +13,7 @@ body {
   align-items: center;
 }
 
-/* sample.html 테스트용 */
+/* ===== sample.html 테스트용 ===== */
 .page-wrap {
   width: 100%;
   max-width: 900px;
@@ -41,14 +41,22 @@ body {
   gap: 8px;
   cursor: pointer;
   transition: transform 0.15s ease;
-  width: 72px; /* ✅ 너비 고정 → 모든 카드 동일한 폭 */
+  width: 72px; /* 카드 전체 폭 고정 */
+}
+
+.tool-icon-card:hover {
+  transform: translateY(-3px);
+}
+
+.tool-icon-card:active {
+  transform: scale(0.97);
 }
 
 /* ===== 아이콘 ===== */
 .tool-icon-card__icon {
   width: 64px;
   height: 64px;
-  flex-shrink: 0; /* ✅ 아이콘 크기 절대 안 줄어들게 */
+  flex-shrink: 0;
 
   background-image: url("https://cdn.brandfetch.io/ideA07K8J2/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1766207012399");
   background-size: cover;
@@ -60,14 +68,6 @@ body {
   display: block;
 }
 
-.tool-icon-card:hover {
-  transform: translateY(-3px);
-}
-
-.tool-icon-card:active {
-  transform: scale(0.97);
-}
-
 /* ===== 텍스트 ===== */
 .tool-icon-card__title {
   width: 100%;
@@ -77,12 +77,10 @@ body {
   text-align: center;
   line-height: 1.2;
 
-  overflow: hidden;
-  white-space: normal;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  min-height: 2.4em; /* ✅ 2줄 높이 고정 */
+  white-space: nowrap;      /* 무조건 1줄 */
+  overflow: hidden;         /* 넘치면 숨김 */
+  text-overflow: ellipsis;  /* ... 처리 */
+  word-break: keep-all;
+
+  min-height: 1.2em;        /* 1줄 높이 고정 */
 }

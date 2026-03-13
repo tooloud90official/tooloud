@@ -6,23 +6,23 @@ const MENU_DATA = {
   category: {
     desc: '카테고리별 AI 툴을\n탐색해보세요.',
     items: [
-      { label: '이미지·오디오·영상', href: '/category/category.html?tab=이미지·오디오·영상' }, // ✅
-      { label: '리서치',             href: '/category/category.html?tab=리서치' },              // ✅
-      { label: '문서 생성·요약·편집', href: '/category/category.html?tab=문서 생성·요약·편집' }, // ✅
-      { label: '개발·코딩',          href: '/category/category.html?tab=개발·코딩' },           // ✅
-      { label: '학습·교육',          href: '/category/category.html?tab=학습·교육' },           // ✅
-      { label: '챗봇·어시스턴트',    href: '/category/category.html?tab=챗봇·어시스턴트' },     // ✅
+      { label: '이미지·오디오·영상', href: '/category/category.html?tab=이미지·오디오·영상' },
+      { label: '리서치',             href: '/category/category.html?tab=리서치' },
+      { label: '문서 생성·요약·편집', href: '/category/category.html?tab=문서 생성·요약·편집' },
+      { label: '개발·코딩',          href: '/category/category.html?tab=개발·코딩' },
+      { label: '학습·교육',          href: '/category/category.html?tab=학습·교육' },
+      { label: '챗봇·어시스턴트',    href: '/category/category.html?tab=챗봇·어시스턴트' },
     ]
   },
   price: {
     desc: '가격별 AI 툴을\n탐색해보세요.',
     items: [
-      { label: '이미지·오디오·영상', href: '#' },
-      { label: '리서치',             href: '#' },
-      { label: '문서 생성·요약·편집', href: '#' },
-      { label: '개발·코딩',          href: '#' },
-      { label: '학습·교육',          href: '#' },
-      { label: '문서 생성·요약·편집', href: '#' },
+      { label: '이미지·오디오·영상', href: '/price_AI/price_AI.html?category=이미지·오디오·영상' },
+      { label: '리서치',             href: '/price_AI/price_AI.html?category=리서치' },
+      { label: '문서 생성·요약·편집', href: '/price_AI/price_AI.html?category=문서 생성·요약·편집' },
+      { label: '개발·코딩',          href: '/price_AI/price_AI.html?category=개발·코딩' },
+      { label: '학습·교육',          href: '/price_AI/price_AI.html?category=학습·교육' },
+      { label: '챗봇·어시스턴트',    href: '/price_AI/price_AI.html?category=챗봇·어시스턴트' },
     ]
   },
   personal: {
