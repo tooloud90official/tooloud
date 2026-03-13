@@ -20,6 +20,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).then(() => {
       const btn = document.querySelector("#wishlistBtn .btn");
       btn.innerHTML = `<img src="/media/pin.png" style="width:1em;height:1em;object-fit:contain;vertical-align:middle;margin-right:6px;"> 관심 목록에 추가`;
+    
+      // ✅ 추가
+      let pinned = false;
+      btn.addEventListener("click", () => {
+        pinned = !pinned;
+        const img = btn.querySelector("img");
+        img.src = pinned ? "/media/pin_fill.png" : "/media/pin.png";
+      });
     }),
     window.loadButton({
       target: "#planBtn1",
