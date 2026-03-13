@@ -35,7 +35,7 @@ const EDIT_DUMMY = {
   artwork_001: {
     description: "신년을 맞아 비즈니스 계획을 세워보았습니다. 좋은 레퍼런스가 될 것 같아 여러분께 공유드립니다.",
     toolId: "firefly",
-    imageSrc: "/media/work.png",  // DB 연동 시 실제 파일 URL로 교체
+    imageSrc: "/media/work.png",
   },
 };
 
@@ -180,15 +180,38 @@ function renderVideoPreview(file) {
       </video>
     </div>`;
 }
+
+// ✅ 오디오 프리뷰 - SVG 음표 + 재생 버튼
 function renderAudioPreview(file) {
   cleanupObjectUrl(); currentObjectUrl = URL.createObjectURL(file);
   const audioId = "audioPlayer_" + Date.now();
   document.getElementById("previewBody").innerHTML = `
-    <div class="preview-audio-wrap">
-      <div class="preview-audio-thumb">
-        <img class="preview-audio-thumb__img" src="/media/audio_thumb.png" alt="오디오 썸네일" />
-        <button class="preview-audio-thumb__play" id="audioPlayBtn" aria-label="재생">
-          <svg viewBox="0 0 24 24" fill="white" width="36" height="36">
+    <div class="preview-audio-wrap" style="display:flex; align-items:center; justify-content:center; padding:24px;">
+      <div style="position:relative; width:220px; height:220px; flex-shrink:0; border-radius:24px; overflow:hidden;">
+        <div style="
+          width:220px;
+          height:220px;
+          border-radius:24px;
+          background: linear-gradient(135deg, #dce8f8 0%, #c8d9f5 100%);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          color:#2a7cff;
+          box-sizing:border-box;
+        ">
+          <svg width="72" height="72" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        <button id="audioPlayBtn" aria-label="재생"
+          style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:transparent; border:none; cursor:pointer; border-radius:24px; transition:background 0.15s;"
+          onmouseover="this.style.background='rgba(0,0,0,0.08)'"
+          onmouseout="this.style.background='transparent'">
+          <svg viewBox="0 0 24 24" fill="white" width="52" height="52" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">
             <path d="M8 5v14l11-7z"/>
           </svg>
         </button>
@@ -215,6 +238,7 @@ function renderAudioPreview(file) {
     playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" width="36" height="36"><path d="M8 5v14l11-7z"/></svg>`;
   });
 }
+
 async function renderTextPreview(file) {
   const text = await file.text();
   const safe = text.slice(0, 12000).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
@@ -329,42 +353,34 @@ async function mountActionButtons() {
   await loadButton({ target: "#cancelBtnMount", text: "취소하기", variant: "outline", onClick: () => history.back() });
   await loadButton({
     target: "#submitBtnMount",
-    // ✅ edit 모드면 "수정하기", 아니면 "등록하기"
     text: isEditMode ? "수정하기" : "등록하기",
     variant: "primary",
     onClick: () => {
       const desc = document.querySelector("#description")?.value?.trim() ?? "";
       const tool = getSelectedTool();
       if (isEditMode) {
-        // TODO: DB 연동 시 PATCH/PUT API 호출 후 이동
         history.back();
       } else {
-        // TODO: DB 연동 시 POST API 호출
         alert(`등록하기 클릭\n설명: ${desc || "(없음)"}\n툴: ${tool ? tool.name : "(미선택)"}\n파일: ${currentFile ? currentFile.name : "(미선택)"}`);
       }
     },
   });
 }
 
-// ✅ edit 모드일 때 기존 데이터 채우기 (DB 연동 시 fetch로 교체)
+// ✅ edit 모드일 때 기존 데이터 채우기
 function fillEditData() {
   if (!isEditMode || !editArtworkId) return;
-
-  // TODO: DB 연동 시 아래 더미 데이터 대신 fetch(`/api/artworks/${editArtworkId}`) 로 교체
   const data = EDIT_DUMMY[editArtworkId];
   if (!data) return;
 
-  // 설명 채우기
   const descEl = document.querySelector("#description");
   if (descEl && data.description) descEl.value = data.description;
 
-  // 툴 선택 채우기
   if (data.toolId) {
     selectedToolId = data.toolId;
     renderToolCard(getSelectedTool());
   }
 
-  // ✅ 기존 이미지 미리보기로 바로 보여주기
   if (data.imageSrc) {
     document.getElementById("dropZoneEmpty").hidden = true;
     document.getElementById("previewCard").hidden   = false;
@@ -409,7 +425,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("replaceFileBtn")?.addEventListener("click", () => fileInput.click());
 
   await mountActionButtons();
-
-  // ✅ edit 모드 데이터 채우기 (버튼 마운트 후에 실행)
   fillEditData();
 });

@@ -233,7 +233,7 @@ body {
   position: relative;
   width: 200px;
   height: 200px;
-  border-radius: 16px;
+  border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.28);
 }
@@ -251,15 +251,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.35);
+  background: transparent;  /* ← 이것만 바꾸면 됨 */
   border: none;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .preview-audio-thumb__play:hover {
-  background: rgba(0,0,0,0.52);
+  background: rgba(0,0,0,0.12);  /* ← 호버할 때만 살짝 */
 }
+
 .preview-text-wrap {
   width: 100%;
   max-width: 680px;
