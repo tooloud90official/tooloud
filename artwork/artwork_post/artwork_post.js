@@ -89,18 +89,6 @@ function render() {
     if ($(replyMountId) && typeof loadButton === "function") {
       loadButton({ target: replyMountId, text: "등록", variant: "primary" });
     }
-
-    const editSaveMountId = `#edit-save-c-${c.id}`;
-    if ($(editSaveMountId) && typeof loadButton === "function") {
-      loadButton({ target: editSaveMountId, text: "저장", variant: "primary" });
-    }
-
-    c.replies.forEach((r) => {
-      const rEditSaveMountId = `#edit-save-r-${r.id}`;
-      if ($(rEditSaveMountId) && typeof loadButton === "function") {
-        loadButton({ target: rEditSaveMountId, text: "저장", variant: "primary" });
-      }
-    });
   });
 }
 
@@ -112,7 +100,7 @@ function commentHTML(c) {
         <textarea class="edit-textarea" id="edit-input-c-${c.id}" rows="3">${esc(c.text)}</textarea>
         <div class="edit-actions">
           <button class="act" data-act="edit-cancel-c" data-cid="${c.id}">취소</button>
-          <div id="edit-save-c-${c.id}"></div>
+          <button class="act" data-act="edit-save-c" data-cid="${c.id}">저장</button>
         </div>
       </div>`
     : `<p class="text">${esc(c.text)}</p>`;
@@ -181,7 +169,7 @@ function replyHTML(r, cid) {
         <textarea class="edit-textarea" id="edit-input-r-${r.id}" rows="2">${esc(r.text)}</textarea>
         <div class="edit-actions">
           <button class="act" data-act="edit-cancel-r" data-cid="${cid}" data-rid="${r.id}">취소</button>
-          <div id="edit-save-r-${r.id}"></div>
+          <button class="act" data-act="edit-save-r" data-cid="${cid}" data-rid="${r.id}">저장</button>
         </div>
       </div>`
     : `<p class="reply-text">${esc(r.text)}</p>`;
@@ -273,30 +261,6 @@ document.addEventListener("click", (e) => {
     return;
   }
 
-  const cEditSaveArea = e.target.closest("[id^='edit-save-c-']");
-  if (cEditSaveArea && e.target.tagName === "BUTTON") {
-    const cid = cEditSaveArea.id.replace("edit-save-c-", "");
-    const ta  = $(`#edit-input-c-${cid}`);
-    const text = (ta?.value || "").trim();
-    if (!text) return;
-    const c = state.comments.find((x) => x.id === cid);
-    if (c) { c.text = text; c.editMode = false; c.date = now(); render(); }
-    return;
-  }
-
-  const rEditSaveArea = e.target.closest("[id^='edit-save-r-']");
-  if (rEditSaveArea && e.target.tagName === "BUTTON") {
-    const rid = rEditSaveArea.id.replace("edit-save-r-", "");
-    const ta  = $(`#edit-input-r-${rid}`);
-    const text = (ta?.value || "").trim();
-    if (!text) return;
-    for (const c of state.comments) {
-      const r = c.replies.find((x) => x.id === rid);
-      if (r) { r.text = text; r.editMode = false; r.date = now(); render(); break; }
-    }
-    return;
-  }
-
   const t = e.target.closest("[data-act]");
   if (!t) return;
   const { act, cid, rid } = t.dataset;
@@ -314,6 +278,15 @@ document.addEventListener("click", (e) => {
   if (act === "edit-cancel-c") {
     const c = state.comments.find((x) => x.id === cid);
     if (c) { c.editMode = false; render(); }
+  }
+
+  // ✅ 댓글 저장
+  if (act === "edit-save-c") {
+    const ta = $(`#edit-input-c-${cid}`);
+    const text = (ta?.value || "").trim();
+    if (!text) return;
+    const c = state.comments.find((x) => x.id === cid);
+    if (c) { c.text = text; c.editMode = false; c.date = now(); render(); }
   }
 
   if (act === "del-c") {
@@ -335,6 +308,17 @@ document.addEventListener("click", (e) => {
     for (const c of state.comments) {
       const r = c.replies.find((x) => x.id === rid);
       if (r) { r.editMode = false; render(); break; }
+    }
+  }
+
+  // ✅ 대댓글 저장
+  if (act === "edit-save-r") {
+    const ta = $(`#edit-input-r-${rid}`);
+    const text = (ta?.value || "").trim();
+    if (!text) return;
+    for (const c of state.comments) {
+      const r = c.replies.find((x) => x.id === rid);
+      if (r) { r.text = text; r.editMode = false; r.date = now(); render(); break; }
     }
   }
 
