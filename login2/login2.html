@@ -52,24 +52,11 @@
       <!-- 직접 입력 시 노출 -->
       <input type="text" id="emailCustom" placeholder="직접 입력" style="display:none; margin-top:8px;">
 
-      <!-- 인증코드 전송 버튼 + 상태 메시지 -->
+      <!-- 인증 메일 전송 버튼 -->
       <div class="email-verify-row">
-        <button type="button" class="btn-send-code" id="sendCodeBtn">인증코드 전송</button>
+        <button type="button" class="btn-send-code" id="sendCodeBtn">인증 메일 전송</button>
       </div>
       <p class="field-msg" id="email-msg"></p>
-
-      <!-- 인증코드 입력 영역 (전송 후 노출) -->
-      <div class="verify-code-wrap" id="verifyCodeWrap" style="display:none;">
-        <div class="verify-input-row">
-          <div class="verify-input-wrap">
-            <input type="text" id="verifyCode" class="verify-input" placeholder="인증코드 6자리 입력" maxlength="6" autocomplete="one-time-code">
-            <span class="verify-timer" id="verifyTimer">3:00</span>
-          </div>
-          <button type="button" class="btn-verify" id="verifyBtn">확인</button>
-        </div>
-        <p class="field-msg" id="verify-msg"></p>
-        <button type="button" class="btn-resend" id="resendBtn">인증코드 재전송</button>
-      </div>
     </div>
 
     <!-- 비밀번호 -->

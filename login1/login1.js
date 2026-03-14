@@ -132,7 +132,7 @@ async function handleLogin() {
     passwordInput.focus(); return;
   }
 
-  // ✅ Supabase 로그인
+  // Supabase 로그인
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
@@ -140,8 +140,21 @@ async function handleLogin() {
     return;
   }
 
-  // ✅ 로그인 성공
+  // 로그인 성공 → users 테이블에 있는지 확인
+  const { data: userData } = await supabase
+    .from('users')
+    .select('user_id')
+    .eq('user_name', data.user.email)
+    .maybeSingle();
+
+  // users 테이블에 없으면 (회원가입 미완료) → login3으로
+  // 있으면 → main1으로
   showEmailError('');
   showPasswordError('');
-  window.location.href = '/main1/main1.html';
+
+  if (!userData) {
+    window.location.href = '/login3/login3.html';
+  } else {
+    window.location.href = '/main1/main1.html';
+  }
 }
