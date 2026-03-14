@@ -139,14 +139,14 @@ body {
 
 /* ===== 소셜 로그인 버튼 컨테이너 ===== */
 #googleBtnContainer,
-#appleBtnContainer {
+#githubBtnContainer {
   display: flex;
   justify-content: center;
   width: 100%;
 }
 
 #googleBtnContainer .btn,
-#appleBtnContainer .btn {
+#githubBtnContainer .btn {
   width: 350px;
   height: 48px;
   font-size: 15px;

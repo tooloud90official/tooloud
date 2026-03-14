@@ -46,59 +46,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
 
-  // ===== 3. 생년월일 셀렉트 =====
-  const currentYear = new Date().getFullYear();
-
-  const yearOptions = [];
-  for (let y = currentYear; y >= 1924; y--) {
-    yearOptions.push({ value: String(y), label: `${y}년` });
-  }
-
-  const monthOptions = [];
-  for (let m = 1; m <= 12; m++) {
-    monthOptions.push({ value: String(m), label: `${m}월` });
-  }
-
-  function getDayOptions(year, month) {
-    const days = new Date(year || 2000, month || 1, 0).getDate();
-    const options = [];
-    for (let d = 1; d <= days; d++) {
-      options.push({ value: String(d), label: `${d}일` });
-    }
-    return options;
-  }
-
-  let yearInstance  = null;
-  let monthInstance = null;
-
-  async function refreshDaySelect() {
-    const y = yearInstance?.getValue();
-    const m = monthInstance?.getValue();
-    await loadNativeSelect({
-      target: '#birth-day-wrap',
-      placeholder: '일',
-      options: getDayOptions(y ? Number(y) : null, m ? Number(m) : null)
-    });
-  }
-
-  yearInstance = await loadNativeSelect({
-    target: '#birth-year-wrap',
-    placeholder: '연도',
-    options: yearOptions,
-    onChange: () => refreshDaySelect()
-  });
-
-  monthInstance = await loadNativeSelect({
-    target: '#birth-month-wrap',
-    placeholder: '월',
-    options: monthOptions,
-    onChange: () => refreshDaySelect()
-  });
-
-  await loadNativeSelect({
-    target: '#birth-day-wrap',
-    placeholder: '일',
-    options: getDayOptions(null, null)
+  // ===== 3. 연령대 셀렉트 =====
+  const ageInstance = await loadNativeSelect({
+    target: '#age-select-wrap',
+    placeholder: '선택 해주세요',
+    options: [
+      { value: '10s', label: '10대' },
+      { value: '20s', label: '20대' },
+      { value: '30s', label: '30대' },
+      { value: '40s', label: '40대' },
+      { value: '50s', label: '50대' },
+      { value: '60s', label: '60대' },
+      { value: '70s', label: '70대' },
+    ]
   });
 
 
@@ -135,12 +95,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== 5. 다음 버튼 유효성 검사 =====
   window.validateLogin3 = function() {
+    let isValid = true;
+
+    // 닉네임 중복 확인 여부
     if (!isNicknameChecked) {
       nicknameMsg.innerHTML = `${CAUTION_ICON}닉네임 중복 확인을 해주세요.`;
       nicknameMsg.style.color = '#e53e3e';
-      return false;
+      isValid = false;
     }
-    return true;
+
+    // 연령대 선택 여부
+    const ageValue = ageInstance?.getValue?.();
+    if (!ageValue) {
+      // age-select-wrap 아래 메시지 엘리먼트가 없으면 생성
+      let ageMsg = document.getElementById('age-msg');
+      if (!ageMsg) {
+        ageMsg = document.createElement('p');
+        ageMsg.id = 'age-msg';
+        ageMsg.className = 'field-msg';
+        document.getElementById('age-select-wrap').insertAdjacentElement('afterend', ageMsg);
+      }
+      ageMsg.innerHTML = `${CAUTION_ICON}연령대를 선택해주세요.`;
+      ageMsg.style.color = '#e53e3e';
+      isValid = false;
+    } else {
+      const ageMsg = document.getElementById('age-msg');
+      if (ageMsg) ageMsg.innerHTML = '';
+    }
+
+    return isValid;
   };
 
 

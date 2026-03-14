@@ -7,13 +7,11 @@
 
   <link rel="stylesheet" href="/_common/background.css">
   <link rel="stylesheet" href="/_common/signup_status/signup_status.css">
-  <link rel="stylesheet" href="/_common/confirm/confirm.css">  <!-- 앞으로 이동 -->
+  <link rel="stylesheet" href="/_common/confirm/confirm.css">
   <link rel="stylesheet" href="/_common/button/button.css">
   <link rel="stylesheet" href="/_common/select/select.css">
-  <link rel="stylesheet" href="/login2/login2.css"> 
+  <link rel="stylesheet" href="/login2/login2.css">
   <link rel="stylesheet" href="/_common/bottom-banner/bottom-banner.css">
-
-
 </head>
 
 <body>
@@ -25,6 +23,7 @@
   </header>
 
   <div id="signup-status" data-step="1"></div>
+
   <main class="signup-container">
 
     <h1 class="title">계정을 생성해주세요.</h1>
@@ -35,7 +34,6 @@
       <div class="email-wrap">
         <input type="text" id="emailId" placeholder="이메일 입력창">
         <span>@</span>
-        <!-- JeonubSelect 컴포넌트 -->
         <div class="select" id="emailDomainSelect" role="combobox">
           <button class="select__trigger" data-select-trigger aria-expanded="false">
             <span class="select__value" data-select-value>이메일 주소 선택</span>
@@ -53,6 +51,25 @@
       </div>
       <!-- 직접 입력 시 노출 -->
       <input type="text" id="emailCustom" placeholder="직접 입력" style="display:none; margin-top:8px;">
+
+      <!-- 인증코드 전송 버튼 + 상태 메시지 -->
+      <div class="email-verify-row">
+        <button type="button" class="btn-send-code" id="sendCodeBtn">인증코드 전송</button>
+      </div>
+      <p class="field-msg" id="email-msg"></p>
+
+      <!-- 인증코드 입력 영역 (전송 후 노출) -->
+      <div class="verify-code-wrap" id="verifyCodeWrap" style="display:none;">
+        <div class="verify-input-row">
+          <div class="verify-input-wrap">
+            <input type="text" id="verifyCode" class="verify-input" placeholder="인증코드 6자리 입력" maxlength="6" autocomplete="one-time-code">
+            <span class="verify-timer" id="verifyTimer">3:00</span>
+          </div>
+          <button type="button" class="btn-verify" id="verifyBtn">확인</button>
+        </div>
+        <p class="field-msg" id="verify-msg"></p>
+        <button type="button" class="btn-resend" id="resendBtn">인증코드 재전송</button>
+      </div>
     </div>
 
     <!-- 비밀번호 -->
@@ -76,15 +93,14 @@
   </main>
   <div id="bottom-banner"></div>
 
-  <div id="modal-root"></div>  <!-- ← 추가 -->
+  <div id="modal-root"></div>
 
   <script src="/_common/confirm/include.js"></script>
   <script src="/_common/signup_status/include.js"></script>
   <script src="/_common/button/button.js"></script>
-  <script src="/_common/confirm/confirm.js"></script>  <!-- button.js 뒤로 이동 -->
+  <script src="/_common/confirm/confirm.js"></script>
   <script type="module" src="/login2/login2.js"></script>
   <script src="/_common/bottom-banner/include.js"></script>
-
 
 </body>
 </html>

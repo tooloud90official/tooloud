@@ -40,7 +40,7 @@ loadButton({
 });
 
 loadButton({
-  target: '#appleBtnContainer',
+  target: '#githubBtnContainer',
   text: 'GitHub 계정으로 계속하기',
   variant: 'outline',
   onClick: async () => {
@@ -53,10 +53,10 @@ loadButton({
     if (error) console.error(error);
   }
 }).then(() => {
-  const btn = document.querySelector('#appleBtnContainer .btn');
+  const btn = document.querySelector('#githubBtnContainer .btn');
   btn.insertAdjacentHTML(
     'afterbegin',
-    '<img src="/media/githubLogo.svg" alt="GitHub" style="width:20px;height:20px;margin-right:10px;margin-top:-3px;">'
+    '<img src="/media/githubLogo.png" alt="GitHub" style="width:20px;height:20px;margin-right:10px;margin-top:-3px;">'
   );
   btn.style.display = 'flex';
   btn.style.alignItems = 'center';
