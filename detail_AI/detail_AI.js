@@ -3,14 +3,12 @@ import { supabase } from "/_ignore/supabase.js";
 
 /* ============================================================
    URL 파라미터
-   - 이전 페이지에서 ?tool=Claude 처럼 전달됨
-   - 여기서는 tool 값을 tool_name 으로 사용해서 tools 조회
+   - 이전 페이지에서 ?tool=tool_001 처럼 전달됨
+   - 여기서는 tool 값을 tool_ID 로 사용해서 tools 조회
 ============================================================ */
-const TOOL_NAME = decodeURIComponent(
+const TOOL_ID = decodeURIComponent(
   new URLSearchParams(location.search).get("tool") || ""
 ).trim();
-
-let TOOL_ID = null;
 
 /* ============================================================
    Auth — supabase.auth.getUser() 로 현재 로그인 유저 확인
@@ -127,7 +125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const toolRow = await loadToolInfo();
 
-  if (TOOL_ID) {
+  if (TOOL_ID && toolRow) {
     await Promise.all([loadWorks(), loadReviews()]);
   } else {
     renderEmptyWorks();
@@ -149,25 +147,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 /* ============================================================
    툴 정보 로드 (tools 테이블)
-   - URL의 ?tool=값을 tool_name 으로 조회
-   - 조회 성공 시 실제 tool_ID 저장
+   - URL의 ?tool=값을 tool_ID 로 조회
 ============================================================ */
 async function loadToolInfo() {
   try {
-    if (!TOOL_NAME) {
+    if (!TOOL_ID) {
       throw new Error("URL에 tool 파라미터가 없음");
     }
 
     const { data, error } = await supabase
       .from("tools")
       .select("*")
-      .eq("tool_name", TOOL_NAME)
-      .limit(1)
+      .eq("tool_ID", TOOL_ID)
       .single();
 
     if (error || !data) throw error ?? new Error("툴 없음");
-
-    TOOL_ID = data.tool_ID;
 
     await window.loadToolIconCard("#toolIconMount", {
       toolName: data.tool_name ?? "",
@@ -175,7 +169,7 @@ async function loadToolInfo() {
     });
     applyToolIcon("#toolIconMount", data.icon);
 
-    setTextEl("toolBrand", `@ ${data.tool_company ?? ""}`);
+    setTextEl("toolBrand", data.tool_company ? `@ ${data.tool_company}` : "");
     setTextEl("toolDesc", data.tool_des ?? "");
 
     setSitePreview({
@@ -194,7 +188,7 @@ async function loadToolInfo() {
     console.error("툴 정보 로드 실패:", e);
 
     await window.loadToolIconCard("#toolIconMount", {
-      toolName: TOOL_NAME || "툴 정보 없음",
+      toolName: "툴 정보 없음",
       url: "#",
     });
 
@@ -247,18 +241,25 @@ function renderPlanCards(tool) {
     const nameEl = card.querySelector(".plan-card__name");
     const listEl = card.querySelector(".plan-card__list");
     const topEl = card.querySelector(".plan-card__top");
+    const badgeEl = card.querySelector(".plan-card__badge");
 
+    if (badgeEl) badgeEl.textContent = `플랜 #${i + 1}`;
     if (nameEl) nameEl.textContent = tool[nameKey] ?? "";
 
     const price = tool[priceKey];
-    if (topEl && price !== undefined && price !== null && price !== "") {
-      let priceEl = topEl.querySelector(".plan-card__price");
-      if (!priceEl) {
+    let priceEl = topEl?.querySelector(".plan-card__price");
+
+    if (price !== undefined && price !== null && price !== "") {
+      if (!priceEl && topEl) {
         priceEl = document.createElement("div");
         priceEl.className = "plan-card__price";
         topEl.appendChild(priceEl);
       }
-      priceEl.textContent = Number(price) === 0 ? "무료" : `₩${Number(price).toLocaleString()} / 월`;
+      if (priceEl) {
+        priceEl.textContent = Number(price) === 0 ? "무료" : `₩${Number(price).toLocaleString()} / 월`;
+      }
+    } else if (priceEl) {
+      priceEl.remove();
     }
 
     if (listEl) {
@@ -285,8 +286,8 @@ function renderPromo(toolName, toolProm) {
   const subEl = document.querySelector(".promo-banner__sub");
   const dateEl = document.querySelector(".promo-banner__date");
 
-  if (titleEl && toolName) {
-    titleEl.textContent = `${toolName} 에서 진행 중인 프로모션`;
+  if (titleEl) {
+    titleEl.textContent = toolName ? `${toolName} 에서 진행 중인 프로모션` : "";
   }
 
   if (!toolProm) {
@@ -294,7 +295,12 @@ function renderPromo(toolName, toolProm) {
     return;
   }
 
-  const lines = toolProm.split(/[\/,\n]/).map((s) => s.trim()).filter(Boolean);
+  if (section) section.style.display = "";
+
+  const lines = toolProm
+    .split(/[\/,\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   function getPromoEmoji(text) {
     if (/할인|%|dc/i.test(text)) return "🎉";
@@ -308,22 +314,27 @@ function renderPromo(toolName, toolProm) {
     return "✨";
   }
 
-  if (headlineEl && lines[0]) {
-    headlineEl.textContent = `${getPromoEmoji(lines[0])} ${lines[0]}`;
+  if (headlineEl) {
+    headlineEl.textContent = lines[0] ? `${getPromoEmoji(lines[0])} ${lines[0]}` : "";
   }
 
   if (subEl) {
     if (lines.length > 1) {
+      subEl.style.display = "";
       subEl.innerHTML = lines
         .slice(1)
         .map((l) => `<span>${getPromoEmoji(l)} ${l}</span>`)
         .join("<br>");
     } else {
+      subEl.innerHTML = "";
       subEl.style.display = "none";
     }
   }
 
-  if (dateEl) dateEl.style.display = "none";
+  if (dateEl) {
+    dateEl.textContent = "";
+    dateEl.style.display = "none";
+  }
 }
 
 /* ============================================================
@@ -461,16 +472,28 @@ function renderEmptyWorks() {
 }
 
 function renderWorksCarousel(works) {
+  const profile = document.querySelector(".detail_AI__profile");
+  const showcase = document.querySelector(".detail_AI__showcase");
   const frame = document.querySelector(".detail_AI__carousel-frame img");
   const likeEl = document.querySelector(".detail_AI__like-count");
   const dotsEl = document.querySelector(".detail_AI__dots");
   const nameEl = document.querySelector(".detail_AI__profile-name");
+  const avatarImg = document.querySelector(".detail_AI__avatar img");
 
-  if (frame) frame.src = works[0].work_path ?? "/media/work.png";
+  if (profile) profile.style.display = "";
+  if (showcase) showcase.style.gridTemplateColumns = "";
+
+  if (frame) {
+    frame.src = works[0].work_path ?? "";
+    frame.style.display = works[0].work_path ? "" : "none";
+  }
+
   if (likeEl) likeEl.textContent = works[0].like_count ?? 0;
   if (nameEl && works[0].user_id) nameEl.textContent = `by. ${works[0].user_id}`;
+  if (avatarImg) avatarImg.src = "/media/profil.png";
 
   if (dotsEl) {
+    dotsEl.style.display = works.length > 1 ? "" : "none";
     dotsEl.innerHTML = works
       .slice(0, 5)
       .map(
@@ -484,8 +507,12 @@ function renderWorksCarousel(works) {
         dotsEl.querySelectorAll(".dot").forEach((d) => d.classList.remove("is-active"));
         dot.classList.add("is-active");
 
-        if (frame) frame.src = works[i].work_path ?? "/media/work.png";
+        if (frame) {
+          frame.src = works[i].work_path ?? "";
+          frame.style.display = works[i].work_path ? "" : "none";
+        }
         if (likeEl) likeEl.textContent = works[i].like_count ?? 0;
+        if (nameEl && works[i].user_id) nameEl.textContent = `by. ${works[i].user_id}`;
       });
     });
   }
@@ -521,7 +548,9 @@ async function loadReviews() {
     }));
 
     updateAvgScore();
-    updateCardStars(Math.round(reviewData.reduce((s, r) => s + r.score, 0) / (reviewData.length || 1)));
+    updateCardStars(
+      Math.round(reviewData.reduce((s, r) => s + r.score, 0) / (reviewData.length || 1))
+    );
   } catch (e) {
     console.error("리뷰 로드 실패:", e);
     reviewData = [];
@@ -895,10 +924,10 @@ function setSitePreview({ name, url, icon, iframeEnabled = false } = {}) {
   const nameEl = document.getElementById("sitePreviewName");
   const urlEl = document.getElementById("sitePreviewUrl");
 
-  if (nameEl && name) nameEl.textContent = name;
-  if (urlEl && url) {
-    urlEl.textContent = url;
-    urlEl.href = url;
+  if (nameEl) nameEl.textContent = name ?? "";
+  if (urlEl) {
+    urlEl.textContent = url ?? "";
+    urlEl.href = url ?? "#";
   }
 
   const mediaEl = document.querySelector(".site-preview__media");
@@ -924,8 +953,13 @@ function setSitePreview({ name, url, icon, iframeEnabled = false } = {}) {
   } else {
     const imgEl = mediaEl.querySelector("img");
     if (imgEl) {
-      imgEl.style.display = "";
-      if (icon) imgEl.src = icon;
+      if (icon) {
+        imgEl.src = icon;
+        imgEl.style.display = "";
+      } else {
+        imgEl.removeAttribute("src");
+        imgEl.style.display = "none";
+      }
     }
 
     if (imgEl && !imgEl.closest(".site-preview__fallback-logo")) {
@@ -996,5 +1030,5 @@ function initSectionTabs() {
 ============================================================ */
 function setTextEl(id, text) {
   const el = document.getElementById(id);
-  if (el) el.textContent = text;
+  if (el) el.textContent = text ?? "";
 }
