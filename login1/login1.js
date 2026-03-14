@@ -144,15 +144,14 @@ async function handleLogin() {
   const { data: userData } = await supabase
     .from('users')
     .select('user_id')
-    .eq('user_name', data.user.email)
+    .eq('user_id', data.user.id)
     .maybeSingle();
 
-  // users 테이블에 없으면 (회원가입 미완료) → login3으로
-  // 있으면 → main1으로
   showEmailError('');
   showPasswordError('');
 
   if (!userData) {
+    sessionStorage.setItem('signup_email', data.user.email);
     window.location.href = '/login3/login3.html';
   } else {
     window.location.href = '/main1/main1.html';

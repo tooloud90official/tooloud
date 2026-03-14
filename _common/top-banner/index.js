@@ -1,7 +1,4 @@
 // index.js
-// top-banner 동작 스크립트
-
-// ===== 드롭다운 메뉴 데이터 =====
 const MENU_DATA = {
   category: {
     desc: '카테고리별 AI 툴을\n탐색해보세요.',
@@ -50,7 +47,6 @@ const MENU_DATA = {
   mypage: null
 };
 
-// ===== 드롭다운 렌더링 =====
 function renderDropdown(menuKey, navItemEl) {
   const data    = MENU_DATA[menuKey];
   const panel   = document.getElementById('dropdownPanel');
@@ -67,7 +63,7 @@ function renderDropdown(menuKey, navItemEl) {
 
   if (navItemEl) {
     const rect = navItemEl.getBoundingClientRect();
-    inner.style.paddingLeft = `${rect.left-260}px`;
+    inner.style.paddingLeft = `${rect.left - 260}px`;
   }
 
   panel.classList.add('is-open');
@@ -79,7 +75,6 @@ function closeDropdown() {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('is-active'));
 }
 
-// ===== 이벤트 위임 =====
 document.addEventListener('mouseover', (e) => {
   const navItem = e.target.closest('.nav-item');
 
@@ -109,17 +104,14 @@ document.addEventListener('mouseover', (e) => {
   if (!inNav && !inDropdown) closeDropdown();
 });
 
-// ===== 클릭 이벤트 =====
 document.addEventListener('click', (e) => {
   const toggle = e.target.closest('#menuToggle');
-
   if (toggle) {
     const navMenu = document.getElementById('navMenu');
     if (navMenu) navMenu.classList.toggle('open');
   }
 });
 
-// ✅ 로고 직접 등록
 const logoEl = document.getElementById('logo');
 if (logoEl) {
   logoEl.addEventListener('click', () => {
@@ -127,11 +119,9 @@ if (logoEl) {
   });
 }
 
-// ===== 키보드 접근성 =====
 document.addEventListener('keydown', (e) => {
   const toggle = e.target.closest('#menuToggle');
   if (!toggle) return;
-
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     const navMenu = document.getElementById('navMenu');
@@ -139,14 +129,13 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ===== 마이페이지 로그인 체크 =====
-document.addEventListener('click', (e) => {
+// ===== 마이페이지 로그인 체크 (window._supabase 사용) =====
+document.addEventListener('click', async (e) => {
   const mypageLink = e.target.closest('.nav-item[data-menu="mypage"] a');
   if (!mypageLink) return;
 
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-
-  if (!isLoggedIn) {
+  const { data: { session } } = await window._supabase.auth.getSession();
+  if (!session) {
     e.preventDefault();
     window.location.href = '/login1/login1.html';
   }

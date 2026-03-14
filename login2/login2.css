@@ -272,7 +272,7 @@ input:focus {
 
 /* 인증 완료 상태 */
 .btn-verify.verified {
-  background: #22c55e;
+  background: #0080ff;
   cursor: default;
 }
 

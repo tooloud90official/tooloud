@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       domain = custom.value.trim();
     } else {
       const nativeSelect = document.querySelector('#emailDomainSelect select');
-      domain = nativeSelect ? nativeSelect.value : '';
+       domain = nativeSelect ? nativeSelect.value : '';
       if (!domain || domain === '이메일 주소 선택') domain = '';
     }
 
@@ -67,28 +67,81 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const emailMsg = document.getElementById('email-msg');
 
-  // 전송 상태 초기화
-  let pollingInterval = null;
-  let isEmailVerified = false;
 
+  // ===== 4. 상태 변수 =====
+  let isEmailVerified = false;
+  let timerInterval   = null;
+  let currentEmail    = null;
+
+
+  // ===== 5. 타이머 =====
+  const TIMER_SEC = 180;
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    const timerEl = document.getElementById('verifyTimer');
+    let remaining = TIMER_SEC;
+
+    function tick() {
+      const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+      const s = String(remaining % 60).padStart(2, '0');
+      timerEl.textContent = `${m}:${s}`;
+
+      if (remaining <= 0) {
+        clearInterval(timerInterval);
+        timerEl.textContent = '만료';
+        timerEl.classList.add('expired');
+        document.getElementById('verifyBtn').disabled = true;
+        setFieldMsg(emailMsg, '인증 시간이 만료되었습니다. 재전송 해주세요.', '#e53e3e');
+      }
+      remaining--;
+    }
+    tick();
+    timerInterval = setInterval(tick, 1000);
+  }
+
+
+  // ===== 6. 전송 상태 초기화 =====
   function resetSendState() {
-    clearInterval(pollingInterval);
+    clearInterval(timerInterval);
     isEmailVerified = false;
+    currentEmail    = null;
     sessionStorage.removeItem('signup_email');
     sessionStorage.removeItem('signup_password');
     setFieldMsg(emailMsg, '', '');
-    const btn = document.getElementById('sendCodeBtn');
-    if (btn) { btn.disabled = false; btn.textContent = '인증 메일 전송'; }
+
+    const sendBtn = document.getElementById('sendCodeBtn');
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = '인증 메일 전송';
+      sendBtn.classList.remove('sent');
+    }
+
+    const wrap = document.getElementById('verifyCodeWrap');
+    if (wrap) wrap.style.display = 'none';
+
+    const input = document.getElementById('verifyCodeInput');
+    if (input) input.value = '';
+
+    const timerEl = document.getElementById('verifyTimer');
+    if (timerEl) { timerEl.textContent = ''; timerEl.classList.remove('expired'); }
+
+    const verifyBtn = document.getElementById('verifyBtn');
+    if (verifyBtn) {
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = '확인';
+      verifyBtn.classList.remove('verified');
+    }
   }
 
   document.getElementById('emailId')?.addEventListener('input', resetSendState);
 
 
-  // ===== 4. 인증 메일 전송 + 폴링 =====
-  document.getElementById('sendCodeBtn')?.addEventListener('click', async () => {
-    const email = getFullEmail();
-    const btn   = document.getElementById('sendCodeBtn');
-    const pw    = document.getElementById('password').value;
+  // ===== 7. 인증 메일 전송 (signUp) =====
+  async function sendOtp() {
+    const email   = getFullEmail();
+    const sendBtn = document.getElementById('sendCodeBtn');
+    const pw      = document.getElementById('password').value;
 
     if (!email) {
       setFieldMsg(emailMsg, '이메일 주소를 입력해 주세요.', '#e53e3e');
@@ -103,20 +156,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    btn.disabled = true;
+    sendBtn.disabled = true;
     setFieldMsg(emailMsg, '인증 메일을 전송 중입니다...', '#888');
 
-    // ⭐ emailRedirectTo 추가
     const { error } = await supabase.auth.signUp({
       email,
       password: pw,
-      options: {
-        emailRedirectTo: `http://127.0.0.1:5500/login3/login3.html`
-      }
     });
 
     if (error) {
-      btn.disabled = false;
+      sendBtn.disabled = false;
       if (error.message?.includes('already registered')) {
         setFieldMsg(emailMsg, '이미 사용 중인 이메일입니다.', '#e53e3e');
       } else {
@@ -126,28 +175,94 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    btn.textContent = '전송 완료';
-    setFieldMsg(emailMsg, `${email} 로 인증 메일을 전송했습니다. 메일함을 확인해 주세요.`, '#0080ff');
+    currentEmail = email;
+    sendBtn.textContent = '전송 완료';
+    sendBtn.classList.add('sent');
+    setFieldMsg(emailMsg, `${email} 로 인증 코드를 전송했습니다.`, '#0080ff');
 
     sessionStorage.setItem('signup_email',    email);
     sessionStorage.setItem('signup_password', pw);
 
-    // ── 폴링 시작: 3초마다 인증 여부 체크 ──────────────────
-    clearInterval(pollingInterval);
-    pollingInterval = setInterval(async () => {
-      const { data } = await supabase.auth.getUser();
-      const user = data?.user;
+    const wrap = document.getElementById('verifyCodeWrap');
+    wrap.style.display = 'block';
 
-      if (user?.email_confirmed_at) {
-        clearInterval(pollingInterval);
-        isEmailVerified = true;
-        setFieldMsg(emailMsg, '이메일 인증이 완료되었습니다.', '#0080ff');
-      }
-    }, 3000);
+    const timerEl = document.getElementById('verifyTimer');
+    timerEl.classList.remove('expired');
+
+    const verifyBtn = document.getElementById('verifyBtn');
+    verifyBtn.disabled = false;
+    verifyBtn.textContent = '확인';
+    verifyBtn.classList.remove('verified');
+
+    document.getElementById('verifyCodeInput').value = '';
+    document.getElementById('verifyCodeInput').focus();
+
+    startTimer();
+  }
+
+  document.getElementById('sendCodeBtn')?.addEventListener('click', sendOtp);
+
+  // 재전송 버튼
+  document.getElementById('resendBtn')?.addEventListener('click', () => {
+    resetSendState();
+    sendOtp();
   });
 
 
-  // ===== 5. 비밀번호 유효성 검사 =====
+  // ===== 8. 인증코드 확인 =====
+  document.getElementById('verifyBtn')?.addEventListener('click', async () => {
+    const code      = document.getElementById('verifyCodeInput').value.trim();
+    const verifyBtn = document.getElementById('verifyBtn');
+
+    if (!code || code.length < 8) {
+      setFieldMsg(emailMsg, '8자리 인증 코드를 입력해 주세요.', '#e53e3e');
+      return;
+    }
+    if (!currentEmail) {
+      setFieldMsg(emailMsg, '먼저 인증 메일을 전송해 주세요.', '#e53e3e');
+      return;
+    }
+
+    verifyBtn.disabled = true;
+    setFieldMsg(emailMsg, '인증 코드 확인 중...', '#888');
+
+    const { error } = await supabase.auth.verifyOtp({
+      email: currentEmail,
+      token: code,
+      type:  'signup'
+    });
+
+    if (error) {
+      verifyBtn.disabled = false;
+      setFieldMsg(emailMsg, '인증 코드가 올바르지 않습니다.', '#e53e3e');
+      console.error('[OTP 확인 오류]', error);
+      return;
+    }
+
+    // ✅ 인증 완료
+    clearInterval(timerInterval);
+    isEmailVerified = true;
+
+    verifyBtn.textContent = '완료';
+    verifyBtn.classList.add('verified');
+    document.getElementById('verifyCodeInput').disabled = true;
+    document.getElementById('verifyTimer').textContent  = '';
+
+    setFieldMsg(emailMsg, '이메일 인증이 완료되었습니다. ✓', '#22c55e');
+  });
+
+  // 숫자만 입력 허용
+  document.getElementById('verifyCodeInput')?.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  });
+
+  // 엔터키로 확인
+  document.getElementById('verifyCodeInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('verifyBtn')?.click();
+  });
+
+
+  // ===== 9. 비밀번호 유효성 검사 =====
   const password        = document.getElementById('password');
   const passwordConfirm = document.getElementById('passwordConfirm');
 
@@ -195,10 +310,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   passwordConfirm.addEventListener('input', checkConfirm);
 
 
-  // ===== 6. 다음 버튼 유효성 검사 =====
+  // ===== 10. 다음 버튼 유효성 검사 =====
   window.validateLogin2 = function() {
     let isValid = true;
-
     const email = getFullEmail();
 
     if (!email) {
@@ -223,7 +337,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!isValid) return false;
 
-    // 인증 완료 여부 체크
     if (!isEmailVerified) {
       setFieldMsg(emailMsg, '이메일 인증을 완료해 주세요.', '#e53e3e');
       return false;
@@ -233,7 +346,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
 
-  // ===== 7. confirm 모달 초기화 =====
+  // ===== 11. confirm 모달 초기화 =====
   if (!document.getElementById('modal-root')) {
     const root = document.createElement('div');
     root.id = 'modal-root';
@@ -243,7 +356,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await window.includeHTML('#modal-root', '/_common/confirm/confirm.html');
 
 
-  // ===== 8. 이전으로 돌아가기 =====
+  // ===== 12. 이전으로 돌아가기 =====
   document.getElementById('backBtn')?.addEventListener('click', async () => {
     const result = await window.showConfirm({
       title      : '페이지를 나가시겠습니까?',
@@ -252,7 +365,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       cancelText : '취소',
     });
     if (result) {
-      clearInterval(pollingInterval);
+      clearInterval(timerInterval);
       window.location.href = '/login1/login1.html';
     }
   });

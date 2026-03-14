@@ -49,6 +49,7 @@
           </div>
         </div>
       </div>
+
       <!-- 직접 입력 시 노출 -->
       <input type="text" id="emailCustom" placeholder="직접 입력" style="display:none; margin-top:8px;">
 
@@ -56,6 +57,20 @@
       <div class="email-verify-row">
         <button type="button" class="btn-send-code" id="sendCodeBtn">인증 메일 전송</button>
       </div>
+
+      <!-- 인증코드 입력 영역 (전송 후 노출) -->
+      <div class="verify-code-wrap" id="verifyCodeWrap" style="display:none;">
+        <div class="verify-input-row">
+          <div class="verify-input-wrap">
+            <input type="text" class="verify-input" id="verifyCodeInput"
+                   placeholder="인증코드 8자리" maxlength="8" inputmode="numeric">
+            <span class="verify-timer" id="verifyTimer"></span>
+          </div>
+          <button type="button" class="btn-verify" id="verifyBtn">확인</button>
+        </div>
+        <button type="button" class="btn-resend" id="resendBtn">인증코드 재전송</button>
+      </div>
+
       <p class="field-msg" id="email-msg"></p>
     </div>
 
@@ -78,8 +93,8 @@
     <div class="back-link" id="backBtn">이전으로 돌아가기</div>
 
   </main>
-  <div id="bottom-banner"></div>
 
+  <div id="bottom-banner"></div>
   <div id="modal-root"></div>
 
   <script src="/_common/confirm/include.js"></script>

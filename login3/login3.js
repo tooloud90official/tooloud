@@ -8,17 +8,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session?.user) {
-    const authEmail = session.user.email;
+    // users 테이블에 이미 있는지 확인
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
 
-    // sessionStorage에 signup_email이 있으면 → 방금 가입한 신규 유저
-    const isNewUser = !!sessionStorage.getItem('signup_email');
-
-    if (!isNewUser) {
+    // 이미 가입 완료된 유저면 main으로
+    if (existingUser) {
       window.location.href = '/main1/main1.html';
       return;
     }
 
-    sessionStorage.setItem('signup_email', authEmail);
+    // 신규 유저면 계속 진행
+    sessionStorage.setItem('signup_email', session.user.email);
   }
 
 
@@ -79,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
 
-  // ===== 3. 닉네임 중복 확인 (Supabase 조회) =====
+  // ===== 3. 닉네임 중복 확인 =====
   const nicknameInput   = document.getElementById('nickname');
   const nicknameMsg     = document.getElementById('nickname-msg');
   const checkBtn        = document.getElementById('check-duplicate-btn');
@@ -144,14 +148,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const CAUTION = `<img src="/media/caution.png" alt="caution" style="width:14px;height:14px;margin-right:1px;margin-top:-2px;vertical-align:middle;">`;
 
-    // 닉네임
     if (!isNicknameChecked) {
       nicknameMsg.innerHTML = `${CAUTION}닉네임 중복 확인을 해주세요.`;
       nicknameMsg.style.color = '#e53e3e';
       isValid = false;
     }
 
-    // 연령대
     const ageSelect = document.querySelector('#age-select-wrap select');
     const ageValue  = ageSelect?.value || '';
     if (!ageValue) {
@@ -170,7 +172,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (ageMsg) ageMsg.innerHTML = '';
     }
 
-    // 직업
     const jobSelect = document.querySelector('#job-select-wrap select');
     const jobValue  = jobSelect?.value || '';
     if (!jobValue) {
@@ -189,7 +190,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (jobMsg) jobMsg.innerHTML = '';
     }
 
-    // 국가
     const countrySelect = document.querySelector('#country-select-wrap select');
     const countryValue  = countrySelect?.value || '';
     if (!countryValue) {

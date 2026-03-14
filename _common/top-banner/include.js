@@ -1,5 +1,6 @@
-// include.js
-// top-banner 자동 로드 - 로그인 상태에 따라 authArea를 동적으로 렌더링
+import { supabase } from '/_ignore/supabase.js';
+
+window._supabase = supabase;
 
 // ===== 스크립트 동적 로드 헬퍼 =====
 function loadScript(src) {
@@ -39,7 +40,6 @@ function renderLoggedOut(authArea) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
   });
 
-  // 모바일: 로그인/회원가입 표시, 로그아웃 숨김
   const mobileLoginItem  = document.getElementById('mobileLoginItem');
   const mobileLogoutItem = document.getElementById('mobileLogoutItem');
   if (mobileLoginItem)  mobileLoginItem.style.display  = 'block';
@@ -61,11 +61,36 @@ function renderLoggedIn(authArea) {
     <span id="logoutBtn" role="button" tabindex="0">로그아웃</span>
   `;
 
-  // 모바일: 로그인/회원가입 숨김, 로그아웃 표시
   const mobileLoginItem  = document.getElementById('mobileLoginItem');
   const mobileLogoutItem = document.getElementById('mobileLogoutItem');
   if (mobileLoginItem)  mobileLoginItem.style.display  = 'none';
   if (mobileLogoutItem) mobileLogoutItem.style.display = 'block';
+}
+
+// ===== 알림 타입별 텍스트 변환 =====
+function formatAlert(n) {
+  if (n.type === 'like') {
+    return {
+      type:  'like',
+      title: '좋아요 알림',
+      desc:  '누군가 회원님의 작업물에 좋아요를 눌렀어요.',
+      href:  n.reference_id ? `#` : '#',
+    };
+  }
+  if (n.type === 'message') {
+    return {
+      type:  'message',
+      title: '1:1 문의사항 알림',
+      desc:  '회원님의 문의사항에 답글이 달렸어요.',
+      href:  n.reference_id ? `#` : '#',
+    };
+  }
+  return {
+    type:  n.type,
+    title: '알림',
+    desc:  '새로운 알림이 있어요.',
+    href:  '#',
+  };
 }
 
 // ===== 로그아웃 초기화 =====
@@ -73,8 +98,8 @@ async function initLogout() {
   const logoutBtn       = document.getElementById('logoutBtn');
   const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
-  const doLogout = () => {
-    localStorage.removeItem('isLoggedIn');
+  const doLogout = async () => {
+    await supabase.auth.signOut();
     window.location.href = '/main1/main1.html';
   };
 
@@ -92,7 +117,6 @@ async function initLogout() {
     }
   };
 
-  // 데스크탑 로그아웃 버튼
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
     logoutBtn.addEventListener('keydown', (e) => {
@@ -100,7 +124,6 @@ async function initLogout() {
     });
   }
 
-  // 모바일 로그아웃 버튼
   if (mobileLogoutBtn) {
     mobileLogoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -112,11 +135,10 @@ async function initLogout() {
 // ===== 메인 실행 =====
 (async () => {
 
-  // ===== 로그인 상태 확인 =====
-  const isLoginPage = window.location.pathname.includes('/login');
-  const isLoggedIn  = !isLoginPage && localStorage.getItem('isLoggedIn') === 'true';
+  const { data: { session } } = await supabase.auth.getSession();
+  const isLoggedIn = !!session?.user;
 
-  // ===== HTML 로드 =====
+  // HTML 로드
   try {
     const res  = await fetch('/_common/top-banner/top-banner.html');
     const html = await res.text();
@@ -127,30 +149,45 @@ async function initLogout() {
     return;
   }
 
-  // ===== CSS 로드 =====
+  // CSS 로드
   loadStyle('/_common/top-banner/top-banner.css');
 
-  // ===== authArea에 로그인 상태별 UI 렌더링 =====
+  // authArea 렌더링
   const authArea = document.getElementById('authArea');
   if (!authArea) return;
 
   if (isLoggedIn) {
     renderLoggedIn(authArea);
+
+    // 읽지 않은 알림 카운트
+    const { count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', session.user.id)
+      .eq('is_read', false);
+
+    if (count > 0) {
+      const badge = document.getElementById('bellBadge');
+      if (badge) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.classList.remove('hidden');
+      }
+    }
+
   } else {
     renderLoggedOut(authArea);
   }
 
-  // ===== index.js 로드 (드롭다운·로고 등 공통 동작) =====
+  // index.js 로드
   try {
     await loadScript('/_common/top-banner/index.js');
   } catch (e) {
     console.error('[include.js] index.js 로드 실패:', e);
   }
 
-  // ===== 로그인 후 전용 초기화 =====
+  // 로그인 후 전용 초기화
   if (isLoggedIn) {
 
-    // confirm 모달 로드 — 실패해도 로그아웃/알림은 반드시 실행
     try {
       await Promise.all([
         loadStyle('/_common/confirm/confirm.css'),
@@ -166,16 +203,23 @@ async function initLogout() {
         await window.includeHTML('#modal-root', '/_common/confirm/confirm.html');
       }
     } catch (e) {
-      console.warn('[include.js] confirm 모듈 로드 실패 (fallback 사용):', e);
+      console.warn('[include.js] confirm 모듈 로드 실패:', e);
     }
 
-    // 로그아웃 초기화 (데스크탑 + 모바일 버튼 모두)
     await initLogout();
 
-    // ===== alert 모듈 로드 및 초기화 =====
+    // 알림 목록 Supabase에서 가져오기
     try {
       await loadScript('/_common/alert/alert.js');
-      await loadScript('/_common/top-banner/alert-data.js');
+
+      const { data: notiData } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const alerts = (notiData || []).map(formatAlert);
 
       if (!document.getElementById('alert-root')) {
         const alertRoot = document.createElement('div');
@@ -187,7 +231,7 @@ async function initLogout() {
         await window.initAlert({
           triggerSelector: '#bellBtn',
           mountSelector:   '#alert-root',
-          alerts: window.ALERT_DATA || [],
+          alerts,
         });
       }
     } catch (e) {

@@ -95,27 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // =============================
-  // user_id 생성: user001 형식
-  // =============================
-  async function generateUserId() {
-    const { data, error } = await supabase.from('users').select('user_id');
-    if (error) throw error;
-    if (!data || data.length === 0) return 'user001';
-
-    const maxNum = data.reduce((max, row) => {
-      const match = row.user_id?.match(/^user(\d+)$/);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        return num > max ? num : max;
-      }
-      return max;
-    }, 0);
-
-    return `user${String(maxNum + 1).padStart(3, '0')}`;
-  }
-
-
-  // =============================
   // 완료 버튼 → users 테이블 insert
   // =============================
   finishBtn.addEventListener('click', async () => {
@@ -128,6 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
     finishBtn.textContent = '처리 중...';
 
     try {
+      // Auth 세션에서 user.id 가져오기
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        alert('로그인 정보가 없습니다. 처음부터 다시 진행해주세요.');
+        window.location.href = '/login2/login2.html';
+        return;
+      }
+
       const nickname = sessionStorage.getItem('signup_nickname');
       const age      = sessionStorage.getItem('signup_age');
       const job      = sessionStorage.getItem('signup_job');
@@ -139,10 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const newUserId = await generateUserId();
-
       const { error } = await supabase.from('users').insert({
-        user_id        : newUserId,
+        user_id        : session.user.id,  // ✅ Auth uuid 그대로
         user_name      : nickname,
         user_img       : '시스템 지정 이미지',
         user_country   : country,
@@ -154,8 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) throw error;
 
       // sessionStorage 정리
-      ['signup_email','signup_password','signup_uid',
-       'signup_nickname','signup_age','signup_job','signup_country']
+      ['signup_email', 'signup_password', 'signup_uid',
+       'signup_nickname', 'signup_age', 'signup_job', 'signup_country']
         .forEach(k => sessionStorage.removeItem(k));
 
       window.location.href = '/login5/login5.html';
