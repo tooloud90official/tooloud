@@ -227,7 +227,6 @@ body {
 
 /* ===== 드롭다운 패널 ===== */
 .dropdown-panel {
-
   position: fixed;
   top: 60px;
   left: 0;
@@ -268,7 +267,8 @@ body {
 
   width: 100%;
 
-  padding: 48px 40px;
+  /* 기존 padding: 48px 40px → 상하 줄여서 상단/하단 여백 균등하게 */
+  padding: 28px 40px;
 
   box-sizing: border-box;
 }
@@ -292,7 +292,7 @@ body {
   display: flex;
   flex-direction: column;
 
-  gap: 20px;
+  gap: 14px; /* 기존 20px → 항목 간격도 살짝 줄여 균형 맞춤 */
 }
 
 .dropdown-list li a {
@@ -318,12 +318,10 @@ body {
     display: none !important;
   }
 
-  /* auth 영역 숨김 */
   .auth {
     display: none;
   }
 
-  /* 모바일 메뉴 기본 숨김 */
   .nav-menu {
     display: none;
 
@@ -354,7 +352,6 @@ body {
     z-index: 1001;
   }
 
-  /* 햄버거 클릭 시 */
   .nav-menu.open {
     display: flex;
   }
@@ -368,7 +365,6 @@ body {
     font-size: 14px;
   }
 
-  /* 모바일 로그인 */
   .nav-item--login {
     display: block;
 
@@ -380,7 +376,6 @@ body {
     padding-top: 4px;
   }
 
-  /* 모바일 로그아웃 */
   .nav-item--logout {
     display: block;
 
@@ -409,7 +404,6 @@ body {
     display: block;
   }
 
-  /* 드롭다운 위치 보정 */
   .dropdown-panel {
     top: 120px;
   }
@@ -418,12 +412,10 @@ body {
     padding-left: 40px;
   }
 
-  /* 알림 패널 */
   .alert-panel {
     right: 16px;
     width: calc(100vw - 32px);
   }
-
 }
 
 /* =========================
@@ -431,13 +423,8 @@ body {
 ========================= */
 
 @media (min-width: 901px) {
-
   .nav-item--login,
   .nav-item--logout {
     display: none !important;
   }
-  
-
-  
-
 }

@@ -214,8 +214,7 @@ async function renderToolList(tools, sortValue) {
       <div id="${iconId}" style="width:70px; height:70px; flex-shrink:0;"></div>
       <div style="flex:1; position:relative;">
         <img class="pin-icon" src="/media/pin.png" alt="pin" />
-
-        <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+        <div style="display:flex; flex-direction:row; align-items:center; gap:8px;">
           <span class="item-badge">${tool.name}</span>
           <span style="color:#ffcc00; font-size:14px;">${'★'.repeat(tool.rating)}</span>
         </div>
@@ -223,14 +222,14 @@ async function renderToolList(tools, sortValue) {
         <a href="/detail_AI/detail_AI.html" class="item-detail-btn">상세 ></a>
       </div>
     `;
-    // 핀 클릭 토글
+
     item.querySelector('.pin-icon').addEventListener('click', (e) => {
       e.stopPropagation();
       e.currentTarget.classList.toggle('pinned');
     });
+
     toolListEl.appendChild(item);
 
-    // 아이콘 로드
     loadToolIconCard(`#${iconId}`, { toolName: tool.name });
   });
 }

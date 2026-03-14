@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/_common/searchBar/searchBar.css">
   <link rel="stylesheet" href="/_common/button/button.css">
   <link rel="stylesheet" href="/_common/icon/icon.css">
+  <link rel="stylesheet" href="/_common/select/select.css">
   <link rel="stylesheet" href="/searchResult/searchResult.css">
   <link rel="stylesheet" href="/_common/bottom-banner/bottom-banner.css">
 </head>
@@ -25,9 +26,15 @@
 
   <div id="searchBar"></div>
 
+  <div class="filter-wrap">
+    <div class="filter-row">
+      <div id="filterSelect-sort"></div>
+    </div>
+  </div>
+
   <section class="result-list">
 
-    <div class="tool-card" data-url="/detail_AI/detail_AI.html">
+    <div class="tool-card" data-url="/detail_AI/detail_AI.html" data-category="image" data-rating="5">
       <div class="tool-icon" id="toolIcon-chatgpt"></div>
       <div class="tool-info">
         <div class="tool-top">
@@ -41,7 +48,7 @@
       </div>
     </div>
 
-    <div class="tool-card" data-url="/detail_AI/detail_AIhtml">
+    <div class="tool-card" data-url="/detail_AI/detail_AI.html" data-category="image" data-rating="5">
       <div class="tool-icon" id="toolIcon-midjourney"></div>
       <div class="tool-info">
         <div class="tool-top">
@@ -55,7 +62,7 @@
       </div>
     </div>
 
-    <div class="tool-card" data-url="/detail_AI/detail_AI.html">
+    <div class="tool-card" data-url="/detail_AI/detail_AI.html" data-category="writing" data-rating="4">
       <div class="tool-icon" id="toolIcon-notionai"></div>
       <div class="tool-info">
         <div class="tool-top">
@@ -69,7 +76,7 @@
       </div>
     </div>
 
-    <div class="tool-card" data-url="/detail_AI/detail_AI.html">
+    <div class="tool-card" data-url="/detail_AI/detail_AI.html" data-category="video" data-rating="4">
       <div class="tool-icon" id="toolIcon-runway"></div>
       <div class="tool-info">
         <div class="tool-top">
@@ -83,7 +90,7 @@
       </div>
     </div>
 
-    <div class="tool-card" data-url="/detail_AI/detail_AI.html">
+    <div class="tool-card" data-url="/detail_AI/detail_AI.html" data-category="code" data-rating="5">
       <div class="tool-icon" id="toolIcon-copilot"></div>
       <div class="tool-info">
         <div class="tool-top">
@@ -97,7 +104,7 @@
       </div>
     </div>
 
-    <div class="tool-card" data-url="/detail_AI/detail_AI.html">
+    <div class="tool-card" data-url="/detail_AI/detail_AI.html" data-category="design" data-rating="4">
       <div class="tool-icon" id="toolIcon-canva"></div>
       <div class="tool-info">
         <div class="tool-top">
@@ -113,7 +120,6 @@
 
   </section>
 
-  <!-- section 밖으로 뺌 -->
   <div id="bottom-banner"></div>
 
   <script type="module" src="/_common/top-banner/include.js"></script>

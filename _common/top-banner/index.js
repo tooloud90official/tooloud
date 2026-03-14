@@ -1,4 +1,3 @@
-// index.js
 const MENU_DATA = {
   category: {
     desc: '카테고리별 AI 툴을\n탐색해보세요.',
@@ -25,40 +24,40 @@ const MENU_DATA = {
   personal: {
     desc: '개인 맞춤 AI 툴을\n탐색해보세요.',
     items: [
-      { label: '이미지·오디오·영상', href: '#' },
-      { label: '리서치',             href: '#' },
-      { label: '문서 생성·요약·편집', href: '#' },
-      { label: '개발·코딩',          href: '#' },
-      { label: '학습·교육',          href: '#' },
-      { label: '챗봇·어시스턴트',    href: '#' },
+      { label: 'AI 추천 툴',     href: '/personal_AI/personal_AI.html#ai-recommend',   requireLogin: true },
+      { label: '최근 사용한 툴', href: '/personal_AI/personal_AI.html#recent-tools',   requireLogin: true },
+      { label: '관심 있는 툴',   href: '/personal_AI/personal_AI.html#interest-tools', requireLogin: true },
     ]
   },
   library: {
     desc: '작업물 라이브러리를\n탐색해보세요.',
     items: [
-      { label: '이미지·오디오·영상', href: '#' },
-      { label: '리서치',             href: '#' },
-      { label: '문서 생성·요약·편집', href: '#' },
-      { label: '개발·코딩',          href: '#' },
-      { label: '학습·교육',          href: '#' },
-      { label: '챗봇·어시스턴트',    href: '#' },
+      { label: '이미지·오디오·영상', href: '/artwork/artwork.html' },
+      { label: '리서치',             href: '/artwork/artwork.html' },
+      { label: '문서 생성·요약·편집', href: '/artwork/artwork.html' },
+      { label: '개발·코딩',          href: '/artwork/artwork.html' },
+      { label: '학습·교육',          href: '/artwork/artwork.html' },
+      { label: '챗봇·어시스턴트',    href: '/artwork/artwork.html' },
+      { label: 'AI 추천 작업물',     href: '/artwork/artwork.html' },
+      { label: '내 라이브러리',      href: '/artwork/artwork.html' },
+      { label: '작업물 올리기',      href: '/artwork/artwork_upload/artwork_upload.html' },
     ]
   },
   mypage: null
 };
 
 function renderDropdown(menuKey, navItemEl) {
-  const data    = MENU_DATA[menuKey];
-  const panel   = document.getElementById('dropdownPanel');
-  const descEl  = document.getElementById('dropdownDesc');
-  const listEl  = document.getElementById('dropdownList');
-  const inner   = document.querySelector('.dropdown-inner');
+  const data   = MENU_DATA[menuKey];
+  const panel  = document.getElementById('dropdownPanel');
+  const descEl = document.getElementById('dropdownDesc');
+  const listEl = document.getElementById('dropdownList');
+  const inner  = document.querySelector('.dropdown-inner');
 
   if (!data || !panel || !descEl || !listEl || !inner) return;
 
   descEl.textContent = data.desc;
   listEl.innerHTML = data.items
-    .map(item => `<li><a href="${item.href}">${item.label}</a></li>`)
+    .map(item => `<li><a href="${item.href}" ${item.requireLogin ? 'data-require-login="true"' : ''}>${item.label}</a></li>`)
     .join('');
 
   if (navItemEl) {
@@ -129,7 +128,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ===== 마이페이지 로그인 체크 (window._supabase 사용) =====
+// ===== 마이페이지 로그인 체크 =====
 document.addEventListener('click', async (e) => {
   const mypageLink = e.target.closest('.nav-item[data-menu="mypage"] a');
   if (!mypageLink) return;
@@ -138,5 +137,47 @@ document.addEventListener('click', async (e) => {
   if (!session) {
     e.preventDefault();
     window.location.href = '/login1/login1.html';
+  }
+});
+
+// ===== 개인 맞춤 AI 툴 로그인 체크 + 섹션 스크롤 =====
+document.addEventListener('click', async (e) => {
+  const personalLink = e.target.closest('[data-require-login="true"]');
+  if (!personalLink) return;
+
+  e.preventDefault();
+
+  const { data: { session } } = await window._supabase.auth.getSession();
+  if (!session) {
+    window.location.href = '/login1/login1.html';
+    return;
+  }
+
+  const href = personalLink.getAttribute('href');
+  const hashIndex = href.indexOf('#');
+  const path = hashIndex !== -1 ? href.slice(0, hashIndex) : href;
+  const hash = hashIndex !== -1 ? href.slice(hashIndex + 1) : '';
+  const currentPath = window.location.pathname;
+
+  // 이미 personal_AI 페이지에 있으면 스크롤만
+  if (currentPath.includes('personal_AI')) {
+    if (hash) {
+      const target = document.getElementById(hash);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    }
+  } else {
+    // 다른 페이지에서 접근 시 hash 포함 URL로 이동
+    window.location.href = href;
+  }
+});
+
+// ===== personal_AI 페이지 진입 시 hash 스크롤 처리 =====
+window.addEventListener('load', () => {
+  const hash = window.location.hash?.replace('#', '');
+  if (!hash) return;
+
+  const target = document.getElementById(hash);
+  if (target) {
+    setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 300);
   }
 });
