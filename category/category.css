@@ -17,15 +17,21 @@ body {
   font-size: 40px;
   font-weight: 700;
   color: #1a1a2e;
-  margin-top: 6px;
+  margin-top: 65px;           /* ✅ 수정: 6px → 65px */
   margin-bottom: 65px;
   letter-spacing: -0.5px;
+}
+
+/* ===== 탭 + 그리드 공통 래퍼 ===== */
+.category-content-wrap {
+  width: fit-content;          /* ✅ 추가: 탭과 그리드 너비 일치용 래퍼 */
+  margin: 0 auto;
 }
 
 /* ===== 알약 모양 탭 메뉴 ===== */
 .category-tabs {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* ✅ 수정: center → flex-start */
   gap: 12px;
   margin-bottom: 50px;
 }
@@ -51,7 +57,8 @@ body {
 /* ===== 폴더 그리드 및 카드 ===== */
 .tool-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 180px);
+  grid-template-columns: repeat(3, 180px); /* ✅ 수정: auto-fill → 3열 고정 */
+  grid-template-rows: repeat(2, auto);      /* ✅ 추가: 2행 고정 */
   gap: 40px 30px;
   justify-content: center;
 }
@@ -138,8 +145,8 @@ body {
   max-height: 80vh;
   border-radius: 28px;
   padding: 28px 28px 24px 28px;
-  display: flex;
-  flex-direction: column;
+  display: flex;               /* ✅ 유지 */
+  flex-direction: column;      /* ✅ 유지 */
   box-shadow: 0 32px 64px rgba(0, 0, 0, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   box-sizing: border-box;
@@ -153,6 +160,7 @@ body {
   padding-bottom: 16px;
   margin-bottom: 16px;
   border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;              /* ✅ 추가: 헤더가 줄어들지 않도록 */
 }
 
 .header-left {
@@ -234,6 +242,8 @@ body {
 
 /* ===== 모달 바디 ===== */
 .modal-body {
+  flex: 1;                     /* ✅ 추가: 남은 공간 모두 차지 */
+  min-height: 0;               /* ✅ 핵심: flex 자식 스크롤 동작을 위해 필수 */
   overflow-y: auto;
   overflow-x: hidden;
   margin-right: -8px;
@@ -368,7 +378,8 @@ body {
   }
 
   .tool-grid {
-    grid-template-columns: repeat(auto-fill, 150px);
+    grid-template-columns: repeat(3, 150px); /* ✅ 수정: auto-fill → 3열 고정 */
+    grid-template-rows: repeat(2, auto);      /* ✅ 추가 */
     gap: 30px 20px;
   }
 
@@ -397,8 +408,9 @@ body {
   }
 
   .tool-grid {
-    grid-template-columns: repeat(auto-fill, 130px);
-    gap: 24px 16px;
+    grid-template-columns: repeat(3, 110px); /* ✅ 수정: auto-fill → 3열 고정 */
+    grid-template-rows: repeat(2, auto);      /* ✅ 추가 */
+    gap: 24px 10px;
   }
 
   .tool-icon-box {

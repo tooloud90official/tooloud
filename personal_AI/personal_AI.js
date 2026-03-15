@@ -1,73 +1,20 @@
 import { supabase } from "/_ignore/supabase.js";
 
-/**
- * 로그인 체크
- * - 로그인 안 되어 있으면 로그인 페이지로 이동
- */
-<<<<<<< HEAD
-async function includeHTML(targetSelector, filePath) {
-  const target = document.querySelector(targetSelector);
-  if (!target) throw new Error(`[includeHTML] target not found: ${targetSelector}`);
-
-  const res = await fetch(filePath);
-  if (!res.ok) throw new Error(`[includeHTML] failed to load: ${filePath} (${res.status})`);
-
-  const html = await res.text();
-  target.insertAdjacentHTML("beforeend", html);
-}
-
-/**
- * 아이콘 컴포넌트 mount 생성 후 loadToolIconCard 호출
- */
-function renderToolIcons(targetSelector, tools) {
-  const container = document.querySelector(targetSelector);
-  if (!container) return;
-
-  if (typeof window.loadToolIconCard !== "function") {
-    console.warn("loadToolIconCard not found. /_common/icon/icon.js 확인");
-    return;
-  }
-
-  container.innerHTML = "";
-
-  tools.forEach((tool, index) => {
-    const mount = document.createElement("div");
-    mount.className = "tool-icon-mount";
-
-    const mountId = `${targetSelector.replace("#", "")}-icon-${index + 1}`;
-    mount.id = mountId;
-
-    container.appendChild(mount);
-
-    window.loadToolIconCard(`#${mountId}`, {
-      toolName: tool.toolName,
-      url: tool.url || "#",
-      onClick: tool.onClick || undefined
-=======
 async function requireLogin() {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
+  const { data: { user }, error } = await supabase.auth.getUser();
   if (error) {
     console.error("[personal_AI] auth.getUser 오류:", error);
     window.location.replace("/login1/login1.html");
     return null;
   }
-
   if (!user) {
     window.location.replace("/login1/login1.html");
     return null;
   }
-
+  console.log("[DEBUG] 로그인 유저 ID:", user.id);
   return user;
 }
 
-/**
- * users 테이블에서 현재 유저 정보 조회
- * 현재는 users.user_id = auth.uid 라고 가정
- */
 async function fetchUserProfile(authUser) {
   const { data, error } = await supabase
     .from("users")
@@ -76,28 +23,20 @@ async function fetchUserProfile(authUser) {
     .single();
 
   if (error) {
-    console.error("[personal_AI] users 조회 실패:", error);
+    console.error("[DEBUG] users 조회 실패:", error);
     throw error;
   }
 
+  console.log("[DEBUG] userProfile 원본:", JSON.stringify(data));
   return data;
 }
 
-/**
- * users 테이블에 저장된 tool_name 배열로
- * tools 테이블 조회
- *
- * users: ["ChatGPT", "Midjourney"]
- * tools: tool_name 기준 조회
- */
 async function fetchToolsByNames(toolNames = []) {
   if (!Array.isArray(toolNames) || toolNames.length === 0) return [];
-
-  const cleanNames = toolNames
-    .filter(Boolean)
-    .map((name) => String(name).trim());
-
+  const cleanNames = toolNames.filter(Boolean).map((name) => String(name).trim());
   if (cleanNames.length === 0) return [];
+
+  console.log("[DEBUG] tools 조회 요청 names:", cleanNames);
 
   const { data, error } = await supabase
     .from("tools")
@@ -105,35 +44,32 @@ async function fetchToolsByNames(toolNames = []) {
     .in("tool_name", cleanNames);
 
   if (error) {
-    console.error("[personal_AI] tools 조회 실패:", error);
+    console.error("[DEBUG] tools 조회 실패:", error);
     throw error;
   }
 
-  // users 배열 순서 유지
+  console.log("[DEBUG] tools 조회 결과:", JSON.stringify(data));
+
   const toolMap = new Map((data || []).map((tool) => [tool.tool_name, tool]));
   return cleanNames.map((name) => toolMap.get(name)).filter(Boolean);
 }
 
-/**
- * 빈 메시지
- */
 function renderEmptyMessage(container, message = "등록된 툴이 없습니다.") {
   if (!container) return;
   container.innerHTML = `<p class="tool-board__empty">${message}</p>`;
 }
 
-/**
- * 아이콘 렌더링
- * - 이름은 tools.tool_name
- * - 아이콘은 tools.icon
- * - 클릭 시 tool_ID 넘김
- */
 async function renderToolIcons(targetSelector, tools) {
   const container = document.querySelector(targetSelector);
-  if (!container) return;
+  if (!container) {
+    console.warn("[DEBUG] container 없음:", targetSelector);
+    return;
+  }
+
+  console.log("[DEBUG] loadToolIconCard 타입:", typeof window.loadToolIconCard);
 
   if (typeof window.loadToolIconCard !== "function") {
-    console.warn("loadToolIconCard not found. /_common/icon/icon.js 확인");
+    console.warn("[DEBUG] loadToolIconCard 없음 — icon.js 로드 안됨");
     return;
   }
 
@@ -146,7 +82,6 @@ async function renderToolIcons(targetSelector, tools) {
 
   for (let i = 0; i < tools.length; i++) {
     const tool = tools[i];
-
     const mount = document.createElement("div");
     mount.className = "tool-icon-mount";
     mount.id = `${targetSelector.replace("#", "")}-icon-${i + 1}`;
@@ -154,76 +89,26 @@ async function renderToolIcons(targetSelector, tools) {
 
     const detailUrl = `/detail_AI/detail_AI.html?tool_id=${encodeURIComponent(tool.tool_ID)}`;
 
+    console.log("[DEBUG] loadToolIconCard 호출:", mount.id, tool);
+
     await window.loadToolIconCard(`#${mount.id}`, {
       toolName: tool.tool_name || "툴",
       iconUrl: tool.icon || "",
       url: detailUrl,
->>>>>>> 1bdc778e8f7eb440c15dac5ce705de84324eecde
     });
-  });
-}
-
-/* 샘플 데이터 */
-const recommendedTools = [
-  { toolName: "Chat GPT",     url: "/detail_AI/detail_AI.html" },
-  { toolName: "Claude",       url: "/detail_AI/detail_AI.html" },
-  { toolName: "Gemini",       url: "/detail_AI/detail_AI.html" },
-  { toolName: "툴 #1",        url: "/detail_AI/detail_AI.html" },
-  { toolName: "Midjourney",   url: "/detail_AI/detail_AI.html" },
-  { toolName: "Gamma",        url: "/detail_AI/detail_AI.html" },
-  { toolName: "Perplexity AI",url: "/detail_AI/detail_AI.html" },
-  { toolName: "툴 #1",        url: "/detail_AI/detail_AI.html" }
-];
-
-const recentTools = [
-  { toolName: "Chat GPT",     url: "/detail_AI/detail_AI.html" },
-  { toolName: "Claude",       url: "/detail_AI/detail_AI.html" },
-  { toolName: "Gemini",       url: "/detail_AI/detail_AI.html" },
-  { toolName: "툴 #1",        url: "/detail_AI/detail_AI.html" },
-  { toolName: "Midjourney",   url: "/detail_AI/detail_AI.html" },
-  { toolName: "Gamma",        url: "/detail_AI/detail_AI.html" },
-  { toolName: "Perplexity AI",url: "/detail_AI/detail_AI.html" },
-  { toolName: "툴 #1",        url: "/detail_AI/detail_AI.html" }
-];
-
-const favoriteTools = [
-  { toolName: "Chat GPT",     url: "/detail_AI/detail_AI.html" },
-  { toolName: "Claude",       url: "/detail_AI/detail_AI.html" },
-  { toolName: "Gemini",       url: "/detail_AI/detail_AI.html" },
-  { toolName: "툴 #1",        url: "/detail_AI/detail_AI.html" },
-  { toolName: "Midjourney",   url: "/detail_AI/detail_AI.html" },
-  { toolName: "Gamma",        url: "/detail_AI/detail_AI.html" },
-  { toolName: "Perplexity AI",url: "/detail_AI/detail_AI.html" },
-  { toolName: "툴 #1",        url: "/detail_AI/detail_AI.html" }
-];
-
-// ===== hash 스크롤 처리 =====
-function scrollToHash() {
-  const hash = window.location.hash?.replace('#', '');
-  if (!hash) return;
-
-  const target = document.getElementById(hash);
-  if (target) {
-    // top-banner 높이(75px)만큼 오프셋 보정
-    const top = target.getBoundingClientRect().top + window.scrollY - 90;
-    window.scrollTo({ top, behavior: 'smooth' });
   }
 }
 
-<<<<<<< HEAD
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    renderToolIcons("#recommendedTools", recommendedTools);
-    renderToolIcons("#recentTools", recentTools);
-    renderToolIcons("#favoriteTools", favoriteTools);
+function scrollToHash() {
+  const hash = window.location.hash?.replace("#", "");
+  if (!hash) return;
+  const target = document.getElementById(hash);
+  if (target) {
+    const top = target.getBoundingClientRect().top + window.scrollY - 90;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+}
 
-    // 아이콘 렌더 완료 후 스크롤 (비동기 로드 감안해 약간 대기)
-    setTimeout(scrollToHash, 400);
-
-=======
-/**
- * 초기화
- */
 async function initPersonalAIPage() {
   try {
     const authUser = await requireLogin();
@@ -235,6 +120,10 @@ async function initPersonalAIPage() {
     const recentNames = userProfile?.recent_tools || [];
     const favoriteNames = userProfile?.favorite_tools || [];
 
+    console.log("[DEBUG] recommended_tools:", recommendedNames);
+    console.log("[DEBUG] recent_tools:", recentNames);
+    console.log("[DEBUG] favorite_tools:", favoriteNames);
+
     const [recommendedTools, recentTools, favoriteTools] = await Promise.all([
       fetchToolsByNames(recommendedNames),
       fetchToolsByNames(recentNames),
@@ -244,22 +133,13 @@ async function initPersonalAIPage() {
     await renderToolIcons("#recommendedTools", recommendedTools);
     await renderToolIcons("#recentTools", recentTools);
     await renderToolIcons("#favoriteTools", favoriteTools);
->>>>>>> 1bdc778e8f7eb440c15dac5ce705de84324eecde
+
+    setTimeout(scrollToHash, 400);
   } catch (err) {
     console.error("[personal_AI] 초기화 실패:", err);
-
-    renderEmptyMessage(
-      document.querySelector("#recommendedTools"),
-      "추천 툴을 불러오지 못했습니다."
-    );
-    renderEmptyMessage(
-      document.querySelector("#recentTools"),
-      "최근 사용 툴을 불러오지 못했습니다."
-    );
-    renderEmptyMessage(
-      document.querySelector("#favoriteTools"),
-      "관심 툴을 불러오지 못했습니다."
-    );
+    renderEmptyMessage(document.querySelector("#recommendedTools"), "추천 툴을 불러오지 못했습니다.");
+    renderEmptyMessage(document.querySelector("#recentTools"), "최근 사용 툴을 불러오지 못했습니다.");
+    renderEmptyMessage(document.querySelector("#favoriteTools"), "관심 툴을 불러오지 못했습니다.");
   }
 }
 

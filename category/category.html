@@ -1,56 +1,73 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>카테고리별 AI 툴 - TOOLOUD</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 툴 탐색</title>
   <link rel="stylesheet" href="/_common/background.css">
-  <link rel="stylesheet" href="/_common/top-banner/top-banner.css">
-  <link rel="stylesheet" href="/_common/icon/icon.css">
-  <link rel="stylesheet" href="/_common/select/select.css">
-  <link rel="stylesheet" href="category.css">
+  <link rel="stylesheet" href="/category/category.css" />
+  <link rel="stylesheet" href="/_common/top-banner/top-banner.css" />
+  <link rel="stylesheet" href="/_common/icon/icon.css" />
+  <link rel="stylesheet" href="/_common/bottom-banner/bottom-banner.css"> <!-- ✅ 추가 -->
 </head>
 <body>
 
-  <div id="top-banner"></div>
+  <div id="top-banner" class="category-tools-banner-root"></div>
 
-  <main class="category-container">
+  <div class="category-container">
+
     <h1 class="page-title">AI 툴 탐색, 더 쉽고 빠르게</h1>
 
-    <nav class="category-tabs" id="categoryTabs">
-      <button class="tab-item active">이미지·오디오·영상</button>
-      <button class="tab-item">리서치</button>
-      <button class="tab-item">문서 생성·요약·편집</button>
-      <button class="tab-item">개발·코딩</button>
-      <button class="tab-item">학습·교육</button>
-      <button class="tab-item">챗봇·어시스턴트</button>
-    </nav>
+    <!-- ✅ 수정: 탭과 그리드를 래퍼로 묶어 너비 일치 -->
+    <div class="category-content-wrap">
 
-    <div class="tool-grid" id="toolGrid"></div>
-  </main>
+      <div class="category-tabs">
+        <button class="tab-item active">이미지·오디오·영상</button>
+        <button class="tab-item">리서치</button>
+        <button class="tab-item">문서 생성·요약·편집</button>
+        <button class="tab-item">개발·코딩</button>
+        <button class="tab-item">학습·교육</button>
+        <button class="tab-item">챗봇·어시스턴트</button>
+      </div>
 
+      <div class="tool-grid" id="toolGrid"></div>
+
+    </div>
+    <!-- /.category-content-wrap -->
+
+  </div>
+  <!-- /.category-container -->
+
+  <!-- ===== 모달 ===== -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
+
       <div class="modal-header">
         <div class="header-left">
-          <h2 id="modalTitle">카테고리명</h2>
-          <span class="total-count" id="modalTotalCount">전체 (0)</span>
+          <h2 id="modalTitle"></h2>
+          <span class="total-count" id="modalTotalCount"></span>
         </div>
         <div class="header-right">
           <div id="modalSortSelect"></div>
-          <button class="close-btn" id="closeModal">&times;</button>
+          <button class="close-btn" id="closeModal">✕</button>
         </div>
       </div>
 
-      <div class="modal-body" id="modalList">
+      <div class="modal-body">
         <div id="toolList"></div>
       </div>
+
     </div>
   </div>
+  <!-- /.modal-overlay -->
+
+  <!-- ✅ 추가: bottom-banner -->
+  <div id="bottom-banner"></div>
 
   <script type="module" src="/_common/top-banner/include.js"></script>
   <script src="/_common/icon/icon.js"></script>
-  <script type="module" src="category.js"></script>
+  <script type="module" src="/category/category.js"></script>
+  <script src="/_common/bottom-banner/include.js"></script> <!-- ✅ 추가 -->
+
 </body>
 </html>
