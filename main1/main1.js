@@ -4,7 +4,7 @@ import { GROQ_API_KEY } from '/_ignore/groq.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // ===== 로그인 상태 확인 (Supabase Auth) =====
+  // ===== 로그인 상태 확인 =====
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
 
@@ -23,16 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 
-  // ===== 카테고리별 작업물 데이터 =====
-  const WORK_DATA = {
-    media: { img: '/main1/media/work-image.png',    tool: { name: 'Midjourney',    img: 'https://logo.clearbit.com/midjourney.com' },  stars: '★★★★☆' },
-    res:   { img: '/main1/media/work-research.png', tool: { name: 'Perplexity AI', img: 'https://logo.clearbit.com/perplexity.ai' },   stars: '★★★★★' },
-    doc:   { img: '/main1/media/work-document.png', tool: { name: 'Notion AI',     img: 'https://logo.clearbit.com/notion.so' },        stars: '★★★★☆' },
-    dev:   { img: '/main1/media/work-dev.png',      tool: { name: 'Cursor',        img: 'https://logo.clearbit.com/cursor.sh' },        stars: '★★★★★' },
-    edu:   { img: '/main1/media/work-edu.png',      tool: { name: 'Gamma',         img: 'https://logo.clearbit.com/gamma.app' },        stars: '★★★★☆' },
-    ast:   { img: '/main1/media/work-chat.png',     tool: { name: 'ChatGPT',       img: 'https://logo.clearbit.com/openai.com' },       stars: '★★★★★' },
-  };
-
+  // ===== 카테고리 레이블 =====
   const CATEGORY_LABELS = {
     media: '이미지·오디오·영상 AI 툴',
     res:   '리서치 AI 툴',
@@ -41,6 +32,103 @@ document.addEventListener("DOMContentLoaded", async () => {
     edu:   '학습·교육 AI 툴',
     ast:   '챗봇·어시스턴트 AI 툴',
   };
+
+
+  // ===== works + tools + 평점 DB 로드 =====
+  let WORK_DATA = {};
+
+  try {
+    const { data: worksData, error: worksError } = await supabase
+      .from('works')
+      .select('work_id, tool_id, work_link, user_id');  // user_id 추가
+
+    if (worksError) {
+      console.error('[works] Supabase 에러:', worksError.message);
+    } else if (worksData && worksData.length > 0) {
+
+      const toolIds = [...new Set(worksData.map(w => w.tool_id).filter(Boolean))];
+
+      const { data: toolsForWorks, error: toolsError } = await supabase
+        .from('tools')
+        .select('tool_ID, tool_name, icon, tool_link, tool_cat')
+        .in('tool_ID', toolIds);
+
+      if (toolsError) console.error('[tools for works] 에러:', toolsError.message);
+
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from('tool_reviews')
+        .select('tool_ID, rating')
+        .in('tool_ID', toolIds);
+
+      if (reviewsError) console.error('[tool_reviews] 에러:', reviewsError.message);
+
+      const ratingMap = {};
+      (reviewsData || []).forEach(r => {
+        if (!ratingMap[r.tool_ID]) ratingMap[r.tool_ID] = { sum: 0, count: 0 };
+        ratingMap[r.tool_ID].sum += r.rating;
+        ratingMap[r.tool_ID].count += 1;
+      });
+      const avgRatingMap = {};
+      Object.keys(ratingMap).forEach(id => {
+        avgRatingMap[id] = Math.round(ratingMap[id].sum / ratingMap[id].count);
+      });
+
+      const toolMap = {};
+      (toolsForWorks || []).forEach(t => { toolMap[t.tool_ID] = t; });
+
+      worksData.forEach(work => {
+        const tool = toolMap[work.tool_id];
+        if (!tool || !tool.tool_cat) return;
+
+        const cat = tool.tool_cat;
+        if (WORK_DATA[cat]) return;
+
+        const rating = avgRatingMap[tool.tool_ID] ?? 0;
+        const stars = '★'.repeat(rating) + '☆'.repeat(Math.max(0, 5 - rating));
+
+        let iconUrl = tool.icon;
+        if (!iconUrl && tool.tool_link) {
+          try {
+            const domain = new URL(tool.tool_link).hostname.replace('www.', '');
+            iconUrl = `https://logo.clearbit.com/${domain}`;
+          } catch { /* 무시 */ }
+        }
+        if (!iconUrl) {
+          iconUrl = `https://logo.clearbit.com/${tool.tool_name.toLowerCase().replace(/\s/g, '')}.com`;
+        }
+
+        WORK_DATA[cat] = {
+          img:    work.work_link || '',
+          tool:   { id: tool.tool_ID, name: tool.tool_name, img: iconUrl },
+          stars,
+          rating,
+          userId: work.user_id,  // user_id 저장
+        };
+      });
+
+      // ===== works 작성자 이름 일괄 조회 =====
+      const workUserIds = [...new Set(Object.values(WORK_DATA).map(w => w.userId).filter(Boolean))];
+      if (workUserIds.length > 0) {
+        const { data: workUsers, error: workUsersError } = await supabase
+          .from('users')
+          .select('user_id, user_name')
+          .in('user_id', workUserIds);
+
+        if (workUsersError) console.error('[users for works] 에러:', workUsersError.message);
+
+        const userNameMap = {};
+        (workUsers || []).forEach(u => { userNameMap[u.user_id] = u.user_name; });
+
+        Object.values(WORK_DATA).forEach(w => {
+          w.userName = userNameMap[w.userId] ?? null;
+        });
+      }
+
+      console.log('[works] WORK_DATA 로드 완료:', Object.keys(WORK_DATA));
+    }
+  } catch (e) {
+    console.error('[works] 예외 발생:', e.message);
+  }
 
 
   // ===== Supabase tools 테이블 전체 로드 =====
@@ -90,7 +178,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== Groq API로 AI 추천 툴 카테고리 추출 =====
   async function getRecommendCatsFromGroq(userData, allToolsFlat) {
-    // favorite_tools 파싱: "['ChatGPT','Midjourney']" → ['ChatGPT', 'Midjourney']
     let favoriteTools = [];
     try {
       favoriteTools = JSON.parse(userData.favorite_tools.replace(/'/g, '"'));
@@ -98,8 +185,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.warn('[groq] favorite_tools 파싱 실패:', userData.favorite_tools);
     }
 
-    // tools DB의 고유 tool_cat / tool_subcat 목록 추출
-    const catSet = [...new Set(allToolsFlat.map(t => t.tool_cat).filter(Boolean))];
+    const catSet    = [...new Set(allToolsFlat.map(t => t.tool_cat).filter(Boolean))];
     const subcatSet = [...new Set(allToolsFlat.map(t => t.tool_subcat).filter(Boolean))];
 
     const prompt = `
@@ -159,15 +245,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // 로딩 표시
     section.style.display = 'block';
     grid.innerHTML = '<p class="loading-text">AI가 추천 툴을 분석 중입니다...</p>';
 
-    // tools 전체 flat 배열
     const allToolsFlat = Object.values(TOOLS_DATA).flat();
-
-    // Groq로 추천 카테고리 받기
-    const groqResult = await getRecommendCatsFromGroq(userData, allToolsFlat);
+    const groqResult   = await getRecommendCatsFromGroq(userData, allToolsFlat);
 
     let recommendedTools = [];
 
@@ -175,23 +257,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { recommended_cats = [], recommended_subcats = [] } = groqResult;
       console.log('[groq] 추천 cats:', recommended_cats, '/ subcats:', recommended_subcats);
 
-      // tool_cat 또는 tool_subcat이 일치하는 툴 필터링
       recommendedTools = allToolsFlat.filter(tool =>
         recommended_cats.includes(tool.tool_cat) ||
         recommended_subcats.includes(tool.tool_subcat)
       );
     }
 
-    // Groq 실패하거나 결과 없으면 전체에서 랜덤 8개 폴백
     if (recommendedTools.length === 0) {
       console.warn('[groq] 추천 결과 없음 → 랜덤 폴백');
       recommendedTools = allToolsFlat.sort(() => Math.random() - 0.5).slice(0, 8);
     } else {
-      // 최대 8개로 제한
       recommendedTools = recommendedTools.slice(0, 8);
     }
 
-    // 그리드 렌더링
     grid.innerHTML = '';
     grid.className = 'tool-grid';
 
@@ -225,17 +303,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== 작업물 카드 렌더링 =====
   function renderWorkCard(category) {
-    const data   = WORK_DATA[category];
     const imgEl  = document.getElementById('workCardImg');
     const toolEl = document.getElementById('workCardTool');
+    const nameEl = document.getElementById('workCardUserName');
+    const data   = WORK_DATA[category];
+
     if (!data) {
-      console.warn('[renderWorkCard] 카테고리 없음:', category);
+      if (imgEl) {
+        imgEl.src = '';
+        imgEl.style.display = 'none';
+        imgEl.parentElement.style.background = '#e8eef5';
+      }
+      if (nameEl) nameEl.textContent = '님의 작업물';
+      if (toolEl) toolEl.innerHTML = '<p style="color:#aaa; font-size:13px; padding:16px;">등록된 작업물이 없습니다.</p>';
       return;
+    }
+
+    // 작성자 이름 표시 (로그인 여부 무관)
+    if (nameEl) {
+      nameEl.textContent = data.userName ? `${data.userName} 님의 작업물` : '님의 작업물';
     }
 
     if (imgEl) {
       imgEl.src = data.img;
-      imgEl.style.display = 'block';
+      imgEl.style.display = data.img ? 'block' : 'none';
       imgEl.onerror = () => {
         imgEl.parentElement.style.background = '#e8eef5';
         imgEl.style.display = 'none';
@@ -263,10 +354,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===== 툴 그리드 렌더링 =====
   function renderTools(category) {
     const toolsSection = document.getElementById('toolsSection');
-    if (!toolsSection) {
-      console.error('[renderTools] #toolsSection 요소를 찾을 수 없습니다.');
-      return;
-    }
+    if (!toolsSection) return;
 
     toolsSection.innerHTML = '';
     const categories = category === 'all' ? Object.keys(TOOLS_DATA) : [category];
@@ -343,7 +431,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== 로그인 후 전용: AI 추천 툴 =====
   if (isLoggedIn) {
-    await renderRecommend();  // Groq 호출 포함
+    await renderRecommend();
   } else {
     document.getElementById('recommendSection').style.display = 'none';
   }
