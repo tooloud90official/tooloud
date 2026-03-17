@@ -77,24 +77,19 @@
     <!-- 파일 업로드 히어로 -->
     <section class="upload-hero">
       <div class="artwork-post__tool" id="toolPicker" role="button" tabindex="0" aria-label="툴 선택">
-        <div class="artwork-post__tool-placeholder" id="toolPlaceholder">📂 툴을 선택해주세요.</div>
+        <div class="artwork-post__tool-ic" aria-hidden="true">
+          <img id="toolCardIcon" class="artwork-post__tool-icon-img" src="" alt="" />
+          <span id="toolCardPlaceholderIcon" class="artwork-post__tool-placeholder-icon">📂</span>
+        </div>
+
+        <div class="artwork-post__tool-placeholder" id="toolPlaceholder">툴을 선택해주세요.</div>
 
         <div class="artwork-post__tool-meta" id="toolMeta" hidden>
-          <img
-            id="toolCardIcon"
-            class="artwork-post__tool-ic"
-            src=""
-            alt="툴 아이콘"
-            hidden
-          />
-
-          <div class="artwork-post__tool-text">
-            <div class="artwork-post__tool-top">
-              <span class="artwork-post__tool-name" id="toolName"></span>
-            </div>
-            <span class="artwork-post__tool-stars" id="toolStars" hidden></span>
-            <div class="artwork-post__tool-brand" id="toolBrand"></div>
+          <div class="artwork-post__tool-top">
+            <span class="artwork-post__tool-name" id="toolName"></span>
           </div>
+          <span class="artwork-post__tool-stars" id="toolStars" hidden></span>
+          <div class="artwork-post__tool-brand" id="toolBrand"></div>
         </div>
       </div>
 

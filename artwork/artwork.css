@@ -237,6 +237,19 @@
 /* ─────────────────────────────────────
    메인
 ───────────────────────────────────── */
+
+
+.empty-msg{
+  margin-top: 7px;
+  margin-left: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.5);
+  line-height: 1.45;
+  align-items: center;
+}
+
+
 .artwork-main {
   max-width: 1100px;
   margin: 0 auto;

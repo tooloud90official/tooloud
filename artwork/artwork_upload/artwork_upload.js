@@ -118,6 +118,19 @@ function normalizeTag(v) {
   return val;
 }
 
+function logSupabaseError(label, error) {
+  console.group(`[${label}] Supabase Error`);
+  console.error("raw error:", error);
+  console.error("message:", error?.message);
+  console.error("details:", error?.details);
+  console.error("hint:", error?.hint);
+  console.error("code:", error?.code);
+  try {
+    console.error("json:", JSON.stringify(error, null, 2));
+  } catch (_) {}
+  console.groupEnd();
+}
+
 /* =========================================================
    현재 유저
 ========================================================= */
@@ -128,7 +141,7 @@ async function loadCurrentUser() {
   } = await supabase.auth.getSession();
 
   if (error) {
-    console.error("세션 조회 실패:", error);
+    logSupabaseError("auth.getSession", error);
     return;
   }
 
@@ -146,7 +159,8 @@ async function loadCurrentUser() {
     .single();
 
   if (userErr) {
-    console.warn("users 조회 실패:", userErr);
+    console.warn("users 조회 실패:");
+    logSupabaseError("users.select", userErr);
   }
 
   currentUser = {
@@ -166,34 +180,85 @@ function renderCurrentUserProfile() {
 
 /* =========================================================
    tools 로드
-   ※ tool_rate 는 실제 DB 컬럼명 다르면 바꿔야 함
 ========================================================= */
 async function loadToolsFromDB() {
-  const { data, error } = await supabase
-    .from("tools")
-    .select("tool_ID, tool_name, tool_company, icon, tool_cat, tool_rate")
-    .order("tool_name", { ascending: true });
+  try {
+    console.group("[tools] loadToolsFromDB");
+    console.log("start loading tools...");
 
-  console.log("[tools] data:", data);
-  console.log("[tools] error:", error);
+    const sessionRes = await supabase.auth.getSession();
+    console.log("[tools] session exists:", !!sessionRes?.data?.session);
+    console.log("[tools] session user id:", sessionRes?.data?.session?.user?.id ?? null);
 
-  if (error) {
-    console.error("tools 불러오기 실패:", error);
+    // 1차: 기존 쿼리 그대로
+    let { data, error } = await supabase
+      .from("tools")
+      .select("tool_ID, tool_name, tool_company, icon, tool_cat, tool_rate")
+      .order("tool_name", { ascending: true });
+
+    console.log("[tools] first query data:", data);
+    console.log("[tools] first query error:", error);
+
+    if (error) {
+      logSupabaseError("tools.firstQuery", error);
+
+      // 2차: order 제거해서 재시도
+      const retry1 = await supabase
+        .from("tools")
+        .select("tool_ID, tool_name, tool_company, icon, tool_cat, tool_rate");
+
+      console.log("[tools] retry without order data:", retry1.data);
+      console.log("[tools] retry without order error:", retry1.error);
+
+      if (retry1.error) {
+        logSupabaseError("tools.retryWithoutOrder", retry1.error);
+
+        // 3차: select * 로 재시도
+        const retry2 = await supabase
+          .from("tools")
+          .select("*")
+          .limit(100);
+
+        console.log("[tools] retry select * data:", retry2.data);
+        console.log("[tools] retry select * error:", retry2.error);
+
+        if (retry2.error) {
+          logSupabaseError("tools.retrySelectAll", retry2.error);
+          console.error("tools 불러오기 최종 실패");
+          TOOL_LIST = [];
+          console.groupEnd();
+          return [];
+        }
+
+        data = retry2.data;
+        error = null;
+      } else {
+        data = retry1.data;
+        error = null;
+      }
+    }
+
+    TOOL_LIST = (data || []).map((t) => ({
+      id: String(t.tool_ID ?? ""),
+      name: t.tool_name || "",
+      brand: t.tool_company ? `@${t.tool_company}` : "@Tool",
+      icon: t.icon || "",
+      tool_cat: t.tool_cat || "",
+      stars: Number(t.tool_rate) || 0,
+    }));
+
+    console.log("[tools] TOOL_LIST:", TOOL_LIST);
+    console.log("[tools] count:", TOOL_LIST.length);
+    console.groupEnd();
+
+    return TOOL_LIST;
+  } catch (err) {
+    console.group("[tools] unexpected crash");
+    console.error(err);
+    console.groupEnd();
     TOOL_LIST = [];
     return [];
   }
-
-  TOOL_LIST = (data || []).map((t) => ({
-    id: String(t.tool_ID),
-    name: t.tool_name || "",
-    brand: t.tool_company ? `@${t.tool_company}` : "@Tool",
-    icon: t.icon || "",
-    tool_cat: t.tool_cat || "",
-    stars: Number(t.tool_rate) || 0,
-  }));
-
-  console.log("[tools] TOOL_LIST:", TOOL_LIST);
-  return TOOL_LIST;
 }
 
 /* =========================================================
@@ -210,21 +275,23 @@ function renderToolCard(tool) {
   const placeholder = $("#toolPlaceholder");
   const meta = $("#toolMeta");
   const iconEl = $("#toolCardIcon");
+  const placeholderIconEl = $("#toolCardPlaceholderIcon");
   const nameEl = $("#toolName");
   const brandEl = $("#toolBrand");
   const starsEl = $("#toolStars");
 
-  if (!placeholder || !meta || !nameEl || !brandEl || !starsEl) return;
+  if (!placeholder || !meta || !nameEl || !brandEl || !starsEl || !iconEl || !placeholderIconEl) {
+    return;
+  }
 
   if (!tool) {
     placeholder.hidden = false;
     meta.hidden = true;
 
-    if (iconEl) {
-      iconEl.src = "";
-      iconEl.alt = "";
-      iconEl.style.display = "none";
-    }
+    iconEl.src = "";
+    iconEl.alt = "";
+    iconEl.style.display = "none";
+    placeholderIconEl.style.display = "inline-flex";
 
     nameEl.textContent = "";
     brandEl.textContent = "";
@@ -236,24 +303,31 @@ function renderToolCard(tool) {
   placeholder.hidden = true;
   meta.hidden = false;
 
-  if (iconEl) {
-    if (tool.icon) {
-      iconEl.src = tool.icon;
-      iconEl.alt = tool.name || "툴 아이콘";
-      iconEl.style.display = "block";
-    } else {
-      iconEl.src = "";
-      iconEl.alt = "";
-      iconEl.style.display = "none";
-    }
-  }
-
   nameEl.textContent = tool.name || "";
   brandEl.textContent = tool.brand || "@";
 
   const starsText = starsToText(tool.stars);
   starsEl.textContent = starsText;
   starsEl.hidden = !starsText;
+
+  if (tool.icon) {
+    iconEl.src = tool.icon;
+    iconEl.alt = tool.name || "툴 아이콘";
+    iconEl.style.display = "block";
+    placeholderIconEl.style.display = "none";
+
+    iconEl.onerror = () => {
+      iconEl.src = "";
+      iconEl.alt = "";
+      iconEl.style.display = "none";
+      placeholderIconEl.style.display = "inline-flex";
+    };
+  } else {
+    iconEl.src = "";
+    iconEl.alt = "";
+    iconEl.style.display = "none";
+    placeholderIconEl.style.display = "inline-flex";
+  }
 }
 
 /* =========================================================
