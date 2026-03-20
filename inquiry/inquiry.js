@@ -1,7 +1,7 @@
 import { initFaqItems } from "/_common/drop_down/drop_down.js";
 import { supabase } from "/_ignore/supabase.js";
 
-const ADMIN_EMAIL = "admin@example.com"; // ← 이메일 바꿔서 쓰세요
+const ADMIN_EMAIL = "tooloud90official@gmail.com";
 
 let currentUser = null;
 let isAdmin = false;
@@ -187,7 +187,6 @@ async function renderAdminInquiries() {
     container.appendChild(el);
   });
 
-  // ✅ loadButton 컴포넌트로 답변 버튼 렌더링
   data.forEach((item) => {
     if (typeof window.loadButton === "function") {
       window.loadButton({
@@ -221,15 +220,16 @@ async function submitAdminAnswer(inquiryId, userId) {
     return;
   }
 
-  // ✅ notification 저장
+  // ✅ 유저에게 답변 알림 전송
   const { error: notiError } = await supabase
     .from("notifications")
     .insert({
       notification_id: crypto.randomUUID(),
       user_id:         userId,
-      type:            "message",
+      type:            "inquiry",
       reference_id:    inquiryId,
       is_read:         false,
+      sender_id:       currentUser?.id,
     });
 
   if (notiError) console.error("알림 저장 실패:", notiError);
@@ -250,10 +250,12 @@ async function submitInquiry() {
   const message = document.querySelector("#contactMessage")?.value?.trim() ?? "";
   if (!message) return alert("문의 내용을 입력해주세요.");
 
+  const inquiryId = crypto.randomUUID();
+
   const { error } = await supabase
     .from("inquiries")
     .insert({
-      inquiry_id:          crypto.randomUUID(),
+      inquiry_id:          inquiryId,
       user_id:             currentUser.id,
       question:            message,
       question_created_at: new Date().toISOString(),
@@ -264,6 +266,24 @@ async function submitInquiry() {
     console.error("문의 등록 실패:", error);
     alert("문의 등록 중 오류가 발생했습니다.");
     return;
+  }
+
+  // ✅ 관리자 계정 user_id 조회 후 알림 전송
+  const { data: adminUser } = await supabase
+    .from("users")
+    .select("user_id")
+    .eq("email", ADMIN_EMAIL)
+    .single();
+
+  if (adminUser) {
+    await supabase.from("notifications").insert({
+      notification_id: crypto.randomUUID(),
+      user_id:         adminUser.user_id,
+      type:            "inquiry",
+      reference_id:    inquiryId,
+      is_read:         false,
+      sender_id:       currentUser.id,
+    });
   }
 
   alert("문의가 등록되었습니다.");

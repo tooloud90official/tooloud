@@ -52,7 +52,7 @@ let dataLoaded = false;
 
 // ✅ 로그인 유저 + 핀 상태 전역 관리
 let currentUser  = null;
-let pinnedToolIds = new Set(); // 현재 핀된 tool_ID 목록
+let pinnedToolIds = new Set();
 
 // ─── tool_des 단답 → 완전한 문장으로 변환 ──────────────────────────
 function formatDesc(raw) {
@@ -91,8 +91,7 @@ async function fetchAvgRatings(toolIDs) {
   return avgMap;
 }
 
-
-// ✅ DB에서 현재 favorite_tools 불러오기 (category 핀 상태 초기화)
+// ✅ DB에서 현재 favorite_tools 불러오기
 async function fetchPinnedTools() {
   if (!currentUser) return;
 
@@ -110,17 +109,14 @@ async function fetchPinnedTools() {
   const raw = data?.favorite_tools;
   if (!Array.isArray(raw)) return;
 
-  // 각 항목이 문자열(tool_ID)이면 그대로, 객체이면 tool_ID 추출
   const parsed = raw.map(item => {
     if (typeof item === 'string') return item;
     if (typeof item === 'object' && item !== null) return item.tool_ID ?? item.id ?? null;
     return null;
   }).filter(Boolean);
 
-  // tool_ID 기준으로 Set 구성
   pinnedToolIds = new Set(parsed);
 }
-
 
 // ✅ 핀 토글 → DB 저장
 async function togglePin(tool, pinIconEl) {
@@ -132,7 +128,6 @@ async function togglePin(tool, pinIconEl) {
   const toolId = tool.tool_ID;
   const isPinned = pinnedToolIds.has(toolId);
 
-  // 낙관적 UI 업데이트
   if (isPinned) {
     pinnedToolIds.delete(toolId);
     pinIconEl.classList.remove('pinned');
@@ -141,7 +136,6 @@ async function togglePin(tool, pinIconEl) {
     pinIconEl.classList.add('pinned');
   }
 
-  // 현재 DB 전체 favorite_tools 조회
   const { data, error: fetchError } = await supabase
     .from('users')
     .select('favorite_tools')
@@ -153,7 +147,6 @@ async function togglePin(tool, pinIconEl) {
     return;
   }
 
-  // favorite_tools는 tool_ID 문자열 배열 OR 객체 배열 혼재 가능 → tool_ID 문자열로 정규화
   const raw = data?.favorite_tools ?? [];
   let currentIds = raw.map(item => {
     if (typeof item === 'string') return item;
@@ -162,10 +155,8 @@ async function togglePin(tool, pinIconEl) {
   }).filter(Boolean);
 
   if (isPinned) {
-    // 핀 해제: 해당 tool_ID 제거
     currentIds = currentIds.filter(id => id !== toolId);
   } else {
-    // 핀 추가: 중복 방지
     if (!currentIds.includes(toolId)) {
       currentIds.push(toolId);
     }
@@ -178,7 +169,6 @@ async function togglePin(tool, pinIconEl) {
 
   if (updateError) {
     console.error('[pin] 저장 실패:', updateError.message);
-    // 실패 시 UI 롤백
     if (isPinned) {
       pinnedToolIds.add(toolId);
       pinIconEl.classList.add('pinned');
@@ -191,7 +181,6 @@ async function togglePin(tool, pinIconEl) {
     console.log('[favorite] 저장 완료. isPinned →', !isPinned, '/ tool:', tool.tool_name);
   }
 }
-
 
 // ─── Supabase에서 전체 툴 + 평점 로드 ─────────────────────────────
 async function loadAllTools() {
@@ -279,10 +268,10 @@ function renderToolList(tools, sortValue) {
   }
 
   sorted.forEach(tool => {
-    const rating  = tool.rating || 0;
-    const stars   = '★'.repeat(rating) + '☆'.repeat(Math.max(0, 5 - rating));
-    const desc    = formatDesc(tool.tool_des);
-    const isPinned = pinnedToolIds.has(tool.tool_ID); // ✅ 핀 상태 반영
+    const rating   = tool.rating || 0;
+    const stars = `<span style="color:orange;">${'★'.repeat(rating)}</span><span style="color:#ccc;">${'★'.repeat(Math.max(0, 5 - rating))}</span>`;
+    const desc     = formatDesc(tool.tool_des);
+    const isPinned = pinnedToolIds.has(tool.tool_ID);
 
     const item = document.createElement('div');
     item.className = 'list-item';
@@ -297,18 +286,32 @@ function renderToolList(tools, sortValue) {
         <img class="pin-icon${isPinned ? ' pinned' : ''}" src="/media/pin.png" alt="pin" title="${isPinned ? '관심 툴 해제' : '관심 툴 추가'}" />
         <div style="display:flex; flex-direction:row; align-items:center; gap:8px;">
           <span class="item-badge">${tool.tool_name}</span>
-          <span style="color:#ffcc00; font-size:14px;" title="${rating}점">${stars}</span>
+          <span style="font-size:14px;" title="${rating}점">${stars}</span>
         </div>
         <p class="item-desc">${desc}</p>
-        <a href="/detail_AI/detail_AI.html?id=${tool.tool_ID}" class="item-detail-btn">상세 ></a>
+        <a href="/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}" class="item-detail-btn">상세 ></a>
       </div>
     `;
 
-    // ✅ 핀 클릭 이벤트 → DB 저장
+    // 핀 클릭 → DB 저장 (버블링 차단)
     const pinEl = item.querySelector('.pin-icon');
     pinEl.addEventListener('click', async (e) => {
       e.stopPropagation();
       await togglePin(tool, pinEl);
+    });
+
+    // 상세 링크 클릭 → 버블링 차단 (카드 클릭과 중복 방지)
+    const detailBtn = item.querySelector('.item-detail-btn');
+    if (detailBtn) {
+      detailBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = `/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}`;
+      });
+    }
+
+    // 카드 전체 클릭 → 상세 페이지 이동
+    item.addEventListener('click', () => {
+      window.location.href = `/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}`;
     });
 
     toolListEl.appendChild(item);
@@ -332,8 +335,8 @@ async function openModal(folderData) {
     placeholder: '이름 순',
     value: 'name',
     options: [
-      { label: '이름 순',  value: 'name'   },
-      { label: '평점 순',  value: 'rating' }
+      { label: '이름 순', value: 'name'   },
+      { label: '평점 순', value: 'rating' }
     ],
     onChange: (item) => renderToolList(tools, item.value)
   });
@@ -355,7 +358,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     toolGrid.innerHTML = `<p style="color:#aaa; text-align:center; width:100%; padding:40px 0;">툴 데이터를 불러오는 중...</p>`;
   }
 
-  // ✅ 로그인 유저 + 핀 목록 병렬 로드
   const { data: { user } } = await supabase.auth.getUser();
   currentUser = user ?? null;
 
@@ -378,6 +380,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.body.style.overflow = 'auto';
     });
   }
+
   window.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.style.display = 'none';
@@ -385,8 +388,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  const urlParams  = new URLSearchParams(window.location.search);
-  const tabParam   = urlParams.get('tab');
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam  = urlParams.get('tab');
 
   let initialTab = "이미지·오디오·영상";
   if (tabParam) {

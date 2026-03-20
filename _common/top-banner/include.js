@@ -68,21 +68,31 @@ function renderLoggedIn(authArea) {
 }
 
 // ===== 알림 타입별 텍스트 변환 =====
-function formatAlert(n) {
+function formatAlert(n, senderNameMap = {}) {
+  const sender = senderNameMap[n.sender_id] || '누군가';
+
+  if (n.type === 'reply') {
+    return {
+      type:  'reply',
+      title: '댓글 알림',
+      desc:  `${sender}님이 회원님의 작업물에 댓글을 달았어요.`,
+      href:  '#',
+    };
+  }
   if (n.type === 'like') {
     return {
       type:  'like',
       title: '좋아요 알림',
-      desc:  '누군가 회원님의 작업물에 좋아요를 눌렀어요.',
-      href:  n.reference_id ? `#` : '#',
+      desc:  `${sender}님이 회원님의 작업물에 좋아요를 눌렀어요.`,
+      href:  '#',
     };
   }
-  if (n.type === 'message') {
+  if (n.type === 'inquiry') {
     return {
-      type:  'message',
-      title: '1:1 문의사항 알림',
+      type:  'inquiry',
+      title: '문의사항 알림',
       desc:  '회원님의 문의사항에 답글이 달렸어요.',
-      href:  n.reference_id ? `#` : '#',
+      href:  '#',
     };
   }
   return {
@@ -219,7 +229,20 @@ async function initLogout() {
         .order('created_at', { ascending: false })
         .limit(20);
 
-      const alerts = (notiData || []).map(formatAlert);
+      // ✅ sender_id로 users 테이블에서 이름 일괄 조회
+      const senderIds = [...new Set((notiData || []).map(n => n.sender_id).filter(Boolean))];
+      let senderNameMap = {};
+      if (senderIds.length > 0) {
+        const { data: senderUsers } = await supabase
+          .from('users')
+          .select('user_id, user_name')
+          .in('user_id', senderIds);
+        (senderUsers || []).forEach(u => {
+          senderNameMap[u.user_id] = u.user_name;
+        });
+      }
+
+      const alerts = (notiData || []).map(n => formatAlert(n, senderNameMap));
 
       if (!document.getElementById('alert-root')) {
         const alertRoot = document.createElement('div');

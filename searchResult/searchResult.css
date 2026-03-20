@@ -182,3 +182,25 @@ body {
     width: 90%;
   }
 }
+
+.loading-text {
+  color: #aaa;
+  /* font-size는 별도 지정 없으면 category와 동일하게 기본값 유지 */
+  text-align: center;
+  width: 100%;
+  padding: 40px 0;
+}
+/* ===== 아이콘 호버 모션 ===== */
+.tool-icon {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tool-icon:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(0, 128, 255, 0.2);
+}
+
+.tool-icon:hover img {
+  opacity: 0.85;
+}

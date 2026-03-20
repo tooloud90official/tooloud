@@ -23,7 +23,6 @@ async function extractTags(keyword) {
 /* ===== Supabase에서 툴 목록 조회 ===== */
 async function fetchTools(groqResult, keyword) {
 
-  // 1. tools 기본 조회 (tool_cat, tool_subcat, tool_key 매칭)
   let toolQuery = supabase
     .from('tools')
     .select('tool_ID, tool_name, icon, tool_cat, tool_subcat, tool_link, tool_des, tool_key');
@@ -43,7 +42,6 @@ async function fetchTools(groqResult, keyword) {
     toolQuery = toolQuery.or(filters);
 
   } else {
-    // Groq 실패 시 이름/키 검색 폴백
     console.warn('[search] Groq 실패 → 이름 검색 폴백');
     toolQuery = toolQuery.or(`tool_name.ilike.%${keyword}%,tool_key.ilike.%${keyword}%`);
   }
@@ -61,7 +59,6 @@ async function fetchTools(groqResult, keyword) {
 
   console.log('[supabase] 조회된 툴 수:', tools.length);
 
-  // 2. tool_reviews에서 평균 별점 조회
   const toolIds = tools.map(t => t.tool_ID);
   const { data: reviews, error: reviewError } = await supabase
     .from('tool_reviews')
@@ -72,7 +69,6 @@ async function fetchTools(groqResult, keyword) {
     console.warn('[reviews] 별점 조회 실패:', reviewError.message);
   }
 
-  // 3. 툴별 평균 별점 계산
   const ratingMap = {};
   if (reviews && reviews.length > 0) {
     reviews.forEach(r => {
@@ -81,7 +77,6 @@ async function fetchTools(groqResult, keyword) {
     });
   }
 
-  // 4. tools에 평균 별점 병합
   return tools.map(tool => ({
     ...tool,
     avg_rating: ratingMap[tool.tool_ID]
@@ -116,7 +111,6 @@ function renderResults(tools, keyword) {
   }
 
   tools.forEach(tool => {
-    // 아이콘 URL 결정
     let iconUrl = tool.icon;
     if (!iconUrl && tool.tool_link) {
       try {
@@ -128,14 +122,15 @@ function renderResults(tools, keyword) {
       iconUrl = `https://logo.clearbit.com/${tool.tool_name.toLowerCase().replace(/\s/g, '')}.com`;
     }
 
-    // 별점 변환
     const rating    = tool.avg_rating || 0;
     const starFull  = '★'.repeat(Math.min(rating, 5));
-    const starEmpty = '☆'.repeat(Math.max(5 - rating, 0));
+    const starEmpty = '★'.repeat(Math.max(5 - rating, 0));
 
     const card = document.createElement('div');
     card.className      = 'tool-card';
-    card.dataset.url    = `/detail_AI/detail_AI.html?tool=${encodeURIComponent(tool.tool_name)}`;
+    card.dataset.url    = `/detail_AI/detail_AI.html?tool_id=${tool.tool_ID}`;
+    card.dataset.link   = tool.tool_link || '';
+    card.dataset.toolId = tool.tool_ID;
     card.dataset.rating = rating;
 
     card.innerHTML = `
@@ -145,7 +140,10 @@ function renderResults(tools, keyword) {
       <div class="tool-info">
         <div class="tool-top">
           <span class="tool-name">${tool.tool_name}</span>
-          <span class="rating">${starFull}${starEmpty}</span>
+          <span class="rating">
+            <span style="color: orange;">${starFull}</span>
+            <span style="color: #ccc;">${starEmpty}</span>
+          </span>
         </div>
         <p class="tool-desc">${tool.tool_des || ''}</p>
       </div>
@@ -157,6 +155,63 @@ function renderResults(tools, keyword) {
   });
 
   bindDetailNavigation();
+}
+
+/* ===== recent_tools 저장 ===== */
+async function saveRecentTool(toolId) {
+  if (!toolId) return;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('recent_tools')
+    .eq('user_id', user.id)
+    .single();
+
+  if (error) {
+    console.warn('[recent_tools] 조회 실패:', error.message);
+    return;
+  }
+
+  const current = Array.isArray(data?.recent_tools) ? data.recent_tools : [];
+
+  // ✅ 중복 제거 후 맨 앞에 추가, 최대 20개 유지
+  const updated = [toolId, ...current.filter(id => id !== toolId)].slice(0, 20);
+
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({ recent_tools: updated })
+    .eq('user_id', user.id);
+
+  if (updateError) {
+    console.warn('[recent_tools] 저장 실패:', updateError.message);
+  }
+}
+
+/* ===== 상세 페이지 이동 + 외부 링크 연결 ===== */
+function bindDetailNavigation() {
+  document.querySelectorAll('.tool-card').forEach(card => {
+    const detailBtn = card.querySelector('.detail');
+    const iconEl    = card.querySelector('.tool-icon');
+
+    // ✅ 외부 링크로 이동 + recent_tools 저장
+    const goExternal = async (e) => {
+      e.stopPropagation();
+      const link   = card.dataset.link;
+      const toolId = card.dataset.toolId;
+
+      await saveRecentTool(toolId);
+
+      if (link) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+      }
+    };
+
+    if (detailBtn) detailBtn.addEventListener('click', goExternal);
+    if (iconEl)    iconEl.addEventListener('click', goExternal);
+  });
 }
 
 /* ===== 정렬 ===== */
@@ -177,18 +232,6 @@ function applySort(sortVal) {
   });
 
   cards.forEach(card => list.appendChild(card));
-}
-
-/* ===== 상세 페이지 이동 ===== */
-function bindDetailNavigation() {
-  document.querySelectorAll('.tool-card').forEach(card => {
-    const detailBtn = card.querySelector('.detail');
-    if (!detailBtn) return;
-    detailBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.location.href = card.dataset.url;
-    });
-  });
 }
 
 /* ===== 필터 초기화 ===== */

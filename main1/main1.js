@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (WORK_DATA[cat]) return;
 
         const rating = avgRatingMap[tool.tool_ID] ?? 0;
-        const stars = '★'.repeat(rating) + '☆'.repeat(Math.max(0, 5 - rating));
+        const stars = `<span style="color:orange;">${'★'.repeat(rating)}</span><span style="color:#ccc;">${'★'.repeat(Math.max(0, 5 - rating))}</span>`;
 
         let iconUrl = tool.icon;
         if (!iconUrl && tool.tool_link) {
@@ -270,21 +270,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       recommendedTools = recommendedTools.slice(0, 8);
     }
 
-    // ===== ✅ recommended_tools DB 저장 =====
+    // ✅ 수정: tool_ID 배열로 저장
     try {
-      const toolsToSave = recommendedTools.map(tool => {
-        let iconUrl = tool.icon;
-        if (!iconUrl && tool.tool_link) {
-          try {
-            const domain = new URL(tool.tool_link).hostname.replace('www.', '');
-            iconUrl = `https://logo.clearbit.com/${domain}`;
-          } catch { /* 무시 */ }
-        }
-        if (!iconUrl) {
-          iconUrl = `https://logo.clearbit.com/${tool.tool_name.toLowerCase().replace(/\s/g, '')}.com`;
-        }
-        return { name: tool.tool_name, img: iconUrl };
-      });
+      const toolsToSave = recommendedTools.map(tool => tool.tool_ID);
 
       const { error: saveError } = await supabase
         .from('users')
@@ -296,7 +284,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (e) {
       console.error('[groq] recommended_tools 저장 중 예외:', e.message);
     }
-    // ===== 저장 끝 =====
 
     grid.innerHTML = '';
     grid.className = 'tool-grid';
@@ -322,7 +309,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <span class="tool-icon-card__title">${tool.tool_name}</span>
       `;
       card.addEventListener('click', () => {
-        window.location.href = `/detail_AI/detail_AI.html?tool=${encodeURIComponent(tool.tool_name)}`;
+        window.location.href = `/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}`;
       });
       grid.appendChild(card);
     });
@@ -371,8 +358,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="work-card__stars">${data.stars}</div>
         <button type="button" class="btn-more">툴 더 알아보기</button>
       `;
+      toolEl.querySelector('.tool-icon-card').addEventListener('click', () => {
+        window.location.href = `/detail_AI/detail_AI.html?tool_ID=${data.tool.id}`;
+      });
       toolEl.querySelector('.btn-more').addEventListener('click', () => {
-        window.location.href = `/detail_AI/detail_AI.html?tool=${encodeURIComponent(data.tool.name)}`;
+        window.location.href = `/detail_AI/detail_AI.html?tool_ID=${data.tool.id}`;
       });
     }
   }
@@ -427,7 +417,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <span class="tool-icon-card__title">${tool.tool_name}</span>
         `;
         card.addEventListener('click', () => {
-          window.location.href = `/detail_AI/detail_AI.html?tool=${encodeURIComponent(tool.tool_name)}`;
+          window.location.href = `/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}`;
         });
         grid.appendChild(card);
       });

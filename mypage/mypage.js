@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* =====================================================
      ✅ [WORKS] 확장자 → 필터 카테고리 변환
-     work_path의 확장자를 기준으로 문서/이미지/영상/오디오 분류
      ===================================================== */
   const EXT_FILTER_MAP = {
     pdf:  '문서',
@@ -57,13 +56,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function getExtFilter(workPath) {
     if (!workPath) return null;
-    // 전체 URL에서 확장자 추출 (쿼리스트링 제거 후)
     const pathname = workPath.split('?')[0];
     const ext = pathname.split('.').pop().toLowerCase();
     return EXT_FILTER_MAP[ext] ?? null;
   }
 
-  // ✅ work_path가 이미 전체 URL이므로 그대로 반환
   function getPublicUrl(workPath) {
     return workPath ?? '';
   }
@@ -146,12 +143,99 @@ document.addEventListener('DOMContentLoaded', async () => {
       return [];
     }
 
-    return Array.isArray(data?.recent_tools) ? data.recent_tools : [];
+    const raw = data?.recent_tools ?? [];
+    if (!Array.isArray(raw) || raw.length === 0) return [];
+
+    const toolIds = raw.filter(id => typeof id === 'string');
+    if (toolIds.length === 0) return [];
+
+    const { data: toolsData, error: toolsError } = await supabase
+      .from('tools')
+      .select('tool_ID, tool_name, icon, tool_link')
+      .in('tool_ID', toolIds);
+
+    if (toolsError) {
+      console.error('recent tools 조회 실패:', toolsError.message);
+      return [];
+    }
+
+    const toolMap = {};
+    (toolsData ?? []).forEach(t => {
+      let iconUrl = t.icon;
+      if (!iconUrl && t.tool_link) {
+        try {
+          const domain = new URL(t.tool_link).hostname.replace('www.', '');
+          iconUrl = `https://logo.clearbit.com/${domain}`;
+        } catch { /* 무시 */ }
+      }
+      if (!iconUrl) {
+        iconUrl = `https://logo.clearbit.com/${t.tool_name.toLowerCase().replace(/\s/g, '')}.com`;
+      }
+      toolMap[t.tool_ID] = { name: t.tool_name ?? '', img: iconUrl };
+    });
+
+    return toolIds
+      .filter(id => toolMap[id])
+      .map(id => ({ name: toolMap[id].name, img: toolMap[id].img }));
   }
 
 
   /* =====================================================
-     ✅ 관심 있는 툴 조회 (favorite_tools 단일 컬럼)
+     ✅ recommended_tools DB에서 불러오기
+     ===================================================== */
+  async function fetchRecommendedTools() {
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('recommended_tools')
+      .eq('user_id', user.id)
+      .single();
+
+    if (error) {
+      console.error('recommended_tools 조회 실패:', error.message);
+      return [];
+    }
+
+    const raw = data?.recommended_tools ?? [];
+    if (!Array.isArray(raw) || raw.length === 0) return [];
+
+    const toolIds = raw.filter(id => typeof id === 'string');
+    if (toolIds.length === 0) return [];
+
+    const { data: toolsData, error: toolsError } = await supabase
+      .from('tools')
+      .select('tool_ID, tool_name, icon, tool_link')
+      .in('tool_ID', toolIds);
+
+    if (toolsError) {
+      console.error('recommended tools 조회 실패:', toolsError.message);
+      return [];
+    }
+
+    const toolMap = {};
+    (toolsData ?? []).forEach(t => {
+      let iconUrl = t.icon;
+      if (!iconUrl && t.tool_link) {
+        try {
+          const domain = new URL(t.tool_link).hostname.replace('www.', '');
+          iconUrl = `https://logo.clearbit.com/${domain}`;
+        } catch { /* 무시 */ }
+      }
+      if (!iconUrl) {
+        iconUrl = `https://logo.clearbit.com/${t.tool_name.toLowerCase().replace(/\s/g, '')}.com`;
+      }
+      toolMap[t.tool_ID] = { name: t.tool_name ?? '', img: iconUrl };
+    });
+
+    return toolIds
+      .filter(id => toolMap[id])
+      .map(id => ({ name: toolMap[id].name, img: toolMap[id].img }));
+  }
+
+
+  /* =====================================================
+     ✅ 관심 있는 툴 조회
      ===================================================== */
   async function fetchPinnedTools() {
     if (!user) return [];
@@ -211,35 +295,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return true;
       })
       .map(id => ({ name: toolMap[id].name, img: toolMap[id].img }));
-  }
-
-
-  /* =====================================================
-     ✅ recommended_tools DB에서 불러오기
-     ===================================================== */
-  async function fetchRecommendedTools() {
-    if (!user) return [];
-
-    const { data, error } = await supabase
-      .from('users')
-      .select('recommended_tools')
-      .eq('user_id', user.id)
-      .single();
-
-    if (error) {
-      console.error('recommended_tools 조회 실패:', error.message);
-      return [];
-    }
-
-    const raw = data?.recommended_tools;
-    if (!Array.isArray(raw)) return [];
-
-    return raw.map(item => {
-      if (typeof item === 'string') {
-        try { return JSON.parse(item); } catch { return null; }
-      }
-      return item;
-    }).filter(Boolean);
   }
 
 
@@ -305,15 +360,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* =====================================================
      ✅ [WORKS] works 테이블 DB에서 불러오기
-     work_path 확장자로 문서/이미지/영상/오디오 분류
-     work_path는 전체 URL로 저장되어 있음
      ===================================================== */
   async function fetchMyWorks() {
     if (!user) return {};
 
     const { data, error } = await supabase
       .from('works')
-      .select('work_id, tool_id, tool_cat, work_link, work_desc, updated_at, like_count, comment_count, work_path, work_tags, work_title')
+      .select('work_id, tool_id, tool_cat, work_link, work_desc, updated_at, like_count, comment_count, work_tags, work_title')
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false });
 
@@ -325,33 +378,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const grouped = { '문서': [], '이미지': [], '영상': [], '오디오': [] };
 
     (data ?? []).forEach(w => {
-      const filter = getExtFilter(w.work_path);
+      const filter = getExtFilter(w.work_link);
       if (!filter) return;
 
-      // ✅ work_path가 전체 URL이므로 그대로 사용
-      const publicUrl = getPublicUrl(w.work_path);
+      const publicUrl = getPublicUrl(w.work_link);
 
       const d = new Date(w.updated_at);
       const date = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
 
-      // ✅ 전체 URL에서 파일명만 추출 (쿼리스트링 제거)
-      const fileName = w.work_path.split('?')[0].split('/').pop();
+      const fileName = w.work_link.split('?')[0].split('/').pop();
       const ext = fileName.split('.').pop().toUpperCase();
 
       grouped[filter].push({
-        workId:   w.work_id,
-        name:     w.work_title ?? fileName,
+        workId:    w.work_id,
+        name:      w.work_title ?? fileName,
         date,
         ext,
-        // ✅ 이미지만 URL을 썸네일로 사용, 문서/영상/오디오는 별도 썸네일 없음
-        img:      (filter === '이미지') ? publicUrl : undefined,
-        thumb:    undefined,
-        duration: (filter === '영상' || filter === '오디오')
+        workPath:  publicUrl,  // ✅ 실제 재생용 URL
+        img:       (filter === '이미지') ? publicUrl : undefined,
+        thumb:     undefined,
+        duration:  (filter === '영상' || filter === '오디오')
           ? (parseDuration(w.work_desc) ?? '0:00')
           : undefined,
-        size:     undefined,
-        desc:     w.work_desc ?? '',
-        tags:     w.work_tags ?? [],
+        size:      undefined,
+        desc:      w.work_desc ?? '',
+        tags:      w.work_tags ?? [],
         likeCount:    w.like_count    ?? 0,
         commentCount: w.comment_count ?? 0,
       });
@@ -360,7 +411,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return grouped;
   }
 
-  // work_desc 등에서 "0:42" 형식 duration 파싱 시도
   function parseDuration(str) {
     if (!str) return null;
     const match = str.match(/(\d+:\d{2})/);
@@ -376,18 +426,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const AI_TOOLS       = await fetchRecommendedTools();
   const FAVORITE_TOOLS = await fetchPinnedTools();
   const MY_REVIEWS     = await fetchMyReviews();
-
-  // ✅ DB에서 불러온 작업물 (확장자 기준으로 분류된 객체)
-  const WORKS_DATA = await fetchMyWorks();
+  const WORKS_DATA     = await fetchMyWorks();
 
   let currentWorksFilter = '문서';
 
 
   /* =====================================================
      ✅ [ARTWORK LINK] 작업물 페이지로 이동
-     artwork_post.html?work_id=xxx
      ===================================================== */
-
   function goToArtwork(workId) {
     if (!workId) return;
     window.location.href = `/artwork/artwork_post/artwork_post.html?work_id=${workId}`;
@@ -480,7 +526,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadButton({
       target: '#avatarConfirmContainer',
-      text: '선택 완료',
+      text: '확인',
       variant: 'primary',
       onClick: async () => {
         if (!selectedUrl) return;
@@ -494,7 +540,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           .update({ user_img: selectedUrl })
           .eq('user_id', user.id);
 
-        confirmBtn.textContent = '선택 완료';
+        confirmBtn.textContent = '확인';
 
         if (error) {
           console.error('아바타 저장 실패:', error.message);
@@ -509,7 +555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     const confirmBtn = document.querySelector('#avatarConfirmContainer .btn');
     if (confirmBtn) {
-      confirmBtn.style.cssText += 'width:auto;min-width:100px;height:42px;font-size:14px;padding:0 24px;border-radius:12px;';
+      confirmBtn.style.cssText += 'width:auto;min-width:80px;height:42px;font-size:14px;padding:0 20px;border-radius:12px;';
       confirmBtn.disabled = !currentAvatarUrl;
     }
 
@@ -823,17 +869,14 @@ document.addEventListener('DOMContentLoaded', async () => {
      [7] 업로드한 작업물 렌더링
      ===================================================== */
 
-  function initAudioPlayer(item, duration) {
+  // ✅ 실제 Audio 객체로 재생
+  function initAudioPlayer(item, src) {
     const playBtn  = item.querySelector('.work-audio-play');
     const progress = item.querySelector('.work-audio-progress');
     const timeEl   = item.querySelector('.work-audio-time');
     if (!playBtn) return;
 
-    const [min, sec] = duration.split(':').map(Number);
-    const totalSec = min * 60 + sec;
-    let elapsed = 0;
-    let playing = false;
-    let timer   = null;
+    const audio = src ? new Audio(src) : null;
 
     const PLAY_SVG  = `<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 9,5 2,9"/></svg>`;
     const PAUSE_SVG = `<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="1" y="1" width="3" height="8"/><rect x="6" y="1" width="3" height="8"/></svg>`;
@@ -843,53 +886,70 @@ document.addEventListener('DOMContentLoaded', async () => {
       const ss = Math.floor(s % 60).toString().padStart(2, '0');
       return `${m}:${ss}`;
     };
-    const update = () => {
-      const pct = totalSec > 0 ? (elapsed / totalSec) * 100 : 0;
-      progress.style.width = pct + '%';
-      timeEl.textContent = fmt(elapsed);
-    };
-    const stop = () => {
-      clearInterval(timer);
-      playing = false;
-      playBtn.innerHTML = PLAY_SVG;
-    };
 
     playBtn.innerHTML = PLAY_SVG;
-    playBtn.addEventListener('click', () => {
-      if (playing) { stop(); return; }
-      if (elapsed >= totalSec) elapsed = 0;
-      playing = true;
-      playBtn.innerHTML = PAUSE_SVG;
-      timer = setInterval(() => {
-        elapsed += 0.5;
-        if (elapsed >= totalSec) { elapsed = totalSec; update(); stop(); return; }
-        update();
-      }, 500);
+
+    if (!audio) {
+      playBtn.disabled = true;
+      return;
+    }
+
+    // 재생 시간 업데이트
+    audio.addEventListener('timeupdate', () => {
+      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      progress.style.width = pct + '%';
+      timeEl.textContent = fmt(audio.currentTime);
     });
 
+    // 재생 종료 시 초기화
+    audio.addEventListener('ended', () => {
+      progress.style.width = '0%';
+      timeEl.textContent = '0:00';
+      playBtn.innerHTML = PLAY_SVG;
+    });
+
+    // 메타데이터 로드 시 총 길이 표시
+    audio.addEventListener('loadedmetadata', () => {
+      timeEl.textContent = fmt(audio.duration);
+    });
+
+    // ✅ 재생/일시정지 (버블링 차단)
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (audio.paused) {
+        audio.play();
+        playBtn.innerHTML = PAUSE_SVG;
+      } else {
+        audio.pause();
+        playBtn.innerHTML = PLAY_SVG;
+      }
+    });
+
+    // ✅ 트랙 클릭으로 탐색 (버블링 차단)
     const track = item.querySelector('.work-audio-track');
     if (track) {
       track.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!audio.duration) return;
         const rect  = track.getBoundingClientRect();
         const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        elapsed = ratio * totalSec;
-        update();
+        audio.currentTime = ratio * audio.duration;
       });
     }
-    update();
   }
 
-  function initVideoPlayer(item, duration) {
+  // ✅ 실제 Video 엘리먼트로 재생
+  function initVideoPlayer(item, src) {
     const playBtn  = item.querySelector('.work-video-play');
     const progress = item.querySelector('.work-video-progress');
     const timeEl   = item.querySelector('.work-video-time');
-    if (!playBtn) return;
+    const thumb    = item.querySelector('.work-thumb--video');
+    if (!playBtn || !thumb) return;
 
-    const [min, sec] = duration.split(':').map(Number);
-    const totalSec = min * 60 + sec;
-    let elapsed = 0;
-    let playing = false;
-    let timer   = null;
+    if (!src) {
+      playBtn.disabled = true;
+      return;
+    }
 
     const PLAY_SVG  = `<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 9,5 2,9"/></svg>`;
     const PAUSE_SVG = `<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="1" y="1" width="3" height="8"/><rect x="6" y="1" width="3" height="8"/></svg>`;
@@ -899,40 +959,58 @@ document.addEventListener('DOMContentLoaded', async () => {
       const ss = Math.floor(s % 60).toString().padStart(2, '0');
       return `${m}:${ss}`;
     };
-    const update = () => {
-      const pct = totalSec > 0 ? (elapsed / totalSec) * 100 : 0;
-      progress.style.width = pct + '%';
-      timeEl.textContent = fmt(elapsed);
-    };
-    const stop = () => {
-      clearInterval(timer);
-      playing = false;
-      playBtn.innerHTML = PLAY_SVG;
-    };
+
+    // ✅ video 엘리먼트 생성 후 썸네일에 삽입
+    const video = document.createElement('video');
+    video.src = src;
+    video.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:8px;display:block;';
+    video.preload = 'metadata';
+    thumb.insertBefore(video, thumb.firstChild);
 
     playBtn.innerHTML = PLAY_SVG;
-    playBtn.addEventListener('click', () => {
-      if (playing) { stop(); return; }
-      if (elapsed >= totalSec) elapsed = 0;
-      playing = true;
-      playBtn.innerHTML = PAUSE_SVG;
-      timer = setInterval(() => {
-        elapsed += 0.5;
-        if (elapsed >= totalSec) { elapsed = totalSec; update(); stop(); return; }
-        update();
-      }, 500);
+
+    // 재생 시간 업데이트
+    video.addEventListener('timeupdate', () => {
+      const pct = video.duration ? (video.currentTime / video.duration) * 100 : 0;
+      if (progress) progress.style.width = pct + '%';
+      if (timeEl) timeEl.textContent = fmt(video.currentTime);
     });
 
+    // 재생 종료 시 초기화
+    video.addEventListener('ended', () => {
+      if (progress) progress.style.width = '0%';
+      if (timeEl) timeEl.textContent = '0:00';
+      playBtn.innerHTML = PLAY_SVG;
+    });
+
+    // 메타데이터 로드 시 총 길이 표시
+    video.addEventListener('loadedmetadata', () => {
+      if (timeEl) timeEl.textContent = fmt(video.duration);
+    });
+
+    // ✅ 재생/일시정지 (버블링 차단)
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (video.paused) {
+        video.play();
+        playBtn.innerHTML = PAUSE_SVG;
+      } else {
+        video.pause();
+        playBtn.innerHTML = PLAY_SVG;
+      }
+    });
+
+    // ✅ 트랙 클릭으로 탐색 (버블링 차단)
     const track = item.querySelector('.work-video-track');
     if (track) {
       track.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!video.duration) return;
         const rect  = track.getBoundingClientRect();
         const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        elapsed = ratio * totalSec;
-        update();
+        video.currentTime = ratio * video.duration;
       });
     }
-    update();
   }
 
   function renderWorksContent(filter) {
@@ -958,7 +1036,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       let infoHtml  = '';
 
       if (filter === '문서') {
-        // ✅ 문서(PDF)는 브라우저에서 이미지 렌더링 불가 → ext 아이콘 표시
         thumbHtml = `
           <div class="work-thumb work-thumb--doc work-thumb--clickable"
                data-work-id="${item.workId}"
@@ -977,7 +1054,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>`;
 
       } else if (filter === '이미지') {
-        // ✅ 이미지는 work_path(전체 URL)를 img src로 직접 사용
         thumbHtml = `
           <div class="work-thumb work-thumb--image work-thumb--clickable"
                data-work-id="${item.workId}"
@@ -1016,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <div class="work-video-track">
                 <div class="work-video-progress"></div>
               </div>
-              <span class="work-video-time">${item.duration ?? '0:00'}</span>
+              <span class="work-video-time">0:00</span>
             </div>
           </div>`;
 
@@ -1042,7 +1118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <div class="work-audio-track">
                 <div class="work-audio-progress"></div>
               </div>
-              <span class="work-audio-time">${item.duration ?? '0:00'}</span>
+              <span class="work-audio-time">0:00</span>
             </div>
           </div>`;
       }
@@ -1050,8 +1126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.innerHTML = thumbHtml + infoHtml;
       list.appendChild(div);
 
-      // ✅ 썸네일 클릭 → artwork_post.html?work_id=xxx
-      //    영상 재생 버튼 클릭 시에는 이동 막기
+      // ✅ 썸네일 클릭 → 작업물 페이지 이동 (재생 버튼 클릭 시 이동 막기)
       const clickable = div.querySelector('.work-thumb--clickable');
       if (clickable) {
         clickable.addEventListener('click', (e) => {
@@ -1060,8 +1135,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       }
 
-      if (filter === '오디오') initAudioPlayer(div, item.duration ?? '0:00');
-      else if (filter === '영상') initVideoPlayer(div, item.duration ?? '0:00');
+      // ✅ 수정: workPath를 src로 직접 전달
+      if (filter === '오디오') initAudioPlayer(div, item.workPath ?? '');
+      else if (filter === '영상') initVideoPlayer(div, item.workPath ?? '');
     });
 
     container.appendChild(list);
@@ -1070,7 +1146,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderWorks() {
     const worksCard = document.querySelector('.works-card');
 
-    // ✅ DB 데이터 기준으로 전체 비었는지 확인
     const totalCount = Object.values(WORKS_DATA).reduce((sum, arr) => sum + arr.length, 0);
     const isEmpty = EMPTY_MODE || totalCount === 0;
 
@@ -1106,7 +1181,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
       const sel = filterTarget.querySelector('select');
 
-      // ✅ 데이터가 있는 첫 번째 카테고리를 기본 필터로 설정
       const firstNonEmpty = ['문서', '이미지', '영상', '오디오'].find(f => WORKS_DATA[f]?.length > 0);
       if (firstNonEmpty) currentWorksFilter = firstNonEmpty;
 
