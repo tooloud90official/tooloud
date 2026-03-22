@@ -86,8 +86,12 @@ export function renderArtworkCards(targetSelector, items = []) {
     /* 제목 */
     if (titleEl) titleEl.textContent = item.work_title || "";
 
-    /* 좋아요 */
+    /* 좋아요 카운트 */
     if (likeCountEl) likeCountEl.textContent = item.like_count ?? 0;
+
+    /* ✅ 좋아요 하트 아이콘 — is_liked 여부에 따라 분기 */
+    const heartImg = likeBtn?.querySelector(".artwork-card__action-img");
+    if (heartImg) heartImg.src = item.is_liked ? "/media/Heart_fill.png" : "/media/heart.png";
 
     /* 댓글 */
     if (commentCountEl) commentCountEl.textContent = item.comment_count ?? 0;
