@@ -109,11 +109,23 @@ async function loadWorks() {
     );
   }
 
+  // ✅ 내가 좋아요한 work_id 목록 가져오기
+  let likedSet = new Set();
+  if (currentUser?.id) {
+    const { data: userData } = await supabase
+      .from("users")
+      .select("liked_works")
+      .eq("user_id", currentUser.id)
+      .single();
+    (userData?.liked_works || []).forEach((id) => likedSet.add(String(id)));
+  }
+
   ALL_WORKS = works.map((w) => {
     const tool      = toolsMap[String(w.tool_id)] || null;
     const avgRating = ratingsMap[String(w.tool_id)] ?? 0;
     return {
       ...w,
+      is_liked: likedSet.has(String(w.work_id)), // ✅ 추가
       users: usersMap[String(w.user_id)] || null,
       tools: tool ? { ...tool, avg_rating: avgRating } : null,
     };
@@ -201,22 +213,21 @@ function getSortedWorks() {
   }
 
   // ✅ Groq 검색 필터
-// ✅ Groq 검색 필터
-if (searchFilter.active) {
-  filtered = filtered.filter((w) => {
-    const toolCat    = w.tools?.tool_cat    ?? w.tool_cat ?? "";
-    const toolSubcat = w.tools?.tool_subcat ?? "";
-    const toolName   = (w.tools?.tool_name  ?? "").toLowerCase();
-    const title      = (w.work_title ?? "").toLowerCase();
+  if (searchFilter.active) {
+    filtered = filtered.filter((w) => {
+      const toolCat    = w.tools?.tool_cat    ?? w.tool_cat ?? "";
+      const toolSubcat = w.tools?.tool_subcat ?? "";
+      const toolName   = (w.tools?.tool_name  ?? "").toLowerCase();
+      const title      = (w.work_title ?? "").toLowerCase();
 
-    const catMatch    = searchFilter.cats.includes(toolCat);
-    const subcatMatch = searchFilter.subcats.includes(toolSubcat);
-    const keyMatch    = searchFilter.keywords.some((kw) => title.includes(kw.toLowerCase()));
-    const toolMatch   = searchFilter.keywords.some((kw) => toolName.includes(kw.toLowerCase())); // ✅ 추가
+      const catMatch    = searchFilter.cats.includes(toolCat);
+      const subcatMatch = searchFilter.subcats.includes(toolSubcat);
+      const keyMatch    = searchFilter.keywords.some((kw) => title.includes(kw.toLowerCase()));
+      const toolMatch   = searchFilter.keywords.some((kw) => toolName.includes(kw.toLowerCase()));
 
-    return catMatch || subcatMatch || keyMatch || toolMatch;
-  });
-}
+      return catMatch || subcatMatch || keyMatch || toolMatch;
+    });
+  }
 
   // 정렬
   if (currentSort === "like") {
@@ -262,6 +273,7 @@ function renderWorks() {
         : "",
       like_count:    w.like_count    ?? 0,
       comment_count: w.comment_count ?? 0,
+      is_liked:      w.is_liked      ?? false, // ✅ 추가
     }))
   );
 }

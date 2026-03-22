@@ -12,9 +12,11 @@
 
   <!-- PDF.js -->
   <script type="module">
-    import * as pdfjsLib from '/artwork/artwork_upload/pdf.min.js';
+    import * as pdfjsLib from "https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.min.mjs";
+  
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       "https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.worker.min.mjs";
+  
     window.pdfjsLib = pdfjsLib;
   </script>
 </head>
@@ -66,7 +68,7 @@
             <span id="likeCount">0</span>
           </button>
 
-          <a class="stat" href="#comments">
+          <a class="stat stat--comment" href="#comments">
             <img src="/media/comment.png" alt="댓글" />
             <span id="commentCount">0</span>
           </a>
