@@ -496,28 +496,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       recommendedTools = recommendedTools.slice(0, 8);
     }
 
+    // ✅ tool_ID 배열만 저장 (text[] 타입에 맞게)
     try {
-      const toolsToSave = recommendedTools.map(tool => {
-        let iconUrl = tool.icon;
-        if (!iconUrl && tool.tool_link) {
-          try {
-            const domain = new URL(tool.tool_link).hostname.replace('www.', '');
-            iconUrl = `https://logo.clearbit.com/${domain}`;
-          } catch { }
-        }
-        if (!iconUrl) {
-          iconUrl = `https://logo.clearbit.com/${tool.tool_name.toLowerCase().replace(/\s/g, '')}.com`;
-        }
-        return { name: tool.tool_name, img: iconUrl };
-      });
+      const toolIdsToSave = recommendedTools.map(tool => tool.tool_ID);
 
       const { error: saveError } = await supabase
         .from('users')
-        .update({ recommended_tools: toolsToSave })
+        .update({ recommended_tools: toolIdsToSave })
         .eq('user_id', user.id);
 
       if (saveError) console.error('[groq] recommended_tools 저장 실패:', saveError.message);
-      else console.log('[groq] recommended_tools 저장 완료:', toolsToSave);
+      else console.log('[groq] recommended_tools 저장 완료 (IDs):', toolIdsToSave);
     } catch (e) {
       console.error('[groq] recommended_tools 저장 중 예외:', e.message);
     }

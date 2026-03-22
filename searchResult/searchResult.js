@@ -23,6 +23,9 @@ async function extractTags(keyword) {
 /* ===== Supabase에서 툴 목록 조회 ===== */
 async function fetchTools(groqResult, keyword) {
 
+  // ✅ tool_names가 있으면 tool_name 직접 매칭 필터도 함께 구성
+  const toolNames = groqResult?.tool_names || [];
+
   let toolQuery = supabase
     .from('tools')
     .select('tool_ID, tool_name, icon, tool_cat, tool_subcat, tool_link, tool_des, tool_key');
@@ -30,9 +33,12 @@ async function fetchTools(groqResult, keyword) {
   if (groqResult && (
     groqResult.recommended_cats?.length > 0 ||
     groqResult.recommended_subcats?.length > 0 ||
-    groqResult.keywords?.length > 0
+    groqResult.keywords?.length > 0 ||
+    toolNames.length > 0
   )) {
     const filters = [
+      // ✅ tool_names → tool_name ilike 필터 추가
+      ...toolNames.map(n => `tool_name.ilike.%${n}%`),
       ...(groqResult.recommended_cats    || []).map(c => `tool_cat.eq.${c}`),
       ...(groqResult.recommended_subcats || []).map(s => `tool_subcat.eq.${s}`),
       ...(groqResult.keywords            || []).map(k => `tool_key.ilike.%${k}%`),
@@ -77,12 +83,26 @@ async function fetchTools(groqResult, keyword) {
     });
   }
 
-  return tools.map(tool => ({
+  const toolsWithRating = tools.map(tool => ({
     ...tool,
     avg_rating: ratingMap[tool.tool_ID]
       ? Math.round(ratingMap[tool.tool_ID].reduce((a, b) => a + b, 0) / ratingMap[tool.tool_ID].length)
       : 0,
   }));
+
+  // ✅ tool_names 매칭 툴을 최상단으로 정렬
+  if (toolNames.length > 0) {
+    const isNameMatch = (tool) =>
+      toolNames.some(n => tool.tool_name.toLowerCase().includes(n.toLowerCase()));
+
+    const nameMatched  = toolsWithRating.filter(t => isNameMatch(t));
+    const tagMatched   = toolsWithRating.filter(t => !isNameMatch(t));
+
+    console.log('[sort] 이름 매칭:', nameMatched.map(t => t.tool_name));
+    return [...nameMatched, ...tagMatched];
+  }
+
+  return toolsWithRating;
 }
 
 /* ===== 헤더 업데이트 ===== */

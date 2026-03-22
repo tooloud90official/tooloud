@@ -46,6 +46,9 @@ const SUBCAT_ORDER = {
   ast:   ["ast_gen", "ast_work"]
 };
 
+// ─── 그리드 고정 크기 (4열 × 2행) ────────────────────────────────
+const GRID_SIZE = 8;
+
 // ─── 전역 캐시 ─────────────────────────────────────────────────────
 let allTools   = [];
 let dataLoaded = false;
@@ -218,6 +221,7 @@ function renderFolders(categoryLabel) {
 
   const subcatCodes = SUBCAT_ORDER[catCode] || [];
 
+  // ─── 실제 폴더 렌더링 ──────────────────────────────────────────
   subcatCodes.forEach(subcatCode => {
     const toolsInFolder = allTools.filter(t => t.tool_subcat === subcatCode);
     const folderTitle = SUBCAT_MAP[subcatCode] || subcatCode;
@@ -246,6 +250,23 @@ function renderFolders(categoryLabel) {
 
     toolGrid.appendChild(groupDiv);
   });
+
+  // ─── 빈 슬롯 → ghost 폴더로 채우기 (4×2 = 8칸 고정) ───────────
+  const emptyCount = GRID_SIZE - subcatCodes.length;
+  for (let i = 0; i < emptyCount; i++) {
+    const ghost = document.createElement('div');
+    ghost.className = 'tool-group ghost';
+    ghost.innerHTML = `
+      <div class="tool-icon-box">
+        <div class="mini-icon"></div>
+        <div class="mini-icon"></div>
+        <div class="mini-icon"></div>
+        <div class="mini-icon"></div>
+      </div>
+      <span class="group-title">준비 중</span>
+    `;
+    toolGrid.appendChild(ghost);
+  }
 }
 
 // ─── 모달 내 툴 목록 렌더링 ────────────────────────────────────────

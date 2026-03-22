@@ -17,21 +17,21 @@ body {
   font-size: 40px;
   font-weight: 700;
   color: #1a1a2e;
-  margin-top: 65px;           /* ✅ 수정: 6px → 65px */
+  margin-top: 65px;
   margin-bottom: 65px;
   letter-spacing: -0.5px;
 }
 
 /* ===== 탭 + 그리드 공통 래퍼 ===== */
 .category-content-wrap {
-  width: fit-content;          /* ✅ 추가: 탭과 그리드 너비 일치용 래퍼 */
+  width: fit-content;
   margin: 0 auto;
 }
 
 /* ===== 알약 모양 탭 메뉴 ===== */
 .category-tabs {
   display: flex;
-  justify-content: flex-start; /* ✅ 수정: center → flex-start */
+  justify-content: flex-start;
   gap: 12px;
   margin-bottom: 50px;
 }
@@ -57,10 +57,10 @@ body {
 /* ===== 폴더 그리드 및 카드 ===== */
 .tool-grid {
   display: grid;
-  grid-template-columns: repeat(3, 180px); /* ✅ 수정: auto-fill → 3열 고정 */
-  grid-template-rows: repeat(2, auto);      /* ✅ 추가: 2행 고정 */
+  grid-template-columns: repeat(4, 180px); /* ✅ 3열 → 4열 */
+  grid-template-rows: repeat(2, auto);
   gap: 40px 30px;
-  justify-content: center;
+  justify-content: start; /* ✅ 탭 왼쪽 정렬과 맞춤 */
 }
 
 .tool-group {
@@ -123,6 +123,28 @@ body {
   color: #333;
 }
 
+/* ===== Ghost 폴더 (빈 슬롯) ===== */
+.tool-group.ghost {
+  opacity: 0.3;
+  filter: grayscale(1);
+  cursor: default;
+  pointer-events: none;
+}
+
+.tool-group.ghost .tool-icon-box {
+  background: rgba(240, 243, 250, 0.5);
+  border: 1px dashed rgba(200, 210, 225, 0.8);
+  box-shadow: none;
+}
+
+.tool-group.ghost .mini-icon {
+  background: #ebebeb;
+}
+
+.tool-group.ghost .group-title {
+  color: #bbb;
+}
+
 /* ===== 모달 오버레이 ===== */
 .modal-overlay {
   position: fixed;
@@ -145,8 +167,8 @@ body {
   max-height: 80vh;
   border-radius: 28px;
   padding: 28px 28px 24px 28px;
-  display: flex;               /* ✅ 유지 */
-  flex-direction: column;      /* ✅ 유지 */
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 32px 64px rgba(0, 0, 0, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   box-sizing: border-box;
@@ -160,7 +182,7 @@ body {
   padding-bottom: 16px;
   margin-bottom: 16px;
   border-bottom: 1px solid #f0f0f0;
-  flex-shrink: 0;              /* ✅ 추가: 헤더가 줄어들지 않도록 */
+  flex-shrink: 0;
 }
 
 .header-left {
@@ -242,8 +264,8 @@ body {
 
 /* ===== 모달 바디 ===== */
 .modal-body {
-  flex: 1;                     /* ✅ 추가: 남은 공간 모두 차지 */
-  min-height: 0;               /* ✅ 핵심: flex 자식 스크롤 동작을 위해 필수 */
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   margin-right: -8px;
@@ -378,14 +400,14 @@ body {
   }
 
   .tool-grid {
-    grid-template-columns: repeat(3, 150px); /* ✅ 수정: auto-fill → 3열 고정 */
-    grid-template-rows: repeat(2, auto);      /* ✅ 추가 */
+    grid-template-columns: repeat(4, 140px); /* ✅ 4열 유지 */
+    grid-template-rows: repeat(2, auto);
     gap: 30px 20px;
   }
 
   .tool-icon-box {
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
   }
 }
 
@@ -408,19 +430,19 @@ body {
   }
 
   .tool-grid {
-    grid-template-columns: repeat(3, 110px); /* ✅ 수정: auto-fill → 3열 고정 */
-    grid-template-rows: repeat(2, auto);      /* ✅ 추가 */
-    gap: 24px 10px;
+    grid-template-columns: repeat(4, 80px); /* ✅ 4열 유지 */
+    grid-template-rows: repeat(2, auto);
+    gap: 20px 8px;
   }
 
   .tool-icon-box {
-    width: 110px;
-    height: 110px;
-    border-radius: 26px;
-    padding: 14px;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    padding: 10px;
   }
 
   .group-title {
-    font-size: 12px;
+    font-size: 11px;
   }
 }
