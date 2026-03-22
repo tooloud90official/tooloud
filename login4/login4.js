@@ -120,10 +120,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       // ✅ avatar 랜덤 선택
-      const avatarNum = Math.floor(Math.random() * 4) + 1;
+      const avatarNum = Math.floor(Math.random() * 8) + 1;  // 4 → 8개
       const { data: avatarData } = supabase.storage
         .from("user_img")
-        .getPublicUrl(`avatar${avatarNum}`);
+        .getPublicUrl(`avatar${avatarNum}.jpg`);  // .jpg 추가
+        
       const avatarUrl = avatarData?.publicUrl ?? "/media/profil.png";
 
       const { error } = await supabase.from('users').insert({

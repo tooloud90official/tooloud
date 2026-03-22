@@ -31,6 +31,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: #fff; /* ✅ 추가 */
 
   border-radius: 16px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);

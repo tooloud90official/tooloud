@@ -7,49 +7,52 @@ function renderMainWorkMedia(container, data) {
   const url = data.img || "";
   const ext = url.split(".").pop().toLowerCase().split("?")[0];
 
+  // ✅ 버튼 미리 빼놓기
+  const moreBtn = container.querySelector(".work-card__more-btn");
   container.innerHTML = "";
-  container.style.cursor = "pointer";
-  container.onclick = () => {
-    if (data.workId) {
-      window.location.href = `/artwork/artwork_post/artwork_post.html?work_id=${encodeURIComponent(data.workId)}`;
-    }
-  };
+  if (moreBtn) container.appendChild(moreBtn);
 
   // 이미지
   if (["jpg","jpeg","png","gif","webp"].includes(ext)) {
-    container.innerHTML = `<img src="${url}" alt="작업물" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentElement.style.background='#e8eef5'">`;
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "작업물";
+    img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
+    img.onerror = () => { container.style.background = "#e8eef5"; };
+    container.appendChild(img);
     return;
   }
 
   // 비디오
   if (["mp4","webm","mov"].includes(ext)) {
-    container.innerHTML = `
-      <div class="main-work-video-wrap">
-        <video class="main-work-video" muted playsinline preload="metadata">
-          <source src="${url}">
-        </video>
-        <canvas class="main-work-thumb"></canvas>
-        <button class="main-work-playbtn" aria-label="재생">
-          <svg viewBox="0 0 24 24" fill="white" width="48" height="48"
-            style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5))">
-            <path d="M8 5v14l11-7z"></path>
-          </svg>
-        </button>
-        <div class="main-work-video-controls">
-          <span class="main-work-video-time">0:00 / 0:00</span>
-          <div class="main-work-video-seekbar">
-            <div class="main-work-video-seekbar__fill"></div>
-          </div>
+    const wrap = document.createElement("div");
+    wrap.className = "main-work-video-wrap";
+    wrap.innerHTML = `
+      <video class="main-work-video" muted playsinline preload="metadata">
+        <source src="${url}">
+      </video>
+      <canvas class="main-work-thumb"></canvas>
+      <button class="main-work-playbtn" aria-label="재생">
+        <svg viewBox="0 0 24 24" fill="white" width="48" height="48"
+          style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5))">
+          <path d="M8 5v14l11-7z"></path>
+        </svg>
+      </button>
+      <div class="main-work-video-controls">
+        <span class="main-work-video-time">0:00 / 0:00</span>
+        <div class="main-work-video-seekbar">
+          <div class="main-work-video-seekbar__fill"></div>
         </div>
       </div>`;
+    container.appendChild(wrap);
 
-    const video    = container.querySelector(".main-work-video");
-    const canvas   = container.querySelector(".main-work-thumb");
-    const playBtn  = container.querySelector(".main-work-playbtn");
-    const controls = container.querySelector(".main-work-video-controls");
-    const timeEl   = container.querySelector(".main-work-video-time");
-    const seekbar  = container.querySelector(".main-work-video-seekbar");
-    const fill     = container.querySelector(".main-work-video-seekbar__fill");
+    const video    = wrap.querySelector(".main-work-video");
+    const canvas   = wrap.querySelector(".main-work-thumb");
+    const playBtn  = wrap.querySelector(".main-work-playbtn");
+    const controls = wrap.querySelector(".main-work-video-controls");
+    const timeEl   = wrap.querySelector(".main-work-video-time");
+    const seekbar  = wrap.querySelector(".main-work-video-seekbar");
+    const fill     = wrap.querySelector(".main-work-video-seekbar__fill");
 
     const pauseSvg = `<svg viewBox="0 0 24 24" fill="white" width="36" height="36" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>`;
     const playSvg  = `<svg viewBox="0 0 24 24" fill="white" width="48" height="48" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5))"><path d="M8 5v14l11-7z"></path></svg>`;
@@ -71,18 +74,15 @@ function renderMainWorkMedia(container, data) {
         video.style.display  = "none";
       }
     });
-
     video.addEventListener("loadedmetadata", () => {
       timeEl.textContent = `0:00 / ${formatVideoTime(video.duration)}`;
     });
-
     video.addEventListener("timeupdate", () => {
       if (!video.duration) return;
       const pct = (video.currentTime / video.duration) * 100;
       fill.style.width = `${pct}%`;
       timeEl.textContent = `${formatVideoTime(video.currentTime)} / ${formatVideoTime(video.duration)}`;
     });
-
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       if (video.paused) {
@@ -95,7 +95,6 @@ function renderMainWorkMedia(container, data) {
         playBtn.innerHTML = playSvg;
       }
     });
-
     seekbar.addEventListener("click", (e) => {
       e.stopPropagation();
       if (!video.duration) return;
@@ -103,9 +102,7 @@ function renderMainWorkMedia(container, data) {
       const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       video.currentTime = pct * video.duration;
     });
-
     controls.addEventListener("click", (e) => e.stopPropagation());
-
     video.addEventListener("ended", () => {
       canvas.style.display = "block";
       video.style.display  = "none";
@@ -117,41 +114,42 @@ function renderMainWorkMedia(container, data) {
   // 오디오
   if (["mp3","wav","ogg","m4a"].includes(ext)) {
     const audioId = `mainAudio_${Date.now()}`;
-    container.innerHTML = `
-      <div class="main-work-audio-wrap">
-        <div class="main-work-audio-card">
-          <div class="main-work-audio-thumb">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 18V5l12-2v13"></path>
-              <circle cx="6" cy="18" r="3"></circle>
-              <circle cx="18" cy="16" r="3"></circle>
+    const wrap = document.createElement("div");
+    wrap.className = "main-work-audio-wrap";
+    wrap.innerHTML = `
+      <div class="main-work-audio-card">
+        <div class="main-work-audio-thumb">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+          <button class="main-work-audio-playbtn" id="${audioId}_btn" aria-label="재생">
+            <svg viewBox="0 0 24 24" fill="white" width="48" height="48"
+              style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">
+              <path d="M8 5v14l11-7z"></path>
             </svg>
-            <button class="main-work-audio-playbtn" id="${audioId}_btn" aria-label="재생">
-              <svg viewBox="0 0 24 24" fill="white" width="48" height="48"
-                style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">
-                <path d="M8 5v14l11-7z"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="main-work-audio-controls" id="${audioId}_controls">
-            <span class="main-work-audio-time" id="${audioId}_time">0:00 / 0:00</span>
-            <div class="main-work-audio-seekbar" id="${audioId}_seekbar">
-              <div class="main-work-audio-seekbar__fill" id="${audioId}_fill"></div>
-            </div>
+          </button>
+        </div>
+        <div class="main-work-audio-controls" id="${audioId}_controls">
+          <span class="main-work-audio-time" id="${audioId}_time">0:00 / 0:00</span>
+          <div class="main-work-audio-seekbar" id="${audioId}_seekbar">
+            <div class="main-work-audio-seekbar__fill" id="${audioId}_fill"></div>
           </div>
         </div>
-        <audio id="${audioId}" preload="metadata">
-          <source src="${url}">
-        </audio>
-      </div>`;
+      </div>
+      <audio id="${audioId}" preload="metadata">
+        <source src="${url}">
+      </audio>`;
+    container.appendChild(wrap);
 
-    const audio   = container.querySelector(`#${audioId}`);
-    const playBtn = container.querySelector(`#${audioId}_btn`);
-    const timeEl  = container.querySelector(`#${audioId}_time`);
-    const seekbar = container.querySelector(`#${audioId}_seekbar`);
-    const fill    = container.querySelector(`#${audioId}_fill`);
+    const audio   = wrap.querySelector(`#${audioId}`);
+    const playBtn = wrap.querySelector(`#${audioId}_btn`);
+    const timeEl  = wrap.querySelector(`#${audioId}_time`);
+    const seekbar = wrap.querySelector(`#${audioId}_seekbar`);
+    const fill    = wrap.querySelector(`#${audioId}_fill`);
 
     const pauseSvg = `<svg viewBox="0 0 24 24" fill="white" width="36" height="36"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>`;
     const playSvg  = `<svg viewBox="0 0 24 24" fill="white" width="48" height="48" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))"><path d="M8 5v14l11-7z"></path></svg>`;
@@ -167,7 +165,6 @@ function renderMainWorkMedia(container, data) {
       if (audio.paused) { audio.play(); playBtn.innerHTML = pauseSvg; }
       else              { audio.pause(); playBtn.innerHTML = playSvg; }
     });
-
     seekbar?.addEventListener("click", (e) => {
       e.stopPropagation();
       if (!audio.duration) return;
@@ -175,40 +172,38 @@ function renderMainWorkMedia(container, data) {
       const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       audio.currentTime = pct * audio.duration;
     });
-
     audio?.addEventListener("loadedmetadata", () => {
       timeEl.textContent = `0:00 / ${formatTime(audio.duration)}`;
     });
-
     audio?.addEventListener("timeupdate", () => {
       if (!audio.duration) return;
       const pct = (audio.currentTime / audio.duration) * 100;
       fill.style.width = `${pct}%`;
       timeEl.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
     });
-
     audio?.addEventListener("ended", () => { playBtn.innerHTML = playSvg; });
     return;
   }
 
   // PDF
   if (ext === "pdf" && window.pdfjsLib) {
-    container.innerHTML = `
-      <div class="main-work-pdf-wrap">
-        <div class="main-work-pdf-stage">
-          <canvas class="main-work-pdf-canvas"></canvas>
-        </div>
-        <div class="main-work-pdf-controls">
-          <button type="button" class="main-work-pdf-btn" id="mainPdfPrev">이전</button>
-          <div class="main-work-pdf-page" id="mainPdfPage">1 / 1</div>
-          <button type="button" class="main-work-pdf-btn" id="mainPdfNext">다음</button>
-        </div>
+    const wrap = document.createElement("div");
+    wrap.className = "main-work-pdf-wrap";
+    wrap.innerHTML = `
+      <div class="main-work-pdf-stage">
+        <canvas class="main-work-pdf-canvas"></canvas>
+      </div>
+      <div class="main-work-pdf-controls">
+        <button type="button" class="main-work-pdf-btn" id="mainPdfPrev">이전</button>
+        <div class="main-work-pdf-page" id="mainPdfPage">1 / 1</div>
+        <button type="button" class="main-work-pdf-btn" id="mainPdfNext">다음</button>
       </div>`;
+    container.appendChild(wrap);
 
-    const canvas  = container.querySelector(".main-work-pdf-canvas");
-    const pageEl  = container.querySelector("#mainPdfPage");
-    const prevBtn = container.querySelector("#mainPdfPrev");
-    const nextBtn = container.querySelector("#mainPdfNext");
+    const canvas  = wrap.querySelector(".main-work-pdf-canvas");
+    const pageEl  = wrap.querySelector("#mainPdfPage");
+    const prevBtn = wrap.querySelector("#mainPdfPrev");
+    const nextBtn = wrap.querySelector("#mainPdfNext");
     const pdfState = { doc: null, page: 1, total: 1 };
 
     async function drawPage() {
@@ -237,10 +232,11 @@ function renderMainWorkMedia(container, data) {
     return;
   }
 
-  container.innerHTML = `
-    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,.35);font-size:13px;font-weight:600;">
-      미리보기 없음
-    </div>`;
+  // fallback
+  const fallback = document.createElement("div");
+  fallback.style.cssText = "width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,.35);font-size:13px;font-weight:600;";
+  fallback.textContent = "미리보기 없음";
+  container.appendChild(fallback);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -545,24 +541,41 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById('workCardImage');
     const toolEl    = document.getElementById('workCardTool');
     const nameEl    = document.getElementById('workCardUserName');
+    const moreBtn   = document.getElementById('workCardMoreBtn'); // ✅ 여기서 가져오기
     const data      = WORK_DATA[category];
-
+  
     if (!data) {
       if (container) {
-        container.style.cursor = "";
-        container.onclick = null;
         container.innerHTML = `<div style="width:100%;height:100%;background:#e8eef5;"></div>`;
+        // ✅ 버튼 다시 넣기
+        if (moreBtn) { moreBtn.style.display = "none"; container.appendChild(moreBtn); }
       }
       if (nameEl) nameEl.textContent = '님의 작업물';
       if (toolEl) toolEl.innerHTML = '<p style="color:#aaa; font-size:13px; padding:16px;">등록된 작업물이 없습니다.</p>';
       return;
     }
-
+  
     if (nameEl) {
       nameEl.textContent = data.userName ? `${data.userName} 님의 작업물` : '님의 작업물';
     }
-
+  
+    // ✅ renderMainWorkMedia 호출 전에 버튼 꺼내기
+    if (moreBtn && moreBtn.parentElement === container) {
+      container.removeChild(moreBtn);
+    }
+  
     renderMainWorkMedia(container, data);
+  
+    // ✅ 렌더 후 버튼 다시 넣고 보이게
+    if (moreBtn) {
+      container.appendChild(moreBtn);
+      moreBtn.style.display = "flex";
+      moreBtn.onclick = (e) => {
+        e.stopPropagation();
+        window.location.href = `/artwork/artwork_post/artwork_post.html?work_id=${encodeURIComponent(data.workId)}`;
+      };
+    }
+
 
     if (toolEl) {
       toolEl.innerHTML = `

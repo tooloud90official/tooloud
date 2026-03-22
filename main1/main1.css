@@ -548,3 +548,39 @@ body {
   width: 0%;
   pointer-events: none;
 }
+
+.work-card__image {
+  position: relative; /* ✅ 추가 */
+}
+
+.work-card__more-btn {
+  position: absolute; /* ✅ absolute로 변경 */
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background 0.2s;
+}
+
+.work-card__more-btn:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.more-btn__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff; /* ✅ 이미지 위라 흰색으로 */
+  display: block;
+}

@@ -331,12 +331,10 @@ function renderToolGrid(gridEl, keyword = "") {
   if (!list.length) { gridEl.innerHTML = `<div class="tool-empty">검색 결과가 없습니다.</div>`; return; }
 
   gridEl.innerHTML = list.map((t) => {
-    const starsText = starsToText(t.stars);
     return `
       <button type="button" class="tool-item ${String(t.id) === String(selectedToolId) ? "is-selected" : ""}" data-tool-id="${esc(t.id)}">
         ${t.icon ? `<img class="tool-icon" src="${esc(t.icon)}" alt="${esc(t.name)}" />` : `<div class="tool-icon" aria-hidden="true"></div>`}
         <div class="tool-name">${esc(t.name)}</div>
-        ${starsText ? `<div class="tool-stars">${esc(starsText)}</div>` : ``}
       </button>`;
   }).join("");
 

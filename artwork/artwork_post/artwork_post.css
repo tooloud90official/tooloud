@@ -467,8 +467,10 @@ body {
   height: 70px !important;
   border-radius: 15px;
   flex: 0 0 70px;
-  background-color: #374151;
+  background-color: #fff;
   object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); /* ✅ 추가 */
+  cursor: pointer; /* ✅ 내부 요소 전체 커서 통일 */
 }
 
 .artwork-post__tool-meta { display: grid; gap: 4px; }

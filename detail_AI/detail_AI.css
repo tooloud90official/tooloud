@@ -649,37 +649,50 @@ body{
   pointer-events: none;
 }
 .detail_AI__more-btn {
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(42, 124, 255, 0.85);
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   border: none;
-  border-radius: 999px;
-  padding: 6px 14px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   transition: background 0.2s;
 }
 
 .detail_AI__more-btn:hover {
-  background: rgba(42, 124, 255, 1);
+  background: rgba(0, 0, 0, 0.55);
 }
+
 
 .detail_AI__carousel {
   position: relative; /* ✅ 추가 */
 }
 
-.detail_AI__more-btn {
-  position: absolute;
-  top: 46px; /* work-actions 높이만큼 아래로 */
-  left: 10px;
-  z-index: 10;
+.more-btn__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+}
+
+.plan-card__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   font-size: 12px;
   font-weight: 600;
-  color: #fff;
-  background: rgba(42, 124, 255, 0.85);
-  border: none;
-  border-radius: 999px;
-  padding: 6px 14px;
-  cursor: pointer;
-  transition: background 0.2s;
+  color: rgba(0, 0, 0, 0.3);
+  text-align: center;
+  padding: 20px 0;
 }

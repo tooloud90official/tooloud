@@ -423,7 +423,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const uploadLink = document.querySelector(".detail_AI__work-link");
   if (uploadLink) {
     const dest = `/artwork/artwork_upload/artwork_upload.html${TOOL_ID ? `?tool_ID=${encodeURIComponent(TOOL_ID)}` : ""}`;
-    uploadLink.href = dest;
+    
+    uploadLink.removeAttribute("href");
+    uploadLink.style.cursor = "pointer";
+    
+    uploadLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        window.location.href = "/login1/login1.html";
+        return;
+      }
+      window.location.href = dest;
+    });
   }
 
   initReviewSort();
@@ -498,6 +509,18 @@ function renderPlanCards(tool) {
     const listEl  = card.querySelector(".plan-card__list");
     const topEl   = card.querySelector(".plan-card__top");
     const badgeEl = card.querySelector(".plan-card__badge");
+    const btnEl   = card.querySelector(".plan-card__btn"); // ✅ 추가
+
+    if (!tool[nameKey]) {
+      if (badgeEl) badgeEl.textContent = `플랜 #${i + 1}`;
+      if (nameEl)  nameEl.textContent  = "";
+      if (listEl) listEl.innerHTML = `<li class="plan-card__empty">해당 플랜이 없습니다.</li>`;
+      // 가격 있으면 제거
+      if (btnEl)   btnEl.innerHTML     = ""; // ✅ 버튼 영역 완전히 비우기
+      
+      topEl?.querySelector(".plan-card__price")?.remove();
+      return;
+    }
 
     if (badgeEl) badgeEl.textContent = `플랜 #${i + 1}`;
     if (nameEl)  nameEl.textContent  = tool[nameKey] ?? "";
@@ -663,6 +686,9 @@ function renderEmptyWorks() {
   const profile  = document.querySelector(".detail_AI__profile");
   const showcase = document.querySelector(".detail_AI__showcase");
   const carousel = document.querySelector(".detail_AI__carousel");
+
+  const workMoreBtn = document.getElementById("workMoreBtn");
+  if (workMoreBtn) workMoreBtn.style.display = "none";
 
   if (profile)  profile.style.display = "none";
   if (showcase) showcase.style.gridTemplateColumns = "1fr";

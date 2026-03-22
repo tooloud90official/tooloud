@@ -23,13 +23,11 @@ let ALL_TOOLS = [];
 let currentStep = 0;
 let currentCatKey = "";
 
-/** 숫자 변환 */
 function toPrice(value) {
   const num = parseInt(value, 10);
   return Number.isNaN(num) ? null : num;
 }
 
-/** 플랜 배열 추출 */
 function getToolPlans(tool) {
   return [
     {
@@ -50,20 +48,16 @@ function getToolPlans(tool) {
   ].filter(plan => {
     if (!plan.name) return false;
     if (plan.price === null) return false;
-    if (plan.price < 0) return false; // 문의(-1) 제외
+    if (plan.price < 0) return false;
     return true;
   });
 }
 
-/** 가격 포맷 */
 function formatPrice(price) {
   if (price === 0) return "무료";
   return `₩${price.toLocaleString()}/월`;
 }
 
-/** 현재 step에 맞는 플랜만 뽑아서
- *  툴 단위가 아니라 "플랜 카드용 데이터" 배열로 변환
- */
 function getPlanCardsByStep(step) {
   const range = PRICE_RANGES[step];
 
@@ -71,7 +65,6 @@ function getPlanCardsByStep(step) {
     .filter(tool => tool.tool_cat === currentCatKey)
     .flatMap(tool => {
       const plans = getToolPlans(tool);
-
       return plans
         .filter(plan => plan.price >= range.min && plan.price <= range.max)
         .map(plan => ({
@@ -86,15 +79,32 @@ function getPlanCardsByStep(step) {
     });
 }
 
-/** 아이콘 클릭 시 tool_link 이동 */
-function bindToolLink(iconWrap, toolLink) {
+function bindToolLink(iconWrap, toolLink, toolId) {
   if (!toolLink) return;
 
   iconWrap.style.cursor = "pointer";
   iconWrap.setAttribute("role", "link");
   iconWrap.setAttribute("tabindex", "0");
 
-  const go = () => {
+  const go = async () => {
+    try {
+      const supabase = window._supabase;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && toolId) {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("recent_tools")
+          .eq("user_id", user.id)
+          .single();
+
+        const current = userData?.recent_tools ?? [];
+        const updated = [toolId, ...current.filter(id => id !== toolId)].slice(0, 8);
+        await supabase.from("users").update({ recent_tools: updated }).eq("user_id", user.id);
+      }
+    } catch (e) {
+      console.warn("recent_tools 저장 실패:", e);
+    }
+
     window.location.href = toolLink;
   };
 
@@ -111,7 +121,6 @@ function bindToolLink(iconWrap, toolLink) {
     }
   });
 
-  // 내부 a 태그가 생기는 경우도 가로채기
   setTimeout(() => {
     const a = iconWrap.querySelector("a");
     if (a) {
@@ -122,7 +131,6 @@ function bindToolLink(iconWrap, toolLink) {
   }, 0);
 }
 
-/** 카드 렌더링 */
 function renderToolCards(planCards) {
   const grid = document.querySelector("#toolCardGrid");
   if (!grid) return;
@@ -176,17 +184,15 @@ function renderToolCards(planCards) {
       });
     }
 
-    bindToolLink(iconWrap, item.tool_link);
+    bindToolLink(iconWrap, item.tool_link, item.tool_ID); // ✅ toolId 추가
   });
 }
 
-/** 필터 적용 */
 function applyFilter(step) {
   const planCards = getPlanCardsByStep(step);
   renderToolCards(planCards);
 }
 
-/** 슬라이더 초기화 */
 function initStepSlider() {
   const sliderRoot = document.querySelector("#stepSlider");
   const labelsWrap = document.querySelector(".price-filter__labels");
@@ -228,7 +234,6 @@ function initStepSlider() {
   function calcStepPositions() {
     const sliderRect = sliderRoot.getBoundingClientRect();
     const labelNodes = labelsWrap.querySelectorAll(".price-filter__step-label");
-
     stepPositions = Array.from(labelNodes).map(el => {
       const r = el.getBoundingClientRect();
       return (r.left + r.width / 2) - sliderRect.left;
@@ -317,7 +322,6 @@ function initStepSlider() {
   });
 }
 
-/** 초기 로드 */
 document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const category = params.get("category") || params.get("tab") || "이미지·오디오·영상";

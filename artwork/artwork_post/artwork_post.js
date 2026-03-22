@@ -434,8 +434,20 @@ function fillBanner(data) {
       .map(n => `<span class="tool-star ${n <= rounded ? "is-on" : "is-off"}">★</span>`)
       .join("");
   }
-  if (toolIconEl)    { toolIconEl.src = data.tool_icon || "/media/image.png"; toolIconEl.alt = data.tool_name || "툴 아이콘"; }
 
+  if (toolIconEl) {
+    toolIconEl.src = data.tool_icon || "/media/image.png";
+    toolIconEl.alt = data.tool_name || "툴 아이콘";
+  
+    // ✅ 툴 카드 클릭 시 툴 페이지로 이동
+    const toolCard = toolIconEl.closest(".artwork-post__tool");
+    if (toolCard && artworkData?.tool_id) {
+      toolCard.addEventListener("click", () => {
+        window.location.href = `/detail_AI/detail_AI.html?tool_ID=${encodeURIComponent(artworkData.tool_id)}`;
+      });
+    }
+  }
+  
   const actions = $(".artwork-hero-banner__actions");
   if (actions) actions.style.display = data.isMine ? "flex" : "none";
 
