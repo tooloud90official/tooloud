@@ -280,34 +280,49 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const { data: reviewsData, error: reviewsError } = await supabase
         .from('tool_reviews')
-        .select('tool_ID, rating')
-        .in('tool_ID', toolIds);
+        .select('tool_id, rating')
+        .in('tool_id', toolIds);
 
       if (reviewsError) console.error('[tool_reviews] 에러:', reviewsError.message);
 
+      // ✅ 툴별 평균 평점 계산 (반올림 없이 실수값 유지 — 정렬 정확도를 위해)
       const ratingMap = {};
       (reviewsData || []).forEach(r => {
-        if (!ratingMap[r.tool_ID]) ratingMap[r.tool_ID] = { sum: 0, count: 0 };
-        ratingMap[r.tool_ID].sum += r.rating;
-        ratingMap[r.tool_ID].count += 1;
+        if (!ratingMap[r.tool_id]) ratingMap[r.tool_id] = { sum: 0, count: 0 };
+        ratingMap[r.tool_id].sum += r.rating;
+        ratingMap[r.tool_id].count += 1;
       });
       const avgRatingMap = {};
       Object.keys(ratingMap).forEach(id => {
-        avgRatingMap[id] = Math.round(ratingMap[id].sum / ratingMap[id].count);
+        avgRatingMap[id] = ratingMap[id].sum / ratingMap[id].count;
       });
 
       const toolMap = {};
       (toolsForWorks || []).forEach(t => { toolMap[t.tool_ID] = t; });
 
+      // ✅ 카테고리별로 작업물을 모두 수집한 뒤 평점 높은 순으로 정렬해서 1위만 채택
+      const catCandidates = {}; // { cat: [ { work, tool, rating } ] }
+
       worksData.forEach(work => {
         const tool = toolMap[work.tool_id];
         if (!tool || !tool.tool_cat) return;
 
-        const cat = tool.tool_cat;
-        if (WORK_DATA[cat]) return;
-
+        const cat    = tool.tool_cat;
         const rating = avgRatingMap[tool.tool_ID] ?? 0;
-        const stars = `<span style="color:orange;">${'★'.repeat(rating)}</span><span style="color:#ccc;">${'★'.repeat(Math.max(0, 5 - rating))}</span>`;
+
+        if (!catCandidates[cat]) catCandidates[cat] = [];
+        catCandidates[cat].push({ work, tool, rating });
+      });
+
+      // ✅ 카테고리별로 평점 내림차순 정렬 후 1위 작업물 선택
+      Object.entries(catCandidates).forEach(([cat, candidates]) => {
+        candidates.sort((a, b) => b.rating - a.rating);
+        const best   = candidates[0];
+        const tool   = best.tool;
+        const rating = best.rating;
+
+        const roundedRating = Math.round(rating);
+        const stars = `<span style="color:orange;">${'★'.repeat(roundedRating)}</span><span style="color:#ccc;">${'★'.repeat(Math.max(0, 5 - roundedRating))}</span>`;
 
         let iconUrl = tool.icon;
         if (!iconUrl && tool.tool_link) {
@@ -321,12 +336,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         WORK_DATA[cat] = {
-          img:    work.work_link || '',
-          workId: work.work_id,
+          img:    best.work.work_link || '',
+          workId: best.work.work_id,
           tool:   { id: tool.tool_ID, name: tool.tool_name, img: iconUrl },
           stars,
           rating,
-          userId: work.user_id,
+          userId: best.work.user_id,
         };
       });
 
@@ -346,6 +361,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           w.userName = userNameMap[w.userId] ?? null;
         });
       }
+
+      console.log('[works] WORK_DATA 로드 완료 (평점순):', Object.keys(WORK_DATA));
     }
   } catch (e) {
     console.error('[works] 예외 발생:', e.message);
@@ -390,9 +407,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error('[users] 예외 발생:', e.message);
     }
   }
-
-  // ✅ Groq API 키 없이 Edge Function으로 호출
-  const SUPABASE_URL = 'https://fduhssklnkyvlgaimomv.supabase.co';
 
   async function getRecommendCatsFromGroq(userData, allToolsFlat) {
     let favoriteTools = [];
