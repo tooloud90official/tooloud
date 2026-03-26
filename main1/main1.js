@@ -1,18 +1,14 @@
-// main1/main1.js
 import { supabase } from '/_ignore/supabase.js';
-import { GROQ_API_KEY } from '/_ignore/groq.js';
 
 function renderMainWorkMedia(container, data) {
   if (!container) return;
   const url = data.img || "";
   const ext = url.split(".").pop().toLowerCase().split("?")[0];
 
-  // ✅ 버튼 미리 빼놓기
   const moreBtn = container.querySelector(".work-card__more-btn");
   container.innerHTML = "";
   if (moreBtn) container.appendChild(moreBtn);
 
-  // 이미지
   if (["jpg","jpeg","png","gif","webp"].includes(ext)) {
     const img = document.createElement("img");
     img.src = url;
@@ -23,7 +19,6 @@ function renderMainWorkMedia(container, data) {
     return;
   }
 
-  // 비디오
   if (["mp4","webm","mov"].includes(ext)) {
     const wrap = document.createElement("div");
     wrap.className = "main-work-video-wrap";
@@ -111,7 +106,6 @@ function renderMainWorkMedia(container, data) {
     return;
   }
 
-  // 오디오
   if (["mp3","wav","ogg","m4a"].includes(ext)) {
     const audioId = `mainAudio_${Date.now()}`;
     const wrap = document.createElement("div");
@@ -185,7 +179,6 @@ function renderMainWorkMedia(container, data) {
     return;
   }
 
-  // PDF
   if (ext === "pdf" && window.pdfjsLib) {
     const wrap = document.createElement("div");
     wrap.className = "main-work-pdf-wrap";
@@ -232,7 +225,6 @@ function renderMainWorkMedia(container, data) {
     return;
   }
 
-  // fallback
   const fallback = document.createElement("div");
   fallback.style.cssText = "width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,.35);font-size:13px;font-weight:600;";
   fallback.textContent = "미리보기 없음";
@@ -354,8 +346,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           w.userName = userNameMap[w.userId] ?? null;
         });
       }
-
-      console.log('[works] WORK_DATA 로드 완료:', Object.keys(WORK_DATA));
     }
   } catch (e) {
     console.error('[works] 예외 발생:', e.message);
@@ -380,7 +370,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         acc[cat].push(tool);
         return acc;
       }, {});
-      console.log('[tools] 로드 완료. 카테고리:', Object.keys(TOOLS_DATA));
     }
   } catch (e) {
     console.error('[tools] 예외 발생:', e.message);
@@ -401,6 +390,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error('[users] 예외 발생:', e.message);
     }
   }
+
+  // ✅ Groq API 키 없이 Edge Function으로 호출
+  const SUPABASE_URL = 'https://fduhssklnkyvlgaimomv.supabase.co';
 
   async function getRecommendCatsFromGroq(userData, allToolsFlat) {
     let favoriteTools = [];
@@ -434,17 +426,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     `.trim();
 
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/groq-proxy`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'llama-3.1-8b-instant',
           messages: [{ role: 'user', content: prompt }],
-          temperature: 0.3,
-          max_tokens: 200,
         }),
       });
 
@@ -478,7 +467,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (groqResult) {
       const { recommended_cats = [], recommended_subcats = [] } = groqResult;
-      console.log('[groq] 추천 cats:', recommended_cats, '/ subcats:', recommended_subcats);
       recommendedTools = allToolsFlat.filter(tool =>
         recommended_cats.includes(tool.tool_cat) ||
         recommended_subcats.includes(tool.tool_subcat)
@@ -486,23 +474,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (recommendedTools.length === 0) {
-      console.warn('[groq] 추천 결과 없음 → 랜덤 폴백');
       recommendedTools = allToolsFlat.sort(() => Math.random() - 0.5).slice(0, 8);
     } else {
       recommendedTools = recommendedTools.slice(0, 8);
     }
 
-    // ✅ tool_ID 배열만 저장 (text[] 타입에 맞게)
     try {
       const toolIdsToSave = recommendedTools.map(tool => tool.tool_ID);
-
       const { error: saveError } = await supabase
         .from('users')
         .update({ recommended_tools: toolIdsToSave })
         .eq('user_id', user.id);
-
       if (saveError) console.error('[groq] recommended_tools 저장 실패:', saveError.message);
-      else console.log('[groq] recommended_tools 저장 완료 (IDs):', toolIdsToSave);
     } catch (e) {
       console.error('[groq] recommended_tools 저장 중 예외:', e.message);
     }
@@ -541,32 +524,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById('workCardImage');
     const toolEl    = document.getElementById('workCardTool');
     const nameEl    = document.getElementById('workCardUserName');
-    const moreBtn   = document.getElementById('workCardMoreBtn'); // ✅ 여기서 가져오기
+    const moreBtn   = document.getElementById('workCardMoreBtn');
     const data      = WORK_DATA[category];
-  
+
     if (!data) {
       if (container) {
         container.innerHTML = `<div style="width:100%;height:100%;background:#e8eef5;"></div>`;
-        // ✅ 버튼 다시 넣기
         if (moreBtn) { moreBtn.style.display = "none"; container.appendChild(moreBtn); }
       }
       if (nameEl) nameEl.textContent = '님의 작업물';
       if (toolEl) toolEl.innerHTML = '<p style="color:#aaa; font-size:13px; padding:16px;">등록된 작업물이 없습니다.</p>';
       return;
     }
-  
+
     if (nameEl) {
       nameEl.textContent = data.userName ? `${data.userName} 님의 작업물` : '님의 작업물';
     }
-  
-    // ✅ renderMainWorkMedia 호출 전에 버튼 꺼내기
+
     if (moreBtn && moreBtn.parentElement === container) {
       container.removeChild(moreBtn);
     }
-  
+
     renderMainWorkMedia(container, data);
-  
-    // ✅ 렌더 후 버튼 다시 넣고 보이게
+
     if (moreBtn) {
       container.appendChild(moreBtn);
       moreBtn.style.display = "flex";
@@ -575,7 +555,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = `/artwork/artwork_post/artwork_post.html?work_id=${encodeURIComponent(data.workId)}`;
       };
     }
-
 
     if (toolEl) {
       toolEl.innerHTML = `
