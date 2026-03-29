@@ -1,4 +1,4 @@
-import { supabase } from '/_ignore/supabase.js';
+import { supabase } from '/tooloud/_ignore/supabase.js';
 
 window._supabase = supabase;
 
@@ -34,7 +34,7 @@ function renderLoggedOut(authArea) {
   `;
 
   const loginBtn = document.getElementById('loginBtn');
-  const go = () => { window.location.href = '/login1/login1.html'; };
+  const go = () => { window.location.href = '/tooloud/login1/login1.html'; };
   loginBtn?.addEventListener('click', go);
   loginBtn?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
@@ -77,9 +77,9 @@ function formatAlert(n, senderNameMap = {}, currentUserId = null) {
     switch (type) {
       case 'like':
       case 'reply':
-        return `/artwork/artwork_post/artwork_post.html?work_id=${refId}`;
+        return `/tooloud/artwork/artwork_post/artwork_post.html?work_id=${refId}`;
       case 'inquiry':
-        return `/inquiry/inquiry.html`;
+        return `/tooloud/inquiry/inquiry.html`;
       default:
         return null;
     }
@@ -101,17 +101,13 @@ function formatAlert(n, senderNameMap = {}, currentUserId = null) {
   }
 
   if (n.type === 'inquiry') {
-
-    // 🔥 관리자 판별 (현재는 이름 기준)
     const isAdmin = sender.includes('툴라우드 오피셜');
 
     let desc;
 
     if (isAdmin) {
-      // ✅ 유저 입장 (관리자가 답변)
       desc = '관리자님이 문의사항에 답변을 했어요.';
     } else {
-      // ✅ 관리자 입장 (유저가 문의 등록)
       desc = `${sender}님이 문의사항을 등록했어요.`;
     }
 
@@ -133,7 +129,7 @@ async function initLogout() {
 
   const doLogout = async () => {
     await supabase.auth.signOut();
-    window.location.href = '/main1/main1.html';
+    window.location.href = '/tooloud/main1/main1.html';
   };
 
   const handleLogout = async () => {
@@ -172,7 +168,7 @@ async function initLogout() {
   const isLoggedIn = !!session?.user;
 
   try {
-    const res  = await fetch('/_common/top-banner/top-banner.html');
+    const res  = await fetch('/tooloud/_common/top-banner/top-banner.html');
     const html = await res.text();
     const container = document.getElementById('top-banner');
     if (container) container.innerHTML = html;
@@ -181,7 +177,7 @@ async function initLogout() {
     return;
   }
 
-  loadStyle('/_common/top-banner/top-banner.css');
+  loadStyle('/tooloud/_common/top-banner/top-banner.css');
 
   const authArea = document.getElementById('authArea');
   if (!authArea) return;
@@ -193,7 +189,7 @@ async function initLogout() {
   }
 
   try {
-    await loadScript('/_common/top-banner/index.js');
+    await loadScript('/tooloud/_common/top-banner/index.js');
   } catch (e) {
     console.error('[include.js] index.js 로드 실패:', e);
   }
@@ -202,9 +198,9 @@ async function initLogout() {
 
     try {
       await Promise.all([
-        loadStyle('/_common/confirm/confirm.css'),
-        loadScript('/_common/confirm/include.js'),
-        loadScript('/_common/confirm/confirm.js'),
+        loadStyle('/tooloud/_common/confirm/confirm.css'),
+        loadScript('/tooloud/_common/confirm/include.js'),
+        loadScript('/tooloud/_common/confirm/confirm.js'),
       ]);
       if (!document.getElementById('modal-root')) {
         const root = document.createElement('div');
@@ -212,7 +208,7 @@ async function initLogout() {
         document.body.appendChild(root);
       }
       if (typeof window.includeHTML === 'function') {
-        await window.includeHTML('#modal-root', '/_common/confirm/confirm.html');
+        await window.includeHTML('#modal-root', '/tooloud/_common/confirm/confirm.html');
       }
     } catch (e) {
       console.warn('[include.js] confirm 모듈 로드 실패:', e);
@@ -221,7 +217,7 @@ async function initLogout() {
     await initLogout();
 
     try {
-      await loadScript('/_common/alert/alert.js');
+      await loadScript('/tooloud/_common/alert/alert.js');
 
       const { data: notiData } = await supabase
         .from('notifications')
