@@ -1,5 +1,5 @@
 // login1.js
-import { supabase } from '/_ignore/supabase.js';
+import { supabase } from '../_ignore/supabase.js';
 
 const emailInput    = document.getElementById('email');
 const passwordInput = document.getElementById('password');
@@ -23,7 +23,7 @@ loadButton({
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/login3/login3.html'
+        redirectTo: window.location.origin + '../login3/login3.html'
       }
     });
     if (error) console.error(error);
@@ -32,7 +32,7 @@ loadButton({
   const btn = document.querySelector('#googleBtnContainer .btn');
   btn.insertAdjacentHTML(
     'afterbegin',
-    '<img src="/media/googleLogo.svg" alt="Google" style="width:20px;height:20px;margin-right:10px;">'
+    '<img src="../media/googleLogo.svg" alt="Google" style="width:20px;height:20px;margin-right:10px;">'
   );
   btn.style.display = 'flex';
   btn.style.alignItems = 'center';
@@ -56,7 +56,7 @@ loadButton({
   const btn = document.querySelector('#githubBtnContainer .btn');
   btn.insertAdjacentHTML(
     'afterbegin',
-    '<img src="/media/githubLogo.png" alt="GitHub" style="width:20px;height:20px;margin-right:10px;margin-top:-3px;">'
+    '<img src="../media/githubLogo.png" alt="GitHub" style="width:20px;height:20px;margin-right:10px;margin-top:-3px;">'
   );
   btn.style.display = 'flex';
   btn.style.alignItems = 'center';
@@ -66,25 +66,25 @@ loadButton({
 // ===== 회원가입 텍스트 링크 =====
 const signupLink = document.getElementById('signupLink');
 signupLink?.addEventListener('click', () => {
-  window.location.href = '/login2/login2.html';
+  window.location.href = '../login2/login2.html';
 });
 
 // ===== 비밀번호 재설정 =====
 const resetPwBtn = document.getElementById('resetPw');
 resetPwBtn?.addEventListener('click', () => {
-  window.location.href = '/reset/reset.html';
+  window.location.href = '../reset/reset.html';
 });
 
 // ===== 에러 메시지 함수 =====
 function showEmailError(text) {
   const el = document.getElementById('emailError');
-  el.innerHTML = text ? `<img src="/media/caution.png" alt="caution" style="width:14px;height:14px;margin-right:1px;margin-top:-2px;vertical-align:middle;">${text}` : '';
+  el.innerHTML = text ? `<img src="../media/caution.png" alt="caution" style="width:14px;height:14px;margin-right:1px;margin-top:-2px;vertical-align:middle;">${text}` : '';
   el.classList.toggle('visible', text !== '');
 }
 
 function showPasswordError(text) {
   const el = document.getElementById('passwordError');
-  el.innerHTML = text ? `<img src="/media/caution.png" alt="caution" style="width:14px;height:14px;margin-right:1px;margin-top:-2px;vertical-align:middle;">${text}` : '';
+  el.innerHTML = text ? `<img src="../media/caution.png" alt="caution" style="width:14px;height:14px;margin-right:1px;margin-top:-2px;vertical-align:middle;">${text}` : '';
   el.classList.toggle('visible', text !== '');
 }
 
@@ -152,8 +152,8 @@ async function handleLogin() {
 
   if (!userData) {
     sessionStorage.setItem('signup_email', data.user.email);
-    window.location.href = '/login3/login3.html';
+    window.location.href = '../login3/login3.html';
   } else {
-    window.location.href = '/main1/main1.html';
+    window.location.href = '../main1/main1.html';
   }
 }

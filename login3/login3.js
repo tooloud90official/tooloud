@@ -1,6 +1,6 @@
 // login3.js
-import { loadNativeSelect } from '/_common/select/select.js';
-import { supabase } from '/_ignore/supabase.js';
+import { loadNativeSelect } from '../_common/select/select.js';
+import { supabase } from '../_ignore/supabase.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .maybeSingle();
 
     if (existingUser) {
-      window.location.href = '/main1/main1.html';
+      window.location.href = '../main1/main1.html';
       return;
     }
 
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     size: "md",
     onClick: () => {
       if (window.validateLogin3?.()) {
-        window.location.href = "/login4/login4.html";
+        window.location.href = "../login4/login4.html";
       }
     }
   });
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===== 5. 이전으로 돌아가기 =====
   document.getElementById('backBtn')?.addEventListener('click', () => {
     const result = confirm('페이지를 나가시겠습니까?\n입력한 내용이 저장되지 않습니다.');
-    if (result) window.location.href = '/login2/login2.html';
+    if (result) window.location.href = '../login2/login2.html';
   });
 
 });

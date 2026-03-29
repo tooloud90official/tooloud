@@ -1,6 +1,6 @@
 // login2.js
-import { loadNativeSelect } from '/_common/select/select.js';
-import { supabase } from '/_ignore/supabase.js';
+import { loadNativeSelect } from '../_common/select/select.js';
+import { supabase } from '../_ignore/supabase.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     size: "md",
     onClick: () => {
       if (window.validateLogin2?.()) {
-        window.location.href = "/login3/login3.html";
+        window.location.href = "../login3/login3.html";
       }
     }
   });
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function setMessage(msg, text, color, showIcon = true) {
     msg.innerHTML = text
-      ? `${showIcon ? `<img src="/media/caution.png" alt="caution" style="width:14px;height:14px;margin-right:1px;margin-top:-2px;vertical-align:middle;">` : ''}${text}`
+      ? `${showIcon ? `<img src="../media/caution.png" alt="caution" style="width:14px;height:14px;margin-right:1px;margin-top:-2px;vertical-align:middle;">` : ''}${text}`
       : '';
     msg.style.color = color || '';
   }
@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const result = confirm('페이지를 나가시겠습니까?\n입력한 내용이 저장되지 않습니다.');
     if (result) {
       clearInterval(timerInterval);
-      window.location.href = '/login1/login1.html';
+      window.location.href = '../login1/login1.html';
     }
   });
 
