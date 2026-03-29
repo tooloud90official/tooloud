@@ -11,24 +11,26 @@ function renderWorkCard(data) {
 
   workCardUserName.textContent = data.userName ? `${data.userName}님의 작업물` : "익명의 작업물";
 
-  const imgUrl = data.img || "media/work-sample.png";
-  workCardImg.src = imgUrl.startsWith("http") ? imgUrl : `/tooloud/main1/${imgUrl}`;
+  const imgUrl = data.img || "/media/work-sample.png";
+  workCardImg.src = imgUrl.startsWith("http") ? imgUrl : imgUrl;
   workCardImg.onerror = () => { workCardImg.parentElement.style.background = "#e8eef5"; };
+
+  if (data.hasMore) workCardMoreBtn.style.display = "block";
+  else workCardMoreBtn.style.display = "none";
 
   const toolEl = document.getElementById("workCardTool");
   toolEl.textContent = data.tool || "";
-
-  workCardMoreBtn.style.display = data.hasMore ? "block" : "none";
 }
 
-// 예시 렌더링
+// 예시: 메인 작업물 렌더링
 renderWorkCard({
   userName: "강민주",
-  img: "media/work-sample.png",
+  img: "/media/work-sample.png",
   hasMore: true,
   tool: "AI 이미지 생성"
 });
 
+// 검색바 초기화
 function initSearchBar() {
   const container = document.getElementById("searchbar-container");
   if (!container) return;
@@ -38,9 +40,9 @@ function initSearchBar() {
   input.className = "search-bar";
   container.appendChild(input);
 }
-
 initSearchBar();
 
+// 카테고리 탭 이벤트
 document.querySelectorAll(".category-tab").forEach(tab => {
   tab.addEventListener("click", e => {
     document.querySelectorAll(".category-tab").forEach(t => t.classList.remove("is-active"));
@@ -50,6 +52,7 @@ document.querySelectorAll(".category-tab").forEach(tab => {
   });
 });
 
+// 추천 섹션 표시
 function showRecommendSection(tools = []) {
   const section = document.getElementById("recommendSection");
   const grid = document.getElementById("recommendGrid");
@@ -59,7 +62,6 @@ function showRecommendSection(tools = []) {
     grid.innerHTML = tools.map(tool => `<div class="tool-card">${tool.name}</div>`).join("");
   }
 }
-
 showRecommendSection([
   { name: "AI 이미지 생성" },
   { name: "문서 요약" }
