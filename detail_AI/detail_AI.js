@@ -393,7 +393,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateBtnUI(pinned);
 
       btn.addEventListener("click", async () => {
-        if (!currentUser) { window.location.href = "/login1/login.html"; return; }
+        if (!currentUser) { window.location.href = "/login1/login1.html"; return; }
 
         const { data } = await supabase.from("users").select("favorite_tools").eq("user_id", currentUser.id).single();
         const current = data?.favorite_tools ?? [];
