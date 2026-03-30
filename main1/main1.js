@@ -554,55 +554,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     cardRoot?.querySelector('.work-card__empty-overlay')?.remove();
   
     if (!data) {
-<<<<<<< HEAD
-      if (container) {
-        // 부모의 패딩이나 텍스트 정렬 설정을 무시하도록 스타일 강제 적용
-        container.innerHTML = '';
-        container.style.cssText = `
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          background: #ffffff !important;
-          height: 300px !important;
-          position: relative !important;
-          width: 100% !important;
-          text-align: center !important;
-        `;
-
-        const msg = document.createElement('p');
-        msg.style.cssText = `
-          color: #aaa;
-          font-size: 14px;
-          margin: 0;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-        `;
-        msg.textContent = '등록된 작업물이 없습니다.';
-        container.appendChild(msg);
-
-        if (moreBtn) moreBtn.style.display = 'none';
-      }
-      if (nameEl) nameEl.textContent = '님의 작업물';
-      if (toolEl) toolEl.innerHTML = '';
-      return;
-    }
-
-    // 데이터가 있을 때는 inline style 초기화
-    if (container) {
-      container.style.cssText = '';
-    }
-
-=======
       if (cardRoot) {
         cardRoot.classList.add('is-empty');
   
         const overlay = document.createElement('div');
         overlay.className = 'work-card__empty-overlay';
         overlay.innerHTML = `
-          <div class="work-card__empty-text">❌ 등록된 작업물이 없습니다. ❌</div>
+          <div class="work-card__empty-text"> 등록된 작업물이 없습니다. </div>
         `;
         cardRoot.appendChild(overlay);
       }
@@ -613,7 +571,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 데이터 있으면 empty 상태 해제
     cardRoot?.classList.remove('is-empty');
   
->>>>>>> 6e7ec6db348078e60ccbafd66985558379a8a750
     if (nameEl) {
       nameEl.textContent = data.userName ? `${data.userName} 님의 작업물` : '님의 작업물';
     }
