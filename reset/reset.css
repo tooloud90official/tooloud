@@ -125,22 +125,27 @@ body {
   color: #e53935;
 }
 
+/* 확인 버튼 — 너비 확장 */
 .btn-verify {
-  width: 72px;
+  flex-shrink: 0;
   height: 44px;
+  width: 72px;
   border-radius: 10px;
   border: none;
-  background: #000;
-  color: #fff;
+  background: #0080ff;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  flex-shrink: 0;
+  transition: background 0.18s;
+  white-space: nowrap;
 }
 
 .btn-verify:hover {
-  background: #222;
+  background: #0080ff;
 }
+
+
 
 .btn-resend {
   background: none;

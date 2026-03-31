@@ -3,7 +3,8 @@ import { supabase } from '../_ignore/supabase.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    /* ===== 임시: 모든 요소 강제 노출 =====
+    //===== 임시: 모든 요소 강제 노출 =====
+    /*
     document.getElementById('verifyCodeWrap').style.display = 'block';
     document.getElementById('newPwWrap').style.display = 'block';
     loadButton({
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       size: 'md',
       onClick: () => {}
     });
-    */ 
+    */
 
   // ===== 1. 도메인 셀렉트 =====
   await loadNativeSelect({
