@@ -147,13 +147,16 @@ async function loadStats() {
     { count: tc },
     { count: wc },
     { count: ic },
-    { data: usersChart }
+    { data: usersChart },
+    { data: conversionData }  // ✅ 추가
   ] = await Promise.all([
     supabase.from('users').select('*', { count: 'exact', head: true }),
     supabase.from('tools').select('*', { count: 'exact', head: true }),
     supabase.from('works').select('*', { count: 'exact', head: true }),
     supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('users').select('created_at').order('created_at', { ascending: true }),
+    // ✅ 추가: 회원가입 ~ 첫 클릭 소요시간 계산용
+    supabase.from('users').select('created_at, clicked_timestampz').not('clicked_timestampz', 'is', null),
   ]);
 
   document.getElementById('statUsers').textContent = uc ?? 0;
@@ -162,6 +165,7 @@ async function loadStats() {
   document.getElementById('statInquiries').textContent = ic ?? 0;
 
   renderChart(usersChart || []);
+  renderConversionStats(conversionData || []);  // ✅ 추가
 }
 
 function renderChart(users) {
@@ -199,6 +203,55 @@ function renderChart(users) {
       <span class="chart-label">${months[i].label}</span>
     </div>
   `).join('');
+}
+
+function renderConversionStats(users) {
+  const container = document.getElementById('conversionStats');
+  if (!container) return;
+
+  if (!users.length) {
+    container.innerHTML = '<p style="color:var(--text-sub)">아직 데이터 없음</p>';
+    return;
+  }
+
+  // 소요시간 계산 (분 단위)
+  const diffs = users.map(u => {
+    const created = new Date(u.created_at);
+    const clicked = new Date(u.clicked_timestampz);
+    return (clicked - created) / 1000 / 60; // 분
+  }).filter(d => d >= 0);
+
+  const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+  const min = Math.min(...diffs);
+  const max = Math.max(...diffs);
+
+  const fmt = (min) => {
+    if (min < 60) return `${Math.round(min)}분`;
+    const h = Math.floor(min / 60);
+    const m = Math.round(min % 60);
+    return `${h}시간 ${m}분`;
+  };
+
+  container.innerHTML = `
+    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:12px;">
+      <div class="stat-card">
+        <div class="stat-label">평균 소요시간</div>
+        <div class="stat-value">${fmt(avg)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">최단 소요시간</div>
+        <div class="stat-value">${fmt(min)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">최장 소요시간</div>
+        <div class="stat-value">${fmt(max)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">첫 클릭 완료 유저</div>
+        <div class="stat-value">${users.length}명</div>
+      </div>
+    </div>
+  `;
 }
 
 // ─────────────────────────────────────────────────────────

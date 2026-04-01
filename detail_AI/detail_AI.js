@@ -330,6 +330,11 @@ async function saveRecentTool() {
     const current = data?.recent_tools ?? [];
     const updated = [TOOL_ID, ...current.filter(id => id !== TOOL_ID)].slice(0, 8);
     await supabase.from("users").update({ recent_tools: updated }).eq("user_id", currentUser.id);
+
+    // ✅ 추가
+    if (current.length === 0) {
+      await supabase.from("users").update({ clicked_timestampz: new Date().toISOString() }).eq("user_id", currentUser.id);
+    }
   } catch (e) {
     console.error("recent_tools 저장 실패:", e);
   }

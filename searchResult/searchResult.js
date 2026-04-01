@@ -284,8 +284,6 @@ async function saveRecentTool(toolId) {
     }
 
     const current = Array.isArray(userData?.recent_tools) ? userData.recent_tools : [];
-
-    // 중복 제거 후 맨 앞에 추가, 8개 초과 시 오래된 것 삭제
     const updated = [toolId, ...current.filter(id => id !== toolId)].slice(0, 8);
 
     const { error: updateError } = await supabase
@@ -295,6 +293,11 @@ async function saveRecentTool(toolId) {
 
     if (updateError) {
       console.error('[recentTools] 저장 실패:', updateError.message);
+    }
+
+    // ✅ 추가
+    if (current.length === 0) {
+      await supabase.from("users").update({ clicked_timestampz: new Date().toISOString() }).eq("user_id", user.id);
     }
 
   } catch (e) {

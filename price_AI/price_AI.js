@@ -124,7 +124,7 @@ function getToolPlans(tool) {
       desc: (tool.tool_plan1_des || "").trim(),
     },
     {
-      name: (tool.tool_plan2name || "").trim(),
+      name: (tool.tool_plan2_name || "").trim(),
       rawPrice: tool.tool_plan2_price_krw,
       price: toPriceUSD(tool.tool_plan2_price_krw),
       desc: (tool.tool_plan2_des || "").trim(),
@@ -194,6 +194,11 @@ function bindToolLink(iconWrap, toolLink, toolId) {
         const updated = [toolId, ...current.filter((id) => id !== toolId)].slice(0, 8);
 
         await supabase.from("users").update({ recent_tools: updated }).eq("user_id", user.id);
+
+        // ✅ 추가: 최근 툴이 비어있었던 경우에만 타임스탬프 기록
+        if (current.length === 0) {
+          await supabase.from("users").update({ clicked_timestampz: new Date().toISOString() }).eq("user_id", user.id);
+        }
       }
     } catch (e) {
       console.warn("recent_tools 저장 실패:", e);
@@ -437,7 +442,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       tool_plan1_name,
       tool_plan1_price_krw,
       tool_plan1_des,
-      tool_plan2name,
+      tool_plan2_name,
       tool_plan2_price_krw,
       tool_plan2_des,
       tool_plan3_name,

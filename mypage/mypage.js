@@ -1448,6 +1448,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   /* =====================================================
+     [11-1] 관리자 인트라넷 드롭다운 (관리자만 표시)
+     ===================================================== */
+
+     if (user) {
+      const { data: roleData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+  
+      if (roleData?.role === 'admin') {
+        const adminDrop = document.getElementById('section-faq-admin');
+        if (adminDrop) adminDrop.style.display = '';
+  
+        await loadButton({
+          target: '#adminLinkBtnContainer',
+          text: '인트라넷 접속',
+          variant: 'primary',
+          onClick: () => { window.location.href = '/admin/admin.html'; },
+        });
+      }
+    }
+
+  /* =====================================================
      [12] 초기화
      ===================================================== */
 
