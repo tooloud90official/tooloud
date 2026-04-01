@@ -36,12 +36,12 @@ async function ensureAdminUserId() {
   return adminUserId;
 }
 
-async function markAdminInquiryNotificationRead(inquiryId, currentAdminUserId) {
+async function removeAdminInquiryNotification(inquiryId, currentAdminUserId) {
   if (!inquiryId || !currentAdminUserId) return null;
 
   const { error } = await supabase
     .from('notifications')
-    .update({ is_read: true })
+    .delete()
     .eq('reference_id', inquiryId)
     .eq('user_id', currentAdminUserId)
     .eq('type', 'inquiry');
@@ -795,9 +795,9 @@ document.getElementById('inquiryModalSave')?.addEventListener('click', async () 
   }
 
   // 2. 관리자 알림 읽음 처리
-  const readError = await markAdminInquiryNotificationRead(inquiryId, currentAdminUserId);
-  if (readError) {
-    console.warn('관리자 알림 읽음 처리 실패:', readError.message);
+  const removeError = await removeAdminInquiryNotification(inquiryId, currentAdminUserId);
+  if (removeError) {
+    console.warn('관리자 알림 삭제 실패:', removeError.message);
   }
 
   // 3. 유저에게 답변 완료 알림 발송
