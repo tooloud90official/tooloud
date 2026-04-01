@@ -66,7 +66,6 @@ const esc = str =>
 
 const SLIDER_LABELS = ["$0", "$1–19.99", "$20–39.99", "$40–59.99", "$60+"];
 
-// 가격 문자열 → USD 숫자 변환
 function parsePriceToUSD(value) {
   if (!value) return null;
 
@@ -91,7 +90,6 @@ function parsePriceToUSD(value) {
   return Number.isFinite(num) ? num : null;
 }
 
-// USD → class index
 function getPriceClassIndex(usd) {
   if (usd == null || Number.isNaN(usd)) return null;
   if (usd === 0) return 1;
@@ -101,7 +99,6 @@ function getPriceClassIndex(usd) {
   return 5;
 }
 
-// plan 가격들 → class 값 세트 생성
 function getAutoPriceClasses(...prices) {
   const classSet = new Set();
 
@@ -120,7 +117,6 @@ function getAutoPriceClasses(...prices) {
   };
 }
 
-// 마지막 탭 체크박스 UI 동기화
 function syncClassCheckboxesFromPrices() {
   const plan1Price = document.getElementById('f_plan1_price')?.value.trim() || '';
   const plan2Price = document.getElementById('f_plan2_price')?.value.trim() || '';
@@ -148,14 +144,13 @@ async function loadStats() {
     { count: wc },
     { count: ic },
     { data: usersChart },
-    { data: conversionData }  // ✅ 추가
+    { data: conversionData }
   ] = await Promise.all([
     supabase.from('users').select('*', { count: 'exact', head: true }),
     supabase.from('tools').select('*', { count: 'exact', head: true }),
     supabase.from('works').select('*', { count: 'exact', head: true }),
     supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('users').select('created_at').order('created_at', { ascending: true }),
-    // ✅ 추가: 회원가입 ~ 첫 클릭 소요시간 계산용
     supabase.from('users').select('created_at, clicked_timestampz').not('clicked_timestampz', 'is', null),
   ]);
 
@@ -165,7 +160,7 @@ async function loadStats() {
   document.getElementById('statInquiries').textContent = ic ?? 0;
 
   renderChart(usersChart || []);
-  renderConversionStats(conversionData || []);  // ✅ 추가
+  renderConversionStats(conversionData || []);
 }
 
 function renderChart(users) {
@@ -214,11 +209,10 @@ function renderConversionStats(users) {
     return;
   }
 
-  // 소요시간 계산 (분 단위)
   const diffs = users.map(u => {
     const created = new Date(u.created_at);
     const clicked = new Date(u.clicked_timestampz);
-    return (clicked - created) / 1000 / 60; // 분
+    return (clicked - created) / 1000 / 60;
   }).filter(d => d >= 0);
 
   const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
@@ -305,7 +299,6 @@ document.getElementById('toolSearch')?.addEventListener('input', e => {
   renderToolsTable(allTools.filter(t => t.tool_name?.toLowerCase().includes(q)));
 });
 
-// step 이동
 function goToStep(step) {
   const normalizedStep = Math.max(0, Math.min(step, TOTAL_STEPS - 1));
 
@@ -332,7 +325,6 @@ function goToStep(step) {
   }
 }
 
-// 모달 탭/점 클릭 가능
 function bindToolModalStepTabs() {
   document.querySelectorAll('.step-label').forEach(label => {
     label.style.cursor = 'pointer';
@@ -368,19 +360,16 @@ document.getElementById('toolStepPrev')?.addEventListener('click', () => {
   }
 });
 
-// 모달 열기
 function openToolModal(tool = null) {
   document.getElementById('toolModalTitle').textContent = tool ? '툴 수정' : '툴 추가';
   document.getElementById('toolId').value = tool?.tool_ID || '';
 
-  // 1. 기본 정보
   document.getElementById('f_tool_name').value = tool?.tool_name || '';
   document.getElementById('f_tool_company').value = tool?.tool_company || '';
   document.getElementById('f_tool_cat').value = tool?.tool_cat || 'media';
   document.getElementById('f_tool_subcat').value = tool?.tool_subcat || '';
   document.getElementById('f_tool_key').value = tool?.tool_key || '';
 
-  // 2. 소개 · 링크
   document.getElementById('f_icon').value = tool?.icon || '';
   document.getElementById('f_tool_des').value = tool?.tool_des || '';
   document.getElementById('f_tool_link').value = tool?.tool_link || '';
@@ -390,23 +379,20 @@ function openToolModal(tool = null) {
     : tool?.iframe === false ? 'false'
     : '';
 
-  // 3. 요금제
-// 3. 요금제
-document.getElementById('f_pricing').value = tool?.pricing || '';
+  document.getElementById('f_pricing').value = tool?.pricing || '';
 
-document.getElementById('f_plan1_name').value = tool?.tool_plan1_name || '';
-document.getElementById('f_plan1_price').value = tool?.tool_plan1_price_krw || '';
-document.getElementById('f_plan1_des').value = tool?.tool_plan1_des || '';
+  document.getElementById('f_plan1_name').value = tool?.tool_plan1_name || '';
+  document.getElementById('f_plan1_price').value = tool?.tool_plan1_price_krw || '';
+  document.getElementById('f_plan1_des').value = tool?.tool_plan1_des || '';
 
-document.getElementById('f_plan2_name').value = tool?.tool_plan2_name || '';
-document.getElementById('f_plan2_price').value = tool?.tool_plan2_price_krw || '';
-document.getElementById('f_plan2_des').value = tool?.tool_plan2_des || '';
+  document.getElementById('f_plan2_name').value = tool?.tool_plan2_name || '';
+  document.getElementById('f_plan2_price').value = tool?.tool_plan2_price_krw || '';
+  document.getElementById('f_plan2_des').value = tool?.tool_plan2_des || '';
 
-document.getElementById('f_plan3_name').value = tool?.tool_plan3_name || '';
-document.getElementById('f_plan3_price').value = tool?.tool_plan3_price_krw || '';
-document.getElementById('f_plan3_des').value = tool?.tool_plan3_des || '';
+  document.getElementById('f_plan3_name').value = tool?.tool_plan3_name || '';
+  document.getElementById('f_plan3_price').value = tool?.tool_plan3_price_krw || '';
+  document.getElementById('f_plan3_des').value = tool?.tool_plan3_des || '';
 
-  // 4. 가격대 · 기타
   document.getElementById('f_tool_prom').value = tool?.tool_prom || '';
   document.getElementById('f_tool_plan_etc').value = tool?.tool_plan_etc || '';
 
@@ -440,7 +426,6 @@ window.openEditTool = async (id) => {
   openToolModal(data);
 };
 
-// plan 가격 입력 시 class 자동 반영
 ['f_plan1_price', 'f_plan2_price', 'f_plan3_price'].forEach(id => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -449,14 +434,12 @@ window.openEditTool = async (id) => {
   el.addEventListener('change', syncClassCheckboxesFromPrices);
 });
 
-// 모달 닫기
 ['toolModalClose', 'toolModalCancel'].forEach(id => {
   document.getElementById(id)?.addEventListener('click', () => {
     document.getElementById('toolModal').style.display = 'none';
   });
 });
 
-// 툴 저장
 document.getElementById('toolModalSave')?.addEventListener('click', async () => {
   const id = document.getElementById('toolId').value;
   const iframeValue = document.getElementById('f_iframe').value;
@@ -697,6 +680,7 @@ document.getElementById('inquiryModalSave')?.addEventListener('click', async () 
     return;
   }
 
+  // 1. 문의 답변 저장
   const { error: answerError } = await supabase
     .from('inquiries')
     .update({
@@ -711,10 +695,26 @@ document.getElementById('inquiryModalSave')?.addEventListener('click', async () 
     return;
   }
 
+  // 2. 관리자한테 온 문의 알림 읽음 처리 (알림창에서 자동 제거)
+  if (adminUserId) {
+    const { error: readError } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('reference_id', inquiryId)
+      .eq('user_id', adminUserId)
+      .eq('type', 'inquiry');
+
+    if (readError) {
+      console.warn('관리자 알림 읽음 처리 실패:', readError.message);
+    }
+  }
+
+  // 3. 유저한테 답변 완료 알림 발송 (is_read: false 로 새로 insert)
   if (userId) {
     const { error: notiError } = await supabase
       .from('notifications')
       .insert({
+        notification_id: crypto.randomUUID(),
         user_id: userId,
         sender_id: adminUserId,
         type: 'inquiry',
@@ -724,7 +724,7 @@ document.getElementById('inquiryModalSave')?.addEventListener('click', async () 
       });
 
     if (notiError) {
-      console.warn('알림 발송 실패:', notiError.message);
+      console.warn('유저 알림 발송 실패:', notiError.message);
     }
   }
 
