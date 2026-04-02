@@ -248,6 +248,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
 
+  async function markClickedRecommend() {
+    try {
+      const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !currentUser) {
+        console.warn('[clicked_recommend] 로그인 유저 없음, 저장 생략');
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ clicked_recommend: true })
+        .eq('user_id', currentUser.id);
+
+      if (updateError) {
+        console.error('[clicked_recommend] 업데이트 실패:', updateError.message);
+      }
+    } catch (e) {
+      console.error('[clicked_recommend] 예외 발생:', e.message);
+    }
+  }
+
   try {
     loadSearchBar({
       target: '#searchbar-container',
@@ -530,7 +552,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         </span>
         <span class="tool-icon-card__title">${tool.tool_name}</span>
       `;
-      card.addEventListener('click', () => {
+      card.addEventListener('click', async () => {
+        await markClickedRecommend();
         window.location.href = `/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}`;
       });
       grid.appendChild(card);
@@ -544,13 +567,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const moreBtn   = document.getElementById('workCardMoreBtn');
     const data      = WORK_DATA[category];
   
-    // 바깥 카드 루트
     const cardRoot =
       container?.closest('.work-card') ||
       container?.closest('.main-work-card') ||
       container?.parentElement;
   
-    // 기존 empty overlay 제거
     cardRoot?.querySelector('.work-card__empty-overlay')?.remove();
   
     if (!data) {
@@ -568,7 +589,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
   
-    // 데이터 있으면 empty 상태 해제
     cardRoot?.classList.remove('is-empty');
   
     if (nameEl) {

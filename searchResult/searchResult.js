@@ -46,8 +46,8 @@ function similarity(a, b) {
           ? matrix[i - 1][j - 1]
           : Math.min(
               matrix[i - 1][j - 1] + 1,
-              matrix[i][j - 1]     + 1,
-              matrix[i - 1][j]     + 1
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j] + 1
             );
     }
   }
@@ -67,15 +67,16 @@ const CAT_LABEL = {
   media: '이미지/오디오/영상', res: '리서치', doc: '문서',
   dev: '개발/코딩', edu: '학습/교육', ast: '챗봇/어시스턴트',
 };
+
 const SUBCAT_LABEL = {
-  img_gen: '이미지 생성',  img_edit: '이미지 편집',
-  vid_gen: '영상 생성',    vid_edit: '영상 편집',
-  aud_gen: '음성 생성',    aud_edit: '오디오 편집',
+  img_gen: '이미지 생성', img_edit: '이미지 편집',
+  vid_gen: '영상 생성', vid_edit: '영상 편집',
+  aud_gen: '음성 생성', aud_edit: '오디오 편집',
   res_paper: '논문 리서치', res_img: '이미지 리서치', res_shop: '쇼핑 리서치',
-  doc_gen: '문서 생성',    doc_sum: '문서 요약',     doc_edit: '문서 편집',
-  dev_gen: '코드 생성',    dev_bld: '웹/앱 빌더',
-  edu_lan: '언어',         edu_supp: '학습 보조',
-  ast_gen: '생성형 AI',    ast_work: '협업',
+  doc_gen: '문서 생성', doc_sum: '문서 요약', doc_edit: '문서 편집',
+  dev_gen: '코드 생성', dev_bld: '웹/앱 빌더',
+  edu_lan: '언어', edu_supp: '학습 보조',
+  ast_gen: '생성형 AI', ast_work: '협업',
 };
 
 /* ===== 툴 1개의 유사도 종합 점수 계산 ===== */
@@ -83,34 +84,34 @@ const SUBCAT_LABEL = {
 // tool_name(0.45) + tool_des(0.2) + tool_key(0.15) + tool_cat(0.1) + tool_subcat(0.1)
 function calcToolScore(keyword, tool, tags) {
   const tokens = tokenize(keyword);
-  const effectiveTokens = tokens.length > 0 ? tokens : [keyword]; // 단일 단어면 그대로 사용
+  const effectiveTokens = tokens.length > 0 ? tokens : [keyword];
 
-  const nameScore   = tokenSimilarity(effectiveTokens, tool.tool_name);
-  const descScore   = tokenSimilarity(effectiveTokens, tool.tool_des);
-  const keyScore    = tokenSimilarity(effectiveTokens, tool.tool_key);
-  const catScore    = tokenSimilarity(effectiveTokens, CAT_LABEL[tool.tool_cat]       || '');
+  const nameScore = tokenSimilarity(effectiveTokens, tool.tool_name);
+  const descScore = tokenSimilarity(effectiveTokens, tool.tool_des);
+  const keyScore = tokenSimilarity(effectiveTokens, tool.tool_key);
+  const catScore = tokenSimilarity(effectiveTokens, CAT_LABEL[tool.tool_cat] || '');
   const subcatScore = tokenSimilarity(effectiveTokens, SUBCAT_LABEL[tool.tool_subcat] || '');
 
   const directScore =
-    nameScore   * 0.45 +
-    descScore   * 0.2  +
-    keyScore    * 0.15 +
-    catScore    * 0.1  +
+    nameScore * 0.45 +
+    descScore * 0.2 +
+    keyScore * 0.15 +
+    catScore * 0.1 +
     subcatScore * 0.1;
 
   if (!tags) return directScore;
 
-  // Groq 태그 기반 추가 점수
   let tagBonus = 0;
 
   const simScore = tags._similarityMap?.[tool.tool_name] || 0;
   if (simScore > 0) tagBonus = Math.max(tagBonus, simScore * 0.5);
 
-  if ((tags.recommended_cats    || []).includes(tool.tool_cat))    tagBonus += 0.2;
+  if ((tags.recommended_cats || []).includes(tool.tool_cat)) tagBonus += 0.2;
   if ((tags.recommended_subcats || []).includes(tool.tool_subcat)) tagBonus += 0.2;
 
   const normKey = normalize(tool.tool_key || '');
-  const normDes = normalize(tool.tool_des  || '');
+  const normDes = normalize(tool.tool_des || '');
+
   for (const k of (tags.keywords || [])) {
     const nk = normalize(k);
     if (nk && (normKey.includes(nk) || normDes.includes(nk))) {
@@ -128,6 +129,32 @@ function getKeyword() {
   return decodeURIComponent(params.get('keyword') || '').trim();
 }
 
+/* ===== 검색 사용 여부 기록 ===== */
+async function markSearchUsed() {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.warn('[search_used] 로그인 유저 없음, 저장 생략');
+      return;
+    }
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ search_used: true })
+      .eq('user_id', user.id);
+
+    if (updateError) {
+      console.error('[search_used] 업데이트 실패:', updateError.message);
+      return;
+    }
+
+    console.log('[search_used] true 저장 완료');
+  } catch (e) {
+    console.error('[search_used] 예외 발생:', e.message);
+  }
+}
+
 /* ===== 검색바 초기화 ===== */
 function initSearchBar(keyword) {
   if (typeof window.loadSearchBar !== 'function') {
@@ -139,7 +166,10 @@ function initSearchBar(keyword) {
     target: '#searchbar-container',
     placeholder: keyword || '검색어를 입력하세요',
     onSearch: (value) => {
-      const encoded = encodeURIComponent(value.trim());
+      const trimmed = value.trim();
+      if (!trimmed) return;
+
+      const encoded = encodeURIComponent(trimmed);
       window.location.href = `/searchResult/searchResult.html?keyword=${encoded}`;
     }
   });
@@ -155,8 +185,8 @@ async function initFilters() {
       placeholder: '정렬',
       options: [
         { value: 'similarity', label: '관련도순' },
-        { value: 'name',       label: '이름순'   },
-        { value: 'rating',     label: '별점순'   },
+        { value: 'name', label: '이름순' },
+        { value: 'rating', label: '별점순' },
       ],
       onChange: ({ value }) => applySort(value),
     });
@@ -168,7 +198,9 @@ async function initFilters() {
 
 /* ===== 정렬 ===== */
 function applySort(sortVal) {
-  const list  = document.querySelector('.result-list');
+  const list = document.querySelector('.result-list');
+  if (!list) return;
+
   const cards = Array.from(list.querySelectorAll('.tool-card'));
 
   cards.sort((a, b) => {
@@ -177,12 +209,15 @@ function applySort(sortVal) {
       const nameB = b.querySelector('.tool-name')?.textContent || '';
       return nameA.localeCompare(nameB, 'ko');
     }
+
     if (sortVal === 'rating') {
       return Number(b.dataset.rating || 0) - Number(a.dataset.rating || 0);
     }
+
     if (sortVal === 'similarity') {
       return Number(b.dataset.similarity || 0) - Number(a.dataset.similarity || 0);
     }
+
     return 0;
   });
 
@@ -201,7 +236,6 @@ async function extractTags(keyword) {
 
 /* ===== 데이터 조회 + 유사도 정렬 ===== */
 async function fetchTools(groqResult, keyword) {
-
   const toolNames = groqResult?.tool_names || [];
 
   let toolQuery = supabase
@@ -211,28 +245,39 @@ async function fetchTools(groqResult, keyword) {
   if (groqResult) {
     const filters = [
       ...toolNames.map(n => `tool_name.ilike.%${n}%`),
-      ...(groqResult.recommended_cats    || []).map(c => `tool_cat.eq.${c}`),
+      ...(groqResult.recommended_cats || []).map(c => `tool_cat.eq.${c}`),
       ...(groqResult.recommended_subcats || []).map(s => `tool_subcat.eq.${s}`),
-      ...(groqResult.keywords            || []).map(k => `tool_key.ilike.%${k}%`),
+      ...(groqResult.keywords || []).map(k => `tool_key.ilike.%${k}%`),
     ].join(',');
 
-    if (filters) toolQuery = toolQuery.or(filters);
+    if (filters) {
+      toolQuery = toolQuery.or(filters);
+    }
   } else {
     toolQuery = toolQuery.or(
       `tool_name.ilike.%${keyword}%,tool_key.ilike.%${keyword}%`
     );
   }
 
-  const { data: tools } = await toolQuery;
-  if (!tools) return [];
+  const { data: tools, error: toolsError } = await toolQuery;
 
-  // ⭐ 별점 가져오기
+  if (toolsError) {
+    console.error('[tools] 조회 실패:', toolsError.message);
+    return [];
+  }
+
+  if (!tools || tools.length === 0) return [];
+
   const toolIds = tools.map(t => t.tool_ID);
 
-  const { data: reviews } = await supabase
+  const { data: reviews, error: reviewsError } = await supabase
     .from('tool_reviews')
     .select('tool_id, rating')
     .in('tool_id', toolIds);
+
+  if (reviewsError) {
+    console.error('[reviews] 조회 실패:', reviewsError.message);
+  }
 
   const ratingMap = {};
   (reviews || []).forEach(r => {
@@ -240,7 +285,6 @@ async function fetchTools(groqResult, keyword) {
     ratingMap[r.tool_id].push(r.rating);
   });
 
-  // 유사도 점수 계산 후 높은 순 정렬
   const withScore = tools.map(tool => ({
     ...tool,
     avg_rating: ratingMap[tool.tool_ID]
@@ -259,8 +303,11 @@ async function fetchTools(groqResult, keyword) {
 
 /* ===== 헤더 ===== */
 function updateHeader(keyword, count) {
-  document.getElementById('result-keyword').textContent = `"${keyword}"`;
-  document.getElementById('result-count').textContent   = count;
+  const keywordEl = document.getElementById('result-keyword');
+  const countEl = document.getElementById('result-count');
+
+  if (keywordEl) keywordEl.textContent = `"${keyword}"`;
+  if (countEl) countEl.textContent = count;
 }
 
 /* ===== 최근 사용한 툴 저장 (슬라이딩 윈도우 8개) ===== */
@@ -293,11 +340,14 @@ async function saveRecentTool(toolId) {
 
     if (updateError) {
       console.error('[recentTools] 저장 실패:', updateError.message);
+      return;
     }
 
-    // ✅ 추가
     if (current.length === 0) {
-      await supabase.from("users").update({ clicked_timestampz: new Date().toISOString() }).eq("user_id", user.id);
+      await supabase
+        .from('users')
+        .update({ clicked_timestampz: new Date().toISOString() })
+        .eq('user_id', user.id);
     }
 
   } catch (e) {
@@ -314,17 +364,16 @@ function renderResults(tools, keyword) {
   list.innerHTML = '';
 
   tools.forEach(tool => {
-
     const rating = tool.avg_rating || 0;
-    const starFull  = '★'.repeat(Math.min(rating, 5));
+    const starFull = '★'.repeat(Math.min(rating, 5));
     const starEmpty = '★'.repeat(Math.max(5 - rating, 0));
 
     const card = document.createElement('div');
-    card.className          = 'tool-card';
-    card.dataset.url        = `/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}`;
-    card.dataset.link       = tool.tool_link || '';
-    card.dataset.toolId     = tool.tool_ID;
-    card.dataset.rating     = rating;
+    card.className = 'tool-card';
+    card.dataset.url = `/detail_AI/detail_AI.html?tool_ID=${tool.tool_ID}`;
+    card.dataset.link = tool.tool_link || '';
+    card.dataset.toolId = tool.tool_ID;
+    card.dataset.rating = rating;
     card.dataset.similarity = tool.similarity_score || 0;
 
     card.innerHTML = `
@@ -355,14 +404,12 @@ function renderResults(tools, keyword) {
 /* ===== 클릭 ===== */
 function bindDetailNavigation() {
   document.querySelectorAll('.tool-card').forEach(card => {
-
     card.querySelector('.detail')?.addEventListener('click', () => {
       window.location.href = card.dataset.url;
     });
 
-    // 🔥 외부 링크 클릭 시 최근 사용한 툴 저장
     card.querySelector('.tool-icon')?.addEventListener('click', () => {
-      const link   = card.dataset.link;
+      const link = card.dataset.link;
       const toolId = card.dataset.toolId;
 
       if (link) {
@@ -385,8 +432,10 @@ async function initPage() {
     return;
   }
 
+  await markSearchUsed();
+
   const groqResult = await extractTags(keyword);
-  const tools      = await fetchTools(groqResult, keyword);
+  const tools = await fetchTools(groqResult, keyword);
 
   renderResults(tools, keyword);
 }

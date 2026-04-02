@@ -23,7 +23,7 @@ loadButton({
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '../login3/login3.html'
+        redirectTo: window.location.origin + '/login3/login3.html'
       }
     });
     if (error) console.error(error);

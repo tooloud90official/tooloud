@@ -6,11 +6,7 @@ import { supabase } from '/_ignore/supabase.js';
 let adminUserId = null;
 
 function createUUIDv4() {
-  if (window.crypto?.randomUUID) {
-    return window.crypto.randomUUID();
-  }
-
-  // randomUUID fallback
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -20,117 +16,63 @@ function createUUIDv4() {
 
 async function ensureAdminUserId() {
   if (adminUserId) return adminUserId;
-
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return null;
-
-  const { data, error } = await supabase
-    .from('users')
-    .select('role, user_id')
-    .eq('user_id', user.id)
-    .single();
-
+  const { data, error } = await supabase.from('users').select('role, user_id').eq('user_id', user.id).single();
   if (error || data?.role !== 'admin') return null;
-
   adminUserId = data.user_id;
   return adminUserId;
 }
 
 async function removeAdminInquiryNotification(inquiryId, currentAdminUserId) {
   if (!inquiryId || !currentAdminUserId) return null;
-
-  const { error } = await supabase
-    .from('notifications')
-    .delete()
-    .eq('reference_id', inquiryId)
-    .eq('user_id', currentAdminUserId)
-    .eq('type', 'inquiry');
-
+  const { error } = await supabase.from('notifications').delete()
+    .eq('reference_id', inquiryId).eq('user_id', currentAdminUserId).eq('type', 'inquiry');
   return error;
 }
 
 async function sendInquiryAnswerNotification(userId, inquiryId, currentAdminUserId) {
   if (!userId || !inquiryId) return null;
-
-  // 이미 같은 문의에 대한 유저 알림이 있으면 재사용
-  const { data: existing, error: findError } = await supabase
-    .from('notifications')
-    .select('notification_id, is_read')
-    .eq('user_id', userId)
-    .eq('reference_id', inquiryId)
-    .eq('type', 'inquiry')
-    .order('created_at', { ascending: false })
-    .limit(1);
-
+  const { data: existing, error: findError } = await supabase.from('notifications')
+    .select('notification_id, is_read').eq('user_id', userId).eq('reference_id', inquiryId)
+    .eq('type', 'inquiry').order('created_at', { ascending: false }).limit(1);
   if (findError) return findError;
-
   const existingRow = existing?.[0];
-
   if (existingRow?.notification_id) {
-    const { error: updateError } = await supabase
-      .from('notifications')
-      .update({
-        sender_id: currentAdminUserId,
-        is_read: false,
-        created_at: new Date().toISOString(),
-      })
-      .eq('notification_id', existingRow.notification_id);
-
+    const { error: updateError } = await supabase.from('notifications').update({
+      sender_id: currentAdminUserId, is_read: false, created_at: new Date().toISOString(),
+    }).eq('notification_id', existingRow.notification_id);
     return updateError;
   }
-
   const payload = {
-    notification_id: createUUIDv4(),
-    user_id: userId,
-    sender_id: currentAdminUserId,
-    type: 'inquiry',
-    reference_id: inquiryId,
-    is_read: false,
-    created_at: new Date().toISOString(),
+    notification_id: createUUIDv4(), user_id: userId, sender_id: currentAdminUserId,
+    type: 'inquiry', reference_id: inquiryId, is_read: false, created_at: new Date().toISOString(),
   };
-
-  console.log('[답변 알림 insert payload]', payload);
-
-  const { error: insertError } = await supabase
-    .from('notifications')
-    .insert(payload);
-
+  const { error: insertError } = await supabase.from('notifications').insert(payload);
   return insertError;
 }
 
 (async () => {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    window.location.href = '/admin/admin.html';
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from('users')
-    .select('role, user_id')
-    .eq('user_id', user.id)
-    .single();
-
+  if (!user) { window.location.href = '/admin/admin.html'; return; }
+  const { data, error } = await supabase.from('users').select('role, user_id').eq('user_id', user.id).single();
   if (error || data?.role !== 'admin') {
     await supabase.auth.signOut();
     window.location.href = '/admin/admin.html';
     return;
   }
-
   adminUserId = data.user_id;
 })();
 
 // ─────────────────────────────────────────────────────────
-// 상단 메인 탭 전환
+// 탭 전환
 // ─────────────────────────────────────────────────────────
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('is-active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
-
     btn.classList.add('is-active');
     document.getElementById(`tab-${btn.dataset.tab}`)?.classList.add('is-active');
-
     if (btn.dataset.tab === 'stats') loadStats();
     if (btn.dataset.tab === 'tools') loadTools();
     if (btn.dataset.tab === 'users') loadUsers();
@@ -146,39 +88,16 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 // ─────────────────────────────────────────────────────────
 // 유틸
 // ─────────────────────────────────────────────────────────
-const formatDate = str =>
-  str ? new Date(str).toLocaleDateString('ko-KR') : '-';
-
-const esc = str =>
-  str
-    ? String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-    : '';
-
+const formatDate = str => str ? new Date(str).toLocaleDateString('ko-KR') : '-';
+const esc = str => str ? String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 const SLIDER_LABELS = ["$0", "$1–19.99", "$20–39.99", "$40–59.99", "$60+"];
 
 function parsePriceToUSD(value) {
   if (!value) return null;
-
   const raw = String(value).trim().replace(/,/g, '');
-
-  if (raw === '$0' || raw === '₩0' || /free|무료/i.test(raw)) {
-    return 0;
-  }
-
-  if (raw.includes('$')) {
-    const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
-    return Number.isFinite(num) ? num : null;
-  }
-
-  if (raw.includes('₩') || raw.includes('원')) {
-    const krw = parseFloat(raw.replace(/[^0-9.]/g, ''));
-    if (!Number.isFinite(krw)) return null;
-    return krw / 1500;
-  }
-
+  if (raw === '$0' || raw === '₩0' || /free|무료/i.test(raw)) return 0;
+  if (raw.includes('$')) { const num = parseFloat(raw.replace(/[^0-9.]/g, '')); return Number.isFinite(num) ? num : null; }
+  if (raw.includes('₩') || raw.includes('원')) { const krw = parseFloat(raw.replace(/[^0-9.]/g, '')); if (!Number.isFinite(krw)) return null; return krw / 1500; }
   const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
   return Number.isFinite(num) ? num : null;
 }
@@ -194,13 +113,7 @@ function getPriceClassIndex(usd) {
 
 function getAutoPriceClasses(...prices) {
   const classSet = new Set();
-
-  prices.forEach(price => {
-    const usd = parsePriceToUSD(price);
-    const idx = getPriceClassIndex(usd);
-    if (idx) classSet.add(idx);
-  });
-
+  prices.forEach(price => { const usd = parsePriceToUSD(price); const idx = getPriceClassIndex(usd); if (idx) classSet.add(idx); });
   return {
     tool_class1: classSet.has(1) ? SLIDER_LABELS[0] : null,
     tool_class2: classSet.has(2) ? SLIDER_LABELS[1] : null,
@@ -211,16 +124,13 @@ function getAutoPriceClasses(...prices) {
 }
 
 function syncClassCheckboxesFromPrices() {
-  const plan1Price = document.getElementById('f_plan1_price')?.value.trim() || '';
-  const plan2Price = document.getElementById('f_plan2_price')?.value.trim() || '';
-  const plan3Price = document.getElementById('f_plan3_price')?.value.trim() || '';
-
-  const autoClasses = getAutoPriceClasses(plan1Price, plan2Price, plan3Price);
-
+  const p1 = document.getElementById('f_plan1_price')?.value.trim() || '';
+  const p2 = document.getElementById('f_plan2_price')?.value.trim() || '';
+  const p3 = document.getElementById('f_plan3_price')?.value.trim() || '';
+  const autoClasses = getAutoPriceClasses(p1, p2, p3);
   for (let i = 1; i <= 5; i++) {
     const el = document.getElementById(`f_class${i}`);
     if (!el) continue;
-
     el.value = SLIDER_LABELS[i - 1];
     el.checked = !!autoClasses[`tool_class${i}`];
     el.disabled = true;
@@ -228,7 +138,7 @@ function syncClassCheckboxesFromPrices() {
 }
 
 // ─────────────────────────────────────────────────────────
-// 1. 통계
+// 1. 통계 (업그레이드)
 // ─────────────────────────────────────────────────────────
 async function loadStats() {
   const [
@@ -237,7 +147,11 @@ async function loadStats() {
     { count: wc },
     { count: ic },
     { data: usersChart },
-    { data: conversionData }
+    { data: conversionData },
+    { data: featureData },
+    { data: favoriteData },
+    { data: reviewData },
+    { data: worksData },
   ] = await Promise.all([
     supabase.from('users').select('*', { count: 'exact', head: true }),
     supabase.from('tools').select('*', { count: 'exact', head: true }),
@@ -245,63 +159,180 @@ async function loadStats() {
     supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('users').select('created_at').order('created_at', { ascending: true }),
     supabase.from('users').select('created_at, clicked_timestampz').not('clicked_timestampz', 'is', null),
+    supabase.from('users').select('search_used, clicked_recommend'),
+    supabase.from('users').select('favorite_tools'),           // 1. 관심 툴
+    supabase.from('tool_reviews').select('tool_id, rating'),   // 2. 평점
+    supabase.from('works').select('tool_id'),                  // 3. 작업물
   ]);
 
-  document.getElementById('statUsers').textContent = uc ?? 0;
-  document.getElementById('statTools').textContent = tc ?? 0;
-  document.getElementById('statWorks').textContent = wc ?? 0;
-  document.getElementById('statInquiries').textContent = ic ?? 0;
+  animateCount('statUsers', uc ?? 0);
+  animateCount('statTools', tc ?? 0);
+  animateCount('statWorks', wc ?? 0);
+  animateCount('statInquiries', ic ?? 0);
 
   renderChart(usersChart || []);
   renderConversionStats(conversionData || []);
+  renderFeatureStats(featureData || [], uc ?? 0);
+  await renderPopularTools(favoriteData || [], reviewData || [], worksData || []);
+}
+
+// ─────────────────────────────────────────────────────────
+// 인기 툴 집계
+// ─────────────────────────────────────────────────────────
+async function renderPopularTools(favoriteData, reviewData, worksData) {
+  const container = document.getElementById('popularTools');
+  if (!container) return;
+
+  // 1. 관심 툴 카운트 (favorite_tools 배열 flatten)
+  const favoriteCount = {};
+  favoriteData.forEach(u => {
+    (u.favorite_tools || []).forEach(id => {
+      favoriteCount[id] = (favoriteCount[id] || 0) + 1;
+    });
+  });
+
+  // 2. 평점 평균 계산
+  const ratingMap = {};
+  reviewData.forEach(r => {
+    if (!ratingMap[r.tool_id]) ratingMap[r.tool_id] = [];
+    ratingMap[r.tool_id].push(r.rating);
+  });
+  const ratingAvg = {};
+  Object.entries(ratingMap).forEach(([id, ratings]) => {
+    ratingAvg[id] = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+  });
+
+  // 3. 작업물 카운트
+  const worksCount = {};
+  worksData.forEach(w => {
+    if (w.tool_id) worksCount[w.tool_id] = (worksCount[w.tool_id] || 0) + 1;
+  });
+
+  // 상위 3개씩 tool_id 추출
+  const topFavorite = Object.entries(favoriteCount).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, cnt]) => ({ id, value: cnt }));
+  const topRating   = Object.entries(ratingAvg).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, avg]) => ({ id, value: avg.toFixed(1) }));
+  const topWorks    = Object.entries(worksCount).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, cnt]) => ({ id, value: cnt }));
+
+  // 필요한 tool_id 모아서 한 번에 조회
+  const allIds = [...new Set([
+    ...topFavorite.map(t => t.id),
+    ...topRating.map(t => t.id),
+    ...topWorks.map(t => t.id),
+  ])];
+
+  if (!allIds.length) {
+    container.innerHTML = '<p style="color:var(--text-sub);font-size:13px;">아직 데이터 없음</p>';
+    return;
+  }
+
+  const { data: toolsInfo } = await supabase
+    .from('tools')
+    .select('tool_ID, tool_name, icon')
+    .in('tool_ID', allIds);
+
+  const toolMap = {};
+  (toolsInfo || []).forEach(t => { toolMap[t.tool_ID] = t; });
+
+  const renderList = (items, valueSuffix, valueLabel) => {
+    if (!items.length) return '<div class="pop-empty">데이터 없음</div>';
+    return items.map((item, i) => {
+      const tool = toolMap[item.id];
+      if (!tool) return '';
+      return `
+        <div class="pop-item">
+          <span class="pop-rank">${i + 1}</span>
+          <div class="pop-icon">
+            ${tool.icon
+              ? `<img src="${esc(tool.icon)}" alt="${esc(tool.tool_name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+              : ''
+            }
+            <span class="pop-icon-fallback" style="${tool.icon ? 'display:none' : ''}">${(tool.tool_name || '?')[0]}</span>
+          </div>
+          <span class="pop-name">${esc(tool.tool_name)}</span>
+          <span class="pop-value">${item.value}${valueSuffix}</span>
+        </div>
+      `;
+    }).join('');
+  };
+
+  container.innerHTML = `
+    <div class="popular-grid">
+      <div class="popular-col">
+        <div class="popular-col-title">❤️ 관심 툴 등록 TOP 3</div>
+        ${renderList(topFavorite, '명', '명')}
+      </div>
+      <div class="popular-col">
+        <div class="popular-col-title">⭐ 평점 높은 툴 TOP 3</div>
+        ${renderList(topRating, '점', '점')}
+      </div>
+      <div class="popular-col">
+        <div class="popular-col-title">🎨 작업물 많은 툴 TOP 3</div>
+        ${renderList(topWorks, '개', '개')}
+      </div>
+    </div>
+  `;
+}
+
+// 숫자 카운트업 애니메이션
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const duration = 1000;
+  const start = performance.now();
+  const update = (now) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString();
+    if (progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
 }
 
 function renderChart(users) {
   const container = document.getElementById('chartContainer');
   if (!container) return;
-
   const now = new Date();
-
   const months = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-    return {
-      label: `${d.getMonth() + 1}월`,
-      year: d.getFullYear(),
-      month: d.getMonth(),
-    };
+    return { label: `${d.getMonth() + 1}월`, year: d.getFullYear(), month: d.getMonth() };
   });
-
   const counts = months.map(m =>
     users.filter(u => {
       if (!u.created_at) return false;
       const d = new Date(u.created_at);
-      if (isNaN(d)) return false;
-      return d.getFullYear() === m.year && d.getMonth() === m.month;
+      return !isNaN(d) && d.getFullYear() === m.year && d.getMonth() === m.month;
     }).length
   );
-
   const max = Math.max(...counts, 1);
 
   container.innerHTML = counts.map((c, i) => `
     <div class="chart-bar-wrap">
       <div class="chart-bar-outer">
         <div class="chart-tooltip">${c}명</div>
-        <div class="chart-bar" style="height:${Math.max((c / max) * 140, 4)}px"></div>
+        <div class="chart-bar" style="height:0" data-height="${Math.max((c / max) * 140, 4)}"></div>
       </div>
       <span class="chart-label">${months[i].label}</span>
     </div>
   `).join('');
+
+  // 막대 애니메이션
+  requestAnimationFrame(() => {
+    container.querySelectorAll('.chart-bar').forEach((bar, i) => {
+      setTimeout(() => {
+        bar.style.transition = 'height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        bar.style.height = bar.dataset.height + 'px';
+      }, i * 80);
+    });
+  });
 }
 
 function renderConversionStats(users) {
   const container = document.getElementById('conversionStats');
   if (!container) return;
-
   if (!users.length) {
-    container.innerHTML = '<p style="color:var(--text-sub)">아직 데이터 없음</p>';
+    container.innerHTML = '<p style="color:var(--text-sub);font-size:13px;">아직 데이터 없음</p>';
     return;
   }
-
   const diffs = users.map(u => {
     const created = new Date(u.created_at);
     const clicked = new Date(u.clicked_timestampz);
@@ -320,45 +351,121 @@ function renderConversionStats(users) {
   };
 
   container.innerHTML = `
-    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:12px;">
-      <div class="stat-card">
-        <div class="stat-label">평균 소요시간</div>
-        <div class="stat-value">${fmt(avg)}</div>
+    <div class="conversion-grid">
+      <div class="conv-card">
+        <div class="conv-icon">⚡</div>
+        <div class="conv-label">평균 소요시간</div>
+        <div class="conv-value">${fmt(avg)}</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">최단 소요시간</div>
-        <div class="stat-value">${fmt(min)}</div>
+      <div class="conv-card">
+        <div class="conv-icon">🏁</div>
+        <div class="conv-label">최단 소요시간</div>
+        <div class="conv-value">${fmt(min)}</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">최장 소요시간</div>
-        <div class="stat-value">${fmt(max)}</div>
+      <div class="conv-card">
+        <div class="conv-icon">🐢</div>
+        <div class="conv-label">최장 소요시간</div>
+        <div class="conv-value">${fmt(max)}</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">첫 클릭 완료 유저</div>
-        <div class="stat-value">${users.length}명</div>
+      <div class="conv-card">
+        <div class="conv-icon">✅</div>
+        <div class="conv-label">첫 클릭 완료 유저</div>
+        <div class="conv-value">${users.length}명</div>
       </div>
     </div>
   `;
 }
 
+// ✅ 신규: 기능 사용률 렌더링
+function renderFeatureStats(users, totalUsers) {
+  const container = document.getElementById('featureStats');
+  if (!container) return;
+
+  const total = totalUsers || users.length || 1;
+  const searchCount = users.filter(u => u.search_used === true).length;
+  const recommendCount = users.filter(u => u.clicked_recommend === true).length;
+
+  const searchRate = Math.round((searchCount / total) * 100);
+  const recommendRate = Math.round((recommendCount / total) * 100);
+
+  container.innerHTML = `
+    <div class="feature-row">
+      <div class="feature-info">
+        <span class="feature-icon">🔍</span>
+        <div>
+          <div class="feature-name">검색 기능 사용률</div>
+          <div class="feature-sub">${searchCount.toLocaleString()}명 / 전체 ${total.toLocaleString()}명</div>
+        </div>
+      </div>
+      <div class="feature-bar-wrap">
+        <div class="feature-bar-track">
+          <div class="feature-bar-fill feature-bar--search" style="width:0%" data-target="${searchRate}%"></div>
+        </div>
+        <span class="feature-pct" id="searchPct">0%</span>
+      </div>
+    </div>
+    <div class="feature-row">
+      <div class="feature-info">
+        <span class="feature-icon">🤖</span>
+        <div>
+          <div class="feature-name">AI 추천 툴 사용률</div>
+          <div class="feature-sub">${recommendCount.toLocaleString()}명 / 전체 ${total.toLocaleString()}명</div>
+        </div>
+      </div>
+      <div class="feature-bar-wrap">
+        <div class="feature-bar-track">
+          <div class="feature-bar-fill feature-bar--recommend" style="width:0%" data-target="${recommendRate}%"></div>
+        </div>
+        <span class="feature-pct" id="recommendPct">0%</span>
+      </div>
+    </div>
+  `;
+
+  // 바 애니메이션
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const searchBar = container.querySelector('.feature-bar--search');
+      const recommendBar = container.querySelector('.feature-bar--recommend');
+      if (searchBar) {
+        searchBar.style.transition = 'width 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        searchBar.style.width = searchBar.dataset.target;
+        animatePct('searchPct', searchRate);
+      }
+      if (recommendBar) {
+        recommendBar.style.transition = 'width 1.1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        recommendBar.style.width = recommendBar.dataset.target;
+        animatePct('recommendPct', recommendRate);
+      }
+    }, 300);
+  });
+}
+
+function animatePct(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const duration = 1000;
+  const start = performance.now();
+  const update = (now) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(eased * target) + '%';
+    if (progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
 // ─────────────────────────────────────────────────────────
-// 2. 툴 관리 + 모달 탭
+// 2. 툴 관리
 // ─────────────────────────────────────────────────────────
 let allTools = [];
 let currentStep = 0;
 const TOTAL_STEPS = 4;
 
 async function loadTools() {
-  const { data, error } = await supabase
-    .from('tools')
+  const { data, error } = await supabase.from('tools')
     .select('tool_ID, tool_name, tool_company, tool_cat, tool_key, tool_link')
     .order('tool_name', { ascending: true });
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
+  if (error) { console.error(error); return; }
   allTools = data || [];
   renderToolsTable(allTools);
 }
@@ -366,12 +473,10 @@ async function loadTools() {
 function renderToolsTable(tools) {
   const tbody = document.getElementById('toolsBody');
   if (!tbody) return;
-
   if (!tools.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-sub);padding:32px;">데이터 없음</td></tr>';
     return;
   }
-
   tbody.innerHTML = tools.map(t => `
     <tr>
       <td>${esc(t.tool_name)}</td>
@@ -393,102 +498,64 @@ document.getElementById('toolSearch')?.addEventListener('input', e => {
 });
 
 function goToStep(step) {
-  const normalizedStep = Math.max(0, Math.min(step, TOTAL_STEPS - 1));
-
+  const s = Math.max(0, Math.min(step, TOTAL_STEPS - 1));
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('is-active'));
   document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('is-active'));
   document.querySelectorAll('.step-label').forEach(l => l.classList.remove('is-active'));
-
-  document.querySelector(`.step-panel[data-step="${normalizedStep}"]`)?.classList.add('is-active');
-  document.querySelector(`.step-dot[data-step="${normalizedStep}"]`)?.classList.add('is-active');
-  document.querySelector(`.step-label[data-step="${normalizedStep}"]`)?.classList.add('is-active');
-
+  document.querySelector(`.step-panel[data-step="${s}"]`)?.classList.add('is-active');
+  document.querySelector(`.step-dot[data-step="${s}"]`)?.classList.add('is-active');
+  document.querySelector(`.step-label[data-step="${s}"]`)?.classList.add('is-active');
   const prevBtn = document.getElementById('toolStepPrev');
   const nextBtn = document.getElementById('toolStepNext');
   const saveBtn = document.getElementById('toolModalSave');
-
-  if (prevBtn) prevBtn.style.display = normalizedStep > 0 ? 'inline-flex' : 'none';
-  if (nextBtn) nextBtn.style.display = normalizedStep < TOTAL_STEPS - 1 ? 'inline-flex' : 'none';
-  if (saveBtn) saveBtn.style.display = normalizedStep === TOTAL_STEPS - 1 ? 'inline-flex' : 'none';
-
-  currentStep = normalizedStep;
-
-  if (normalizedStep === 3) {
-    syncClassCheckboxesFromPrices();
-  }
+  if (prevBtn) prevBtn.style.display = s > 0 ? 'inline-flex' : 'none';
+  if (nextBtn) nextBtn.style.display = s < TOTAL_STEPS - 1 ? 'inline-flex' : 'none';
+  if (saveBtn) saveBtn.style.display = s === TOTAL_STEPS - 1 ? 'inline-flex' : 'none';
+  currentStep = s;
+  if (s === 3) syncClassCheckboxesFromPrices();
 }
 
 function bindToolModalStepTabs() {
   document.querySelectorAll('.step-label').forEach(label => {
     label.style.cursor = 'pointer';
-    label.addEventListener('click', () => {
-      const step = Number(label.dataset.step);
-      if (Number.isInteger(step)) goToStep(step);
-    });
+    label.addEventListener('click', () => { const step = Number(label.dataset.step); if (Number.isInteger(step)) goToStep(step); });
   });
-
   document.querySelectorAll('.step-dot').forEach(dot => {
     dot.style.cursor = 'pointer';
-    dot.addEventListener('click', () => {
-      const step = Number(dot.dataset.step);
-      if (Number.isInteger(step)) goToStep(step);
-    });
+    dot.addEventListener('click', () => { const step = Number(dot.dataset.step); if (Number.isInteger(step)) goToStep(step); });
   });
 }
 
 document.getElementById('toolStepNext')?.addEventListener('click', () => {
-  if (currentStep === 0 && !document.getElementById('f_tool_name')?.value.trim()) {
-    alert('툴 이름을 입력해주세요.');
-    return;
-  }
-
-  if (currentStep < TOTAL_STEPS - 1) {
-    goToStep(currentStep + 1);
-  }
+  if (currentStep === 0 && !document.getElementById('f_tool_name')?.value.trim()) { alert('툴 이름을 입력해주세요.'); return; }
+  if (currentStep < TOTAL_STEPS - 1) goToStep(currentStep + 1);
 });
-
-document.getElementById('toolStepPrev')?.addEventListener('click', () => {
-  if (currentStep > 0) {
-    goToStep(currentStep - 1);
-  }
-});
+document.getElementById('toolStepPrev')?.addEventListener('click', () => { if (currentStep > 0) goToStep(currentStep - 1); });
 
 function openToolModal(tool = null) {
   document.getElementById('toolModalTitle').textContent = tool ? '툴 수정' : '툴 추가';
   document.getElementById('toolId').value = tool?.tool_ID || '';
-
   document.getElementById('f_tool_name').value = tool?.tool_name || '';
   document.getElementById('f_tool_company').value = tool?.tool_company || '';
   document.getElementById('f_tool_cat').value = tool?.tool_cat || 'media';
   document.getElementById('f_tool_subcat').value = tool?.tool_subcat || '';
   document.getElementById('f_tool_key').value = tool?.tool_key || '';
-
   document.getElementById('f_icon').value = tool?.icon || '';
   document.getElementById('f_tool_des').value = tool?.tool_des || '';
   document.getElementById('f_tool_link').value = tool?.tool_link || '';
-
-  document.getElementById('f_iframe').value =
-    tool?.iframe === true ? 'true'
-    : tool?.iframe === false ? 'false'
-    : '';
-
+  document.getElementById('f_iframe').value = tool?.iframe === true ? 'true' : tool?.iframe === false ? 'false' : '';
   document.getElementById('f_pricing').value = tool?.pricing || '';
-
   document.getElementById('f_plan1_name').value = tool?.tool_plan1_name || '';
   document.getElementById('f_plan1_price').value = tool?.tool_plan1_price_krw || '';
   document.getElementById('f_plan1_des').value = tool?.tool_plan1_des || '';
-
   document.getElementById('f_plan2_name').value = tool?.tool_plan2_name || '';
   document.getElementById('f_plan2_price').value = tool?.tool_plan2_price_krw || '';
   document.getElementById('f_plan2_des').value = tool?.tool_plan2_des || '';
-
   document.getElementById('f_plan3_name').value = tool?.tool_plan3_name || '';
   document.getElementById('f_plan3_price').value = tool?.tool_plan3_price_krw || '';
   document.getElementById('f_plan3_des').value = tool?.tool_plan3_des || '';
-
   document.getElementById('f_tool_prom').value = tool?.tool_prom || '';
   document.getElementById('f_tool_plan_etc').value = tool?.tool_plan_etc || '';
-
   for (let i = 1; i <= 5; i++) {
     const el = document.getElementById(`f_class${i}`);
     if (!el) continue;
@@ -496,7 +563,6 @@ function openToolModal(tool = null) {
     el.checked = !!tool?.[`tool_class${i}`];
     el.disabled = true;
   }
-
   syncClassCheckboxesFromPrices();
   goToStep(0);
   document.getElementById('toolModal').style.display = 'flex';
@@ -505,111 +571,66 @@ function openToolModal(tool = null) {
 document.getElementById('addToolBtn')?.addEventListener('click', () => openToolModal());
 
 window.openEditTool = async (id) => {
-  const { data, error } = await supabase
-    .from('tools')
-    .select('*')
-    .eq('tool_ID', id)
-    .single();
-
-  if (error) {
-    alert('불러오기 실패: ' + error.message);
-    return;
-  }
-
+  const { data, error } = await supabase.from('tools').select('*').eq('tool_ID', id).single();
+  if (error) { alert('불러오기 실패: ' + error.message); return; }
   openToolModal(data);
 };
 
 ['f_plan1_price', 'f_plan2_price', 'f_plan3_price'].forEach(id => {
   const el = document.getElementById(id);
   if (!el) return;
-
   el.addEventListener('input', syncClassCheckboxesFromPrices);
   el.addEventListener('change', syncClassCheckboxesFromPrices);
 });
 
 ['toolModalClose', 'toolModalCancel'].forEach(id => {
-  document.getElementById(id)?.addEventListener('click', () => {
-    document.getElementById('toolModal').style.display = 'none';
-  });
+  document.getElementById(id)?.addEventListener('click', () => { document.getElementById('toolModal').style.display = 'none'; });
 });
 
 document.getElementById('toolModalSave')?.addEventListener('click', async () => {
   const id = document.getElementById('toolId').value;
   const iframeValue = document.getElementById('f_iframe').value;
-
   const plan1Price = document.getElementById('f_plan1_price').value.trim();
   const plan2Price = document.getElementById('f_plan2_price').value.trim();
   const plan3Price = document.getElementById('f_plan3_price').value.trim();
-
   const autoClasses = getAutoPriceClasses(plan1Price, plan2Price, plan3Price);
-
   const payload = {
     tool_name: document.getElementById('f_tool_name').value.trim(),
     tool_company: document.getElementById('f_tool_company').value.trim(),
     tool_cat: document.getElementById('f_tool_cat').value,
     tool_subcat: document.getElementById('f_tool_subcat').value.trim(),
     tool_key: document.getElementById('f_tool_key').value.trim(),
-
     icon: document.getElementById('f_icon').value.trim(),
     tool_des: document.getElementById('f_tool_des').value.trim(),
     tool_link: document.getElementById('f_tool_link').value.trim(),
-
-    iframe:
-      iframeValue === 'true' ? true :
-      iframeValue === 'false' ? false :
-      null,
-
+    iframe: iframeValue === 'true' ? true : iframeValue === 'false' ? false : null,
     pricing: document.getElementById('f_pricing').value.trim(),
-
     tool_plan1_name: document.getElementById('f_plan1_name').value.trim(),
     tool_plan1_price_krw: plan1Price,
     tool_plan1_des: document.getElementById('f_plan1_des').value.trim(),
-
     tool_plan2_name: document.getElementById('f_plan2_name').value.trim(),
     tool_plan2_price_krw: plan2Price,
     tool_plan2_des: document.getElementById('f_plan2_des').value.trim(),
-
     tool_plan3_name: document.getElementById('f_plan3_name').value.trim(),
     tool_plan3_price_krw: plan3Price,
     tool_plan3_des: document.getElementById('f_plan3_des').value.trim(),
-
     tool_prom: document.getElementById('f_tool_prom').value.trim(),
     tool_plan_etc: document.getElementById('f_tool_plan_etc').value.trim(),
-
     ...autoClasses,
   };
-
-  if (!payload.tool_name) {
-    alert('툴 이름을 입력해주세요.');
-    return;
-  }
-
+  if (!payload.tool_name) { alert('툴 이름을 입력해주세요.'); return; }
   const { error } = id
     ? await supabase.from('tools').update(payload).eq('tool_ID', id)
     : await supabase.from('tools').insert(payload);
-
-  if (error) {
-    alert('저장 실패: ' + error.message);
-    return;
-  }
-
+  if (error) { alert('저장 실패: ' + error.message); return; }
   document.getElementById('toolModal').style.display = 'none';
   await loadTools();
 });
 
 window.deleteTool = async (id) => {
   if (!confirm('정말 삭제하시겠습니까?')) return;
-
-  const { error } = await supabase
-    .from('tools')
-    .delete()
-    .eq('tool_ID', id);
-
-  if (error) {
-    alert('삭제 실패: ' + error.message);
-    return;
-  }
-
+  const { error } = await supabase.from('tools').delete().eq('tool_ID', id);
+  if (error) { alert('삭제 실패: ' + error.message); return; }
   await loadTools();
 };
 
@@ -619,16 +640,10 @@ window.deleteTool = async (id) => {
 let allUsers = [];
 
 async function loadUsers() {
-  const { data, error } = await supabase
-    .from('users')
+  const { data, error } = await supabase.from('users')
     .select('user_id, user_name, user_country, user_age, user_job, role')
     .order('user_name', { ascending: true });
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
+  if (error) { console.error(error); return; }
   allUsers = data || [];
   renderUsersTable(allUsers);
 }
@@ -636,12 +651,10 @@ async function loadUsers() {
 function renderUsersTable(users) {
   const tbody = document.getElementById('usersBody');
   if (!tbody) return;
-
   if (!users.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-sub);padding:32px;">데이터 없음</td></tr>';
     return;
   }
-
   tbody.innerHTML = users.map(u => `
     <tr>
       <td>${esc(u.user_name) || '-'}</td>
@@ -665,19 +678,9 @@ document.getElementById('userSearch')?.addEventListener('input', e => {
 
 window.toggleUserRole = async (userId, currentRole) => {
   const newRole = currentRole === 'admin' ? 'user' : 'admin';
-
   if (!confirm(`${newRole === 'admin' ? '관리자로 지정' : '일반 사용자로 변경'}하시겠습니까?`)) return;
-
-  const { error } = await supabase
-    .from('users')
-    .update({ role: newRole })
-    .eq('user_id', userId);
-
-  if (error) {
-    alert('변경 실패: ' + error.message);
-    return;
-  }
-
+  const { error } = await supabase.from('users').update({ role: newRole }).eq('user_id', userId);
+  if (error) { alert('변경 실패: ' + error.message); return; }
   await loadUsers();
 };
 
@@ -688,51 +691,29 @@ let allInquiries = [];
 let currentFilter = 'all';
 
 async function loadInquiries() {
-  const { data, error } = await supabase
-    .from('inquiries')
+  const { data, error } = await supabase.from('inquiries')
     .select('inquiry_id, user_id, question, question_created_at, status, answer, answer_created_at')
     .order('question_created_at', { ascending: false });
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
+  if (error) { console.error(error); return; }
   allInquiries = data || [];
   renderInquiriesTable(allInquiries);
 }
 
 function renderInquiriesTable(list) {
-  const filtered =
-    currentFilter === 'all'
-      ? list
-      : list.filter(i => i.status === currentFilter);
-
+  const filtered = currentFilter === 'all' ? list : list.filter(i => i.status === currentFilter);
   const tbody = document.getElementById('inquiriesBody');
   if (!tbody) return;
-
   if (!filtered.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-sub);padding:32px;">데이터 없음</td></tr>';
     return;
   }
-
   tbody.innerHTML = filtered.map(i => `
     <tr>
-      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(i.question)}">
-        ${esc(i.question)}
-      </td>
-      <td>
-        <span class="badge ${i.status === 'answered' ? 'badge-answered' : 'badge-pending'}">
-          ${i.status === 'answered' ? '답변완료' : '미답변'}
-        </span>
-      </td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(i.question)}">${esc(i.question)}</td>
+      <td><span class="badge ${i.status === 'answered' ? 'badge-answered' : 'badge-pending'}">${i.status === 'answered' ? '답변완료' : '미답변'}</span></td>
       <td>${formatDate(i.question_created_at)}</td>
       <td>${formatDate(i.answer_created_at)}</td>
-      <td>
-        <button class="btn-icon" onclick="openAnswerModal('${esc(i.inquiry_id)}')">
-          ${i.status === 'answered' ? '답변 수정' : '답변하기'}
-        </button>
-      </td>
+      <td><button class="btn-icon" onclick="openAnswerModal('${esc(i.inquiry_id)}')">${i.status === 'answered' ? '답변 수정' : '답변하기'}</button></td>
     </tr>
   `).join('');
 }
@@ -749,7 +730,6 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 window.openAnswerModal = (id) => {
   const item = allInquiries.find(i => i.inquiry_id === id);
   if (!item) return;
-
   document.getElementById('inquiryId').value = item.inquiry_id;
   document.getElementById('inquiryUserId').value = item.user_id;
   document.getElementById('inquiryQuestion').value = item.question || '';
@@ -758,49 +738,22 @@ window.openAnswerModal = (id) => {
 };
 
 ['inquiryModalClose', 'inquiryModalCancel'].forEach(id => {
-  document.getElementById(id)?.addEventListener('click', () => {
-    document.getElementById('inquiryModal').style.display = 'none';
-  });
+  document.getElementById(id)?.addEventListener('click', () => { document.getElementById('inquiryModal').style.display = 'none'; });
 });
 
 document.getElementById('inquiryModalSave')?.addEventListener('click', async () => {
   const inquiryId = document.getElementById('inquiryId').value;
   const userId = document.getElementById('inquiryUserId').value;
   const answer = document.getElementById('inquiryAnswer').value.trim();
-
-  if (!answer) {
-    alert('답변을 입력해주세요.');
-    return;
-  }
-
+  if (!answer) { alert('답변을 입력해주세요.'); return; }
   const currentAdminUserId = await ensureAdminUserId();
-  if (!currentAdminUserId) {
-    alert('관리자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
-    return;
-  }
-
-  // 1. 문의 답변 저장
-  const { error: answerError } = await supabase
-    .from('inquiries')
-    .update({
-      answer,
-      status: 'answered',
-      answer_created_at: new Date().toISOString(),
-    })
-    .eq('inquiry_id', inquiryId);
-
-  if (answerError) {
-    alert('저장 실패: ' + answerError.message);
-    return;
-  }
-
-  // 2. 관리자 알림 읽음 처리
+  if (!currentAdminUserId) { alert('관리자 정보를 확인할 수 없습니다. 다시 로그인해주세요.'); return; }
+  const { error: answerError } = await supabase.from('inquiries').update({
+    answer, status: 'answered', answer_created_at: new Date().toISOString(),
+  }).eq('inquiry_id', inquiryId);
+  if (answerError) { alert('저장 실패: ' + answerError.message); return; }
   const removeError = await removeAdminInquiryNotification(inquiryId, currentAdminUserId);
-  if (removeError) {
-    console.warn('관리자 알림 삭제 실패:', removeError.message);
-  }
-
-  // 3. 유저에게 답변 완료 알림 발송
+  if (removeError) console.warn('관리자 알림 삭제 실패:', removeError.message);
   const notiError = await sendInquiryAnswerNotification(userId, inquiryId, currentAdminUserId);
   if (notiError) {
     console.warn('유저 알림 발송 실패:', notiError.message);
@@ -808,12 +761,8 @@ document.getElementById('inquiryModalSave')?.addEventListener('click', async () 
   } else {
     alert('답변이 저장되고 유저에게 알림이 발송되었습니다.');
   }
-
   document.getElementById('inquiryModal').style.display = 'none';
   await loadInquiries();
-
-  // 관리자 알림 UI를 따로 불러오는 함수가 있다면 여기서 다시 호출
-  // await loadNotifications();
 });
 
 // ─────────────────────────────────────────────────────────

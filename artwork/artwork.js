@@ -555,6 +555,8 @@ function initSearchBar() {
         return;
       }
 
+      await markSearchUsed();
+
       currentKeyword = keyword;
 
       const grid = document.querySelector("#artworkGrid");
@@ -568,10 +570,10 @@ function initSearchBar() {
       console.log("[groq] 검색 결과:", groqResult);
 
       searchFilter = {
-        cats:     groqResult?.recommended_cats ?? [],
-        subcats:  groqResult?.recommended_subcats ?? [],
+        cats: groqResult?.recommended_cats ?? [],
+        subcats: groqResult?.recommended_subcats ?? [],
         keywords: groqResult?.keywords ?? [],
-        active:   true,
+        active: true,
       };
 
       renderWorks();

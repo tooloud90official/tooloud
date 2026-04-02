@@ -65,6 +65,47 @@ function renderEmptyMessage(container, message = "등록된 툴이 없습니다.
   container.innerHTML = `<p class="tool-board__empty">${message}</p>`;
 }
 
+async function markClickedRecommend(userId) {
+  if (!userId) return;
+
+  try {
+    const { error } = await supabase
+      .from("users")
+      .update({ clicked_recommend: true })
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("[personal_AI] clicked_recommend 업데이트 실패:", error);
+    }
+  } catch (err) {
+    console.error("[personal_AI] clicked_recommend 예외:", err);
+  }
+}
+
+function bindRecommendClicks(containerSelector, tools, authUser) {
+  const container = document.querySelector(containerSelector);
+  if (!container || !Array.isArray(tools) || tools.length === 0 || !authUser?.id) return;
+
+  const mounts = container.querySelectorAll(".tool-icon-mount");
+
+  mounts.forEach((mount, index) => {
+    const tool = tools[index];
+    if (!tool) return;
+
+    const detailUrl = `/detail_AI/detail_AI.html?tool_ID=${encodeURIComponent(tool.tool_ID)}`;
+
+    mount.style.cursor = "pointer";
+
+    mount.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      await markClickedRecommend(authUser.id);
+      window.location.href = detailUrl;
+    });
+  });
+}
+
 async function renderToolIcons(targetSelector, tools) {
   const container = document.querySelector(targetSelector);
   if (!container) return;
@@ -120,7 +161,7 @@ async function initPersonalAIPage() {
       ? userProfile.recommended_tools
       : [];
 
-      const recentIds = Array.isArray(userProfile?.recent_tools)
+    const recentIds = Array.isArray(userProfile?.recent_tools)
       ? userProfile.recent_tools.slice(0, 8)
       : [];
 
@@ -135,6 +176,9 @@ async function initPersonalAIPage() {
     await renderToolIcons("#recommendedTools", recommendedTools);
     await renderToolIcons("#recentTools", recentTools);
     await renderToolIcons("#favoriteTools", favoriteTools);
+
+    // 추천 툴 영역에서 눌렀을 때만 clicked_recommend = true
+    bindRecommendClicks("#recommendedTools", recommendedTools, authUser);
 
     setTimeout(scrollToHash, 400);
   } catch (err) {
