@@ -333,21 +333,45 @@ function renderConversionStats(users) {
     container.innerHTML = '<p style="color:var(--text-sub);font-size:13px;">아직 데이터 없음</p>';
     return;
   }
+
   const diffs = users.map(u => {
     const created = new Date(u.created_at);
     const clicked = new Date(u.clicked_timestampz);
-    return (clicked - created) / 1000 / 60;
-  }).filter(d => d >= 0);
+    return (clicked - created) / 1000; // 초 단위
+  }).filter(d => Number.isFinite(d) && d >= 0);
+
+  if (!diffs.length) {
+    container.innerHTML = '<p style="color:var(--text-sub);font-size:13px;">유효한 전환 데이터 없음</p>';
+    return;
+  }
 
   const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
   const min = Math.min(...diffs);
   const max = Math.max(...diffs);
 
-  const fmt = (min) => {
-    if (min < 60) return `${Math.round(min)}분`;
-    const h = Math.floor(min / 60);
-    const m = Math.round(min % 60);
-    return `${h}시간 ${m}분`;
+  const fmtDuration = (seconds) => {
+    const totalSeconds = Math.round(seconds);
+
+    if (totalSeconds < 60) {
+      return `${totalSeconds}초`;
+    }
+
+    if (totalSeconds < 3600) {
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return s === 0 ? `${m}분` : `${m}분 ${s}초`;
+    }
+
+    const h = Math.floor(totalSeconds / 3600);
+    const rem = totalSeconds % 3600;
+    const m = Math.floor(rem / 60);
+    const s = rem % 60;
+
+    if (s === 0) {
+      return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
+    }
+
+    return `${h}시간 ${m}분 ${s}초`;
   };
 
   container.innerHTML = `
@@ -355,17 +379,17 @@ function renderConversionStats(users) {
       <div class="conv-card">
         <div class="conv-icon">⚡</div>
         <div class="conv-label">평균 소요시간</div>
-        <div class="conv-value">${fmt(avg)}</div>
+        <div class="conv-value">${fmtDuration(avg)}</div>
       </div>
       <div class="conv-card">
         <div class="conv-icon">🏁</div>
         <div class="conv-label">최단 소요시간</div>
-        <div class="conv-value">${fmt(min)}</div>
+        <div class="conv-value">${fmtDuration(min)}</div>
       </div>
       <div class="conv-card">
         <div class="conv-icon">🐢</div>
         <div class="conv-label">최장 소요시간</div>
-        <div class="conv-value">${fmt(max)}</div>
+        <div class="conv-value">${fmtDuration(max)}</div>
       </div>
       <div class="conv-card">
         <div class="conv-icon">✅</div>
